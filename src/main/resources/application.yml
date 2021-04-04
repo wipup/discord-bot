@@ -1,0 +1,21 @@
+
+spring: 
+  application:
+    name: Discord Bot
+  main:
+    web-application-type: none
+
+discord:
+  oauth2-url: ""
+  token: ""
+  status: 
+    name: "Under Development"
+    status: online
+    type: default
+  users:
+    - alias: Wipu 
+      snowflake-id: ""
+      role: owner
+    - alias: P'Ake
+      snowflake-id: ""
+      role: admin 

@@ -1,0 +1,68 @@
+start-state: &startState start
+start-event: &startEvent start
+final-state: &endState end
+finish-event: &endEvent finish
+terminate-event: &errorEvent error 
+
+transition: 
+# log out
+  - from-state: start
+    to-state: log-out
+    on-events: 
+      - log-out
+      - sign-out
+      - get-out
+      - shutdown
+    call-method: logOut
+
+# join voice channel
+  - from-state: start
+    to-state: join.where?
+    on-event: join 
+    call-method: setAction
+    
+  - from-state: join.where?
+    to-state: channel.id?
+    on-events:
+      - channel
+      - id
+    
+  - from-state: join.where?
+    to-state: channel
+    on-events:
+      - author
+      - here
+      - me
+
+##### leave voice channel
+#  - from-state: start
+#    to-state: leave.what?
+#    on-events: 
+#      - leave
+#      - exit
+#      - quit
+#    call-method: leave
+#    
+#  - from-state: leave.what?
+#    to-state: leave.guild
+#    on-events:
+#      - guild
+#      
+#  - from-state: leave.what?
+#    to-state: leave.channel
+#    on-events:
+#      - channel
+    
+on-entry: 
+  - state: channel
+    call-method: setChannel
+  - state: channel.id?
+    call-method: setChannelById
+  - state: *endState
+    call-method: end
+
+on-exit: 
+  - state: *startState
+    call-method: start
+
+    
