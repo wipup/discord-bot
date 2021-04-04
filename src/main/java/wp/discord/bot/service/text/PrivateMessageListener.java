@@ -10,7 +10,7 @@ import wp.discord.bot.core.DiscordEventListener;
 
 @Component
 @Slf4j
-public class PrivateMessageListener implements DiscordEventListener<MessageReceivedEvent> {
+public class PrivateMessageListener extends DiscordEventListener<MessageReceivedEvent> {
 
 	@Override
 	public void handleEvent(MessageReceivedEvent event) throws Exception {

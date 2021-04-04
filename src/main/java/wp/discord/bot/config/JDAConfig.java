@@ -15,21 +15,21 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.hooks.EventListener;
 import wp.discord.bot.config.properties.DiscordProperties;
 import wp.discord.bot.config.properties.DiscordStatus;
+import wp.discord.bot.core.DiscordEventListener;
 import wp.discord.bot.util.SafeUtil;
 
 @Configuration
 @EnableConfigurationProperties(DiscordProperties.class)
 @Slf4j
-public class DiscordConfig {
+public class JDAConfig {
 
 	@Autowired
 	private DiscordProperties discordProperties;
 
 	@Bean
-	public JDA discordJDA(Collection<EventListener> eventListeners) throws Exception {
+	public JDA discordJDA(Collection<DiscordEventListener<?>> eventListeners) throws Exception {
 		log.debug("configuration: {}", discordProperties);
 		log.debug("event listener: {}", eventListeners);
 		DiscordStatus status = discordProperties.getStatus();

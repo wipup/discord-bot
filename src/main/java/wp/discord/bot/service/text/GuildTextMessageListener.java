@@ -11,7 +11,7 @@ import wp.discord.bot.core.DiscordEventListener;
 
 @Component
 @Slf4j
-public class GuildTextMessageListener implements DiscordEventListener<MessageReceivedEvent> {
+public class GuildTextMessageListener extends DiscordEventListener<MessageReceivedEvent> {
 
 	@Override
 	public void handleEvent(MessageReceivedEvent event) throws Exception {

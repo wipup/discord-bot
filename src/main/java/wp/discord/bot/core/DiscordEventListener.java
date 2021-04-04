@@ -1,26 +1,40 @@
 package wp.discord.bot.core;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import brave.Span;
+import brave.Tracer;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 
-public interface DiscordEventListener<T extends GenericEvent> extends EventListener, ThreadContextAware {
+public abstract class DiscordEventListener<T extends GenericEvent> implements EventListener, ThreadContextAware {
+
+	@Autowired
+	private Tracer tracer;
 
 	@SuppressWarnings("unchecked")
-	@Override
-	default void onEvent(GenericEvent event) {
+	public void onEvent(GenericEvent event) {
+		Span sp = null;
 		try {
-			if (accept(event)) {
-				handleEvent((T) event);
+			sp = tracer.newTrace().start();
+			try {
+				if (accept(event)) {
+					handleEvent((T) event);
+				}
+			} catch (Exception e) {
+				handleError(event, e);
+			} finally {
+				clearCurrentContext();
 			}
-		} catch (Exception e) {
-			handleError(event, e);
 		} finally {
-			clearAllThreadContext();
+			if (sp != null) {
+				sp.finish();
+			}
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	default public boolean accept(GenericEvent event) {
+	public boolean accept(GenericEvent event) {
 		if (acceptType(event)) {
 			T e = (T) event;
 			return acceptCondition(e);
@@ -28,21 +42,23 @@ public interface DiscordEventListener<T extends GenericEvent> extends EventListe
 		return false;
 	}
 
-	default public boolean acceptType(GenericEvent event) {
+	public boolean acceptType(GenericEvent event) {
 		Class<T> clazz = eventClass();
 		return clazz.isInstance(event);
 	}
 
-	default public boolean acceptCondition(T event) {
+	public boolean acceptCondition(T event) {
 		return true;
 	}
 
-	default public void handleError(GenericEvent event, Exception e) {
-		e.printStackTrace(); // TODO
+	public void handleError(GenericEvent event, Exception e) {
+		e.printStackTrace(System.out); // TODO
 	}
 
-	public void handleEvent(T event) throws Exception;
+	public void handleEvent(T event) throws Exception {
 
-	public Class<T> eventClass();
+	}
+
+	abstract public Class<T> eventClass();
 
 }

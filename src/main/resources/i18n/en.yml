@@ -36,6 +36,7 @@ reply:
   channel-required: 
     - channel needed
     - what channel?
+    - please specify Channel ID
     
 ancestor: 
   parent: 

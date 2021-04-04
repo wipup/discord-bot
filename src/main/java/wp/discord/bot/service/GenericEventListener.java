@@ -7,7 +7,7 @@ import wp.discord.bot.core.DiscordEventListener;
 
 //@Component
 @Slf4j
-public class GenericEventListener implements DiscordEventListener<GenericEvent> {
+public class GenericEventListener extends DiscordEventListener<GenericEvent> {
 
 	@Override
 	public void handleEvent(GenericEvent event) throws Exception {

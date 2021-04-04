@@ -34,7 +34,7 @@ public class MessageLanguageResolver implements MessageBundle, ThreadContextAwar
 
 	@Override
 	public String getMessage(String key, Object... objs) {
-		String currentLang = getCurrentLanguage();
+		String currentLang = getCurrentContext().getLanguage();
 		return getLocalizedMessage(currentLang, key, objs);
 	}
 
@@ -54,7 +54,7 @@ public class MessageLanguageResolver implements MessageBundle, ThreadContextAwar
 	public boolean matchesKey(String key, String messagePattern) {
 		for (MessageBundle bundle : messageBundles.values()) {
 			if (bundle.matchesKey(key, messagePattern)) {
-				setCurrentLanguage(bundle.getLanguageCode());
+				getCurrentContext().setLanguage(bundle.getLanguageCode());
 				return true;
 			}
 		}

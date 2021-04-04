@@ -8,40 +8,43 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.core.DiscordEventListener;
 import wp.discord.bot.core.DiscordJDABot;
-import wp.discord.bot.locale.MessageKey;
 
 @Component
 @Slf4j
-public class CommandMessageListener implements DiscordEventListener<MessageReceivedEvent> {
+public class CommandMessageListener extends DiscordEventListener<MessageReceivedEvent> {
 
 	@Autowired
 	private DiscordJDABot bot;
 
 	@Override
 	public void handleEvent(MessageReceivedEvent event) throws Exception {
-//		Message message = event.getMessage();
-
-//		String root = bot.getRootCommand(message);
-//		if (StringUtils.isEmpty(root)) {
-//			return;
-//		}
-
 		String cmd = event.getMessage().getContentDisplay();
 		log.debug("[CMD] {}", cmd);
 
 		bot.newRobot(event);
+		boolean foundRootCmd = bot.isMentioned(event.getMessage());
 		for (String f : cmd.split("\\s")) {
 			if (StringUtils.isEmpty(f)) {
 				continue;
 			}
+			if (!foundRootCmd) {
+				String rootCmd = bot.getRootCommand(f);
+				log.debug("rootCmd: {}", rootCmd);
+				if (StringUtils.isNotEmpty(rootCmd)) {
+					foundRootCmd = true;
+				}
+				continue;
+			}
 
 			f = f.toLowerCase();
-			log.debug("canAccept {}? {}", f, bot.canAccept(f));
 			if (bot.canAccept(f)) {
+				log.debug("accept: {}", f);
 				bot.fire(f);
 			} else {
+				log.debug("reject: {}", f);
 				// terminate
 			}
+			log.debug("--------------------");
 		}
 
 		bot.finish();

@@ -1,7 +1,5 @@
 package wp.discord.bot.core.robot;
 
-import java.util.Map;
-
 import org.squirrelframework.foundation.fsm.annotation.StateMachineParameters;
 import org.squirrelframework.foundation.fsm.impl.AbstractUntypedStateMachine;
 
@@ -10,9 +8,10 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import wp.discord.bot.model.CommandContext;
 
 @Slf4j
-@StateMachineParameters(stateType = String.class, eventType = String.class, contextType = Map.class)
+@StateMachineParameters(stateType = String.class, eventType = String.class, contextType = CommandContext.class)
 public class RobotCore extends AbstractUntypedStateMachine {
 
 	private RobotHelper helper;
@@ -20,55 +19,68 @@ public class RobotCore extends AbstractUntypedStateMachine {
 	private GenericEvent jdaEvent;
 	private Class<? extends GenericEvent> eventClass;
 
-	protected void start(String from, String to, String event, Map<String, Object> context) {
-		context.put(RobotField.JDA_EVENT, getJdaEvent());
+	protected void start(String from, String to, String event, CommandContext context) {
+		log.debug("start, from={}, to={}, event={}, context={}", from, to, event, context);
+		context.setJdaEvent(getJdaEvent());
 		greet(from, to, event, context);
 	}
 
-	protected void logOut(String from, String to, String event, Map<String, Object> context) {
-		context.put(RobotField.ACTION, RobotField.ACTION_LOG_OUT);
+	protected void logOut(String from, String to, String event, CommandContext context) {
+		context.setAction(RobotAction.ACTION_LOG_OUT);
 	}
-	
-	protected void greet(String from, String to, String event, Map<String, Object> context) {
+
+	protected void greet(String from, String to, String event, CommandContext context) {
+		log.debug("greet, from={}, to={}, event={}, context={}", from, to, event, context);
 		if (!MessageReceivedEvent.class.isInstance(getJdaEvent())) {
 			return;
 		}
-		
+
 		MessageReceivedEvent e = (MessageReceivedEvent) jdaEvent;
-		
 		helper.setGreetAction(e.getAuthor(), e.getChannel(), context);
-		context.put(RobotField.ACTION, RobotField.ACTION_GREET_AUTHOR);
-	}
-	
-	protected void setAction(String from, String to, String event, Map<String, Object> context) {
-		context.put(RobotField.ACTION, RobotField.ACTION_JOIN_VOICE_CHANNEL);
 	}
 
-	protected void setChannel(String from, String to, String event, Map<String, Object> context) {
+	protected void setAction(String from, String to, String event, CommandContext context) {
+		log.debug("setAction, from={}, to={}, event={}, context={}", from, to, event, context);
+		context.setAction(RobotAction.ACTION_JOIN_VOICE_CHANNEL);
+	}
+
+	protected void setChannel(String from, String to, String event, CommandContext context) {
+		log.debug("setChannel, from={}, to={}, event={}, context={}", from, to, event, context);
 		if (!MessageReceivedEvent.class.isInstance(getJdaEvent())) {
 			return;
 		}
 
 		MessageReceivedEvent e = (MessageReceivedEvent) getJdaEvent();
 		VoiceChannel vc = helper.findAuthorVoiceChannel(e);
-		if (vc == null) {
-			terminate(context);
+		if (vc != null) {
+			helper.setVoiceChannel(vc, context);
 		}
-		helper.setVoiceChannel(vc, context);
+
 	}
 
-	protected void setChannelById(String from, String to, String event, Map<String, Object> context) {
-		String param = (String) context.get(RobotField.PARAMS);
-		VoiceChannel vc = jda.getVoiceChannelById(param);
-		if (vc == null) {
-			terminate(context);
+	protected void setChannelById(String from, String to, String event, CommandContext context) {
+		log.debug("setChannelById, from={}, to={}, event={}, context={}", from, to, event, context);
+		String param = (String) context.getActionParam();
+
+		if (param == null) {
+			return;
 		}
-		helper.setVoiceChannel(vc, context);
+		VoiceChannel vc = getJda().getVoiceChannelById(param);
+		if (vc != null) {
+			helper.setVoiceChannel(vc, context);
+		}
 	}
 
-	protected void end(String from, String to, String event, Map<String, Object> context) {
-		log.debug("context: {}", context);
+	protected void end(String from, String to, String event, CommandContext context) {
+		log.debug("end, from={}, to={}, event={}, context={}", from, to, event, context);
 		helper.executeCommand(from, to, event, context);
+	}
+
+	@Override
+	public void terminate(Object context) {
+		log.debug("terminate internally: {}", context);
+		super.terminate(context);
+		log.debug("===========================");
 	}
 
 	public JDA getJda() {
