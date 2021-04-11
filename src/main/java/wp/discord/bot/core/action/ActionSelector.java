@@ -55,7 +55,7 @@ public class ActionSelector implements ThreadContextAware, InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Collection<Object> beans = applicationContext.getBeansWithAnnotation(ActionExecutor.class).values();
+		Collection<Object> beans = applicationContext.getBeansWithAnnotation(ActionExecutorService.class).values();
 		registerActionExecutors(beans);
 	}
 

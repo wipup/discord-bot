@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.events.message.GenericMessageEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.managers.AudioManager;
 import wp.discord.bot.core.action.Action;
-import wp.discord.bot.core.action.ActionExecutor;
+import wp.discord.bot.core.action.ActionExecutorService;
 import wp.discord.bot.core.action.ActionConstant;
 import wp.discord.bot.locale.MessageKey;
 import wp.discord.bot.locale.MessageLanguageResolver;
@@ -24,8 +24,8 @@ import wp.discord.bot.util.SafeUtil;
 
 @Component
 @Slf4j
-@ActionExecutor
-public class BasicActionExecutor {
+@ActionExecutorService
+public class BasicActionService {
 
 	@Autowired
 	private MessageLanguageResolver languageResolver;
