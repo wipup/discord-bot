@@ -1,12 +1,13 @@
 package wp.discord.bot.core.machine;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -22,33 +23,6 @@ public class StateMachineBuilder {
 
 	private State startNode = null;
 	private Map<String, State> allNodes = new HashMap<>(); // key = name, value = node
-
-	public static void main(String[] args) {
-		StateMachineBuilder gb = new StateMachineBuilder();
-
-		gb.startAt("start");
-		gb.from("start").to("bot").on("bot");
-		gb.from("bot").to("join").on("join");
-		gb.from("join").to("channel").on("channel");
-		gb.from("join").to("done").on("me");
-		gb.from("join").to("here").on("here");
-		gb.from("channel").to("done").on("me");
-		gb.from("channel").to("done").on("here");
-		gb.from("channel").to("done").on(Type.PATTERN, "\\d+");
-
-		StateMachine st = gb.build();
-
-		System.out.println(ToStringUtils.toString(gb));
-
-		String cmd = "bot join me";
-
-		StateDriver t = new StateDriver(st);
-
-		Arrays.stream(cmd.split(" ")).forEach((f) -> {
-			t.accept(f.trim());
-		});
-
-	}
 
 	public StateMachineBuilder startAt(State node) {
 		startNode = node;
@@ -115,7 +89,7 @@ public class StateMachineBuilder {
 		}
 
 		public OnBuilder on(Type valueType, String value) {
-			valueType = ObjectUtils.defaultIfNull(valueType, Type.EQUALS);
+			valueType = ObjectUtils.defaultIfNull(valueType, Type.getDefaultType());
 			Objects.requireNonNull(value, "value cannot be null");
 
 			Transition r = new Transition();
@@ -130,17 +104,22 @@ public class StateMachineBuilder {
 	public class OnBuilder {
 		private Transition transition = null;
 
+		public StateMachineBuilder notify(Collection<StateChangeListener> listeners) {
+			Objects.requireNonNull(listeners);
+			transition.setListeners(listeners.stream().collect(Collectors.toList()));
+			return StateMachineBuilder.this;
+		}
+
 		public StateMachineBuilder notify(StateChangeListener listener, StateChangeListener... listeners) {
 			Objects.requireNonNull(listener);
 
 			List<StateChangeListener> list = new ArrayList<>();
 			list.add(listener);
 			CollectionUtils.addAll(list, listeners);
-			transition.setListeners(list);
 
-			return StateMachineBuilder.this;
+			return notify(list);
 		}
-		
+
 		public Transition getTransition() {
 			return transition;
 		}

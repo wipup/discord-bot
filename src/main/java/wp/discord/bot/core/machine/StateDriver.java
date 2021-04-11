@@ -24,16 +24,18 @@ public class StateDriver implements Acceptable<String> {
 
 	public void accept(String value) {
 		Transition transition = findTransition(value);
-		if (transition != null) {
-			previousState = currentState;
-			currentState = transition.getTo();
 
-			log.debug("Transition from: {}, to: {}, using: {}", previousState.getName(), currentState.getName(), value);
-			callStateChangeListeners(previousState, currentState, value, transition);
-		} else {
+		if (transition == null) {
 			log.debug("Transition not accepted value: {}", value);
 			callStateNotChangeListeners(currentState, value);
+			return;
 		}
+
+		previousState = currentState;
+		currentState = transition.getTo();
+
+		log.debug("Transition from: {}, to: {}, using: {}", previousState.getName(), currentState.getName(), value);
+		callStateChangeListeners(previousState, currentState, value, transition);
 	}
 
 	@Override
@@ -46,7 +48,7 @@ public class StateDriver implements Acceptable<String> {
 	}
 
 	private Transition findTransition(String value) {
-		return currentState.findFirstTransition(value); // TODO maybe find all routes
+		return currentState.findFirstTransition(value);
 	}
 
 	public void reset(StateMachine machine) {

@@ -17,8 +17,6 @@ public class RobotStateProperties {
 	private String finishEvent;
 	private String terminateEvent;
 
-	private List<RobotStateChangeProperties> onEntry;
-	private List<RobotStateChangeProperties> onExit;
 	private List<RobotStateTransitionProperties> transition;
 
 	@Override

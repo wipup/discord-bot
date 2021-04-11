@@ -36,7 +36,7 @@ public class Transition implements Acceptable<String> {
 		if (type == Type.EQUALS) {
 			return value.equals(arg);
 
-		} else if (type == Type.EQUAL_IGNORE_CASE) {
+		} else if (type == Type.EQUALS_IGNORE_CASE) {
 			return value.equalsIgnoreCase(arg);
 
 		} else if (type == Type.PATTERN) {
@@ -48,7 +48,7 @@ public class Transition implements Acceptable<String> {
 		} else if (type == Type.ENDS_WITH) {
 			return arg.endsWith(value);
 		}
-		return false;
+		return value.equals(arg);
 	}
 
 	@Override

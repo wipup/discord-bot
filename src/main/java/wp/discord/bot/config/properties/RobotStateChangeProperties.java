@@ -6,6 +6,7 @@ import wp.discord.bot.util.ToStringUtils;
 
 @Getter
 @Setter
+@Deprecated
 public class RobotStateChangeProperties {
 
 	private String state;

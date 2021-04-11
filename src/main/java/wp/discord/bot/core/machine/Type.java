@@ -1,5 +1,11 @@
 package wp.discord.bot.core.machine;
 
 public enum Type {
-	EQUALS, EQUAL_IGNORE_CASE, PATTERN, STARTS_WITH, ENDS_WITH
+	EQUALS, EQUALS_IGNORE_CASE, PATTERN, STARTS_WITH, ENDS_WITH, //
+	MENTIONED;
+
+	public static final Type getDefaultType() {
+		return Type.EQUALS;
+	}
+
 }

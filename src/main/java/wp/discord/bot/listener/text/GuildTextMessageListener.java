@@ -17,10 +17,9 @@ public class GuildTextMessageListener extends DiscordEventListener<MessageReceiv
 	public void handleEvent(MessageReceivedEvent event) throws Exception {
 		MessageChannel channel = event.getChannel();
 		Message message = event.getMessage();
-		String msg = message.getContentDisplay();
+		String msg = message.getContentRaw();
 
 		log.info("[{}][{}] {}: {}", event.getGuild().getName(), channel.getName(), event.getAuthor(), msg);
-		log.info("           : {}", message.getContentRaw());
 	}
 
 	@Override

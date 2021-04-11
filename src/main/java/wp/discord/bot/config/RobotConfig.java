@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.config.properties.RobotStateProperties;
 import wp.discord.bot.config.properties.RobotStateTransitionProperties;
+import wp.discord.bot.config.properties.RobotTransitEventProperties;
 import wp.discord.bot.core.action.ActionSelector;
 import wp.discord.bot.core.machine.State;
 import wp.discord.bot.core.machine.StateChangeListener;
@@ -24,7 +25,6 @@ import wp.discord.bot.core.machine.StateMachineBuilder;
 import wp.discord.bot.core.machine.StateMachineBuilder.FromBuilder;
 import wp.discord.bot.core.machine.StateMachineBuilder.OnBuilder;
 import wp.discord.bot.core.machine.StateMachineBuilder.ToBuilder;
-import wp.discord.bot.model.CommandContext;
 import wp.discord.bot.core.machine.Transition;
 
 @Configuration
@@ -43,20 +43,16 @@ public class RobotConfig {
 	@Bean
 	public StateMachine machine() throws Exception {
 		log.debug("Robot Properties: {}", robotProperties);
-//		Set<String> allStates = new HashSet<>();
-//
-//		final String finalState = robotProperties.getFinalState();
-//		final String finishEvent = robotProperties.getFinishEvent();
-//		final String errorEvent = robotProperties.getTerminateEvent();
 
 		StateMachineBuilder builder = new StateMachineBuilder();
 		builder.startAt(robotProperties.getStartState());
 
 		// on transition
-		for (RobotStateTransitionProperties e : robotProperties.getTransition()) {
-			List<String> fromStates = combineFields(e.getFromStates(), e.getFromState());
-			List<String> toStates = combineFields(e.getToStates(), e.getToState());
-			List<String> onEvents = combineFields(e.getOnEvents(), e.getOnEvent());
+		for (RobotStateTransitionProperties prop : robotProperties.getTransition()) {
+			List<String> fromStates = combineFields(prop.getFromStates(), prop.getFromState());
+			List<String> toStates = combineFields(prop.getToStates(), prop.getToState());
+			List<String> callActions = combineFields(prop.getCallActions(), prop.getCallAction());
+			List<RobotTransitEventProperties> onEvents = prop.getOnEvents();
 
 			for (String from : fromStates) {
 				FromBuilder fb = builder.from(from);
@@ -64,24 +60,25 @@ public class RobotConfig {
 				for (String to : toStates) {
 					ToBuilder tb = fb.to(to);
 
-					for (String on : onEvents) {
-						OnBuilder ob = tb.on(on);
+					for (RobotTransitEventProperties on : onEvents) {
+						OnBuilder ob = tb.on(on.getType(), on.getValue());
 
-//						Transition t = ob.getTransition();
-
-						String action = e.getCallAction();
-						if (StringUtils.isNotBlank(action)) {
-							ob.notify(new TransitionActionListener(action));
-
-							log.debug("from: {}, to: {}, on: {}, method: {}", from, to, on, action);
-						} else {
+						if (CollectionUtils.isEmpty(callActions)) {
 							log.debug("from: {}, to: {}, on: {}", from, to, on);
+							continue;
 						}
+						// else
+
+						log.debug("from: {}, to: {}, on: {}, action: {}", from, to, on, callActions);
+						List<StateChangeListener> actionListeners = callActions.stream()//
+								.filter(StringUtils::isNotEmpty) //
+								.map((action) -> (StateChangeListener) new TransitionActionListener(action))//
+								.collect(Collectors.toList());
+						ob.notify(actionListeners);
+
 					}
 				}
-
 			}
-
 		}
 
 		return builder.build();
@@ -99,9 +96,7 @@ public class RobotConfig {
 		public void onStateChange(StateDriver driver, State from, State to, String value, Transition transition) {
 			Collection<ActionSelector> routers = getActionRouters();
 			for (ActionSelector router : routers) {
-				CommandContext cmdContext = router.getCurrentContext().getCommandContext();
-				cmdContext.setAction(getAction());
-				router.executeAction(getAction(), cmdContext);
+				router.queueExecuteAction(getAction());
 			}
 		}
 
@@ -116,85 +111,6 @@ public class RobotConfig {
 		}
 		return router;
 	}
-
-//	@Bean
-//	public UntypedStateMachineBuilder robotBuilder() throws Exception {
-//		log.debug("Robot Properties: {}", robotProperties);
-//		Set<String> allStates = new HashSet<>();
-//
-//		final String finalState = robotProperties.getFinalState();
-//		final String finishEvent = robotProperties.getFinishEvent();
-//		final String errorEvent = robotProperties.getTerminateEvent();
-//
-//		UntypedStateMachineBuilder builder = StateMachineBuilderFactory.create(RobotCore.class);
-//
-//		builder.defineTerminateEvent(errorEvent);
-//		builder.defineFinalState(finalState);
-//		builder.defineFinishEvent(finishEvent);
-//		builder.defineStartEvent(robotProperties.getStartEvent());
-//
-//		// on transition
-//		for (RobotStateTransitionProperties e : robotProperties.getTransition()) {
-//
-//			List<String> fromStates = combineFields(e.getFromStates(), e.getFromState());
-//			List<String> toStates = combineFields(e.getToStates(), e.getToState());
-//			List<String> onEvents = combineFields(e.getOnEvents(), e.getOnEvent());
-//
-//			for (String from : fromStates) {
-//				From<?, Object, Object, Object> f = builder.transition().from(from);
-//				
-//				for (String to : toStates) {
-//					To<?, Object, Object, Object> t = f.to(to);
-//
-//					for (String on : onEvents) {
-//						On<?, Object, Object, Object> o = t.on(on);
-//
-//						String method = e.getCallMethod();
-//						if (StringUtils.isNotBlank(method)) {
-//							o.callMethod(method);
-//
-//							log.debug("from: {}, to: {}, on: {}, method: {}", from, to, on, method);
-//						} else {
-//							log.debug("from: {}, to: {}, on: {}", from, to, on);
-//						}
-//					}
-//				}
-//
-//			}
-//
-//			allStates.addAll(fromStates);
-//			allStates.addAll(toStates);
-//		}
-//
-//		// on entry
-//		if (CollectionUtils.isNotEmpty(robotProperties.getOnEntry())) {
-//			for (RobotStateChangeProperties e : robotProperties.getOnEntry()) {
-//				builder.onEntry(e.getState()).callMethod(e.getCallMethod());
-//				allStates.add(e.getState());
-//			}
-//		}
-//
-//		// on exit
-//		if (CollectionUtils.isNotEmpty(robotProperties.getOnExit())) {
-//			for (RobotStateChangeProperties e : robotProperties.getOnExit()) {
-//				builder.onExit(e.getState()).callMethod(e.getCallMethod());
-//				allStates.add(e.getState());
-//			}
-//		}
-//
-//		// wired-up all state to terminate state
-//		allStates.remove(robotProperties.getFinalState());
-//		
-//		for (String state : allStates) {
-//			builder.transition().from(state).to(finalState).on(finishEvent);
-//			log.debug("from: {}, to: {}, on: {}", state, finalState, finishEvent);
-//			
-//			builder.transition().from(state).to(finalState).on(errorEvent);
-//			log.debug("from: {}, to: {}, on: {}", state, finalState, errorEvent);
-//		}
-//
-//		return builder;
-//	}
 
 	private List<String> combineFields(List<String> list, String single) {
 		List<String> newList = CollectionUtils.emptyIfNull(list).stream().collect(Collectors.toList());

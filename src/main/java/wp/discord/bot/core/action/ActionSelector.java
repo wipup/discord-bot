@@ -29,29 +29,28 @@ public class ActionSelector implements ThreadContextAware, InitializingBean {
 
 	private Map<String, List<ActionExecutionRoute>> executionRoute;
 
-	public void executeAction(String action, CommandContext cmdContext) {
-		executeAction(action, (Object) cmdContext);
-	}
-
-	public void executeAction(String action, Object... args) {
+	public void queueExecuteAction(String action) {
 		List<ActionExecutionRoute> routes = executionRoute.get(action);
 		if (CollectionUtils.isEmpty(routes)) {
 			log.error("No route register for action={}", action);
 			return;
 		}
 
-		for (ActionExecutionRoute r : routes) {
-			try {
-				executeRoute(r, args);
-			} catch (Exception e) {
-				log.error("error executing route: {}", r, e);
-			}
+		getCurrentContext().getMethodInvokeQueue().addAll(routes);
+	}
+
+	public void executeQueuedActions() throws Exception {
+		CommandContext cmdContext = getCurrentContext().getCommandContext();
+		for (ActionExecutionRoute exe : getCurrentContext().getMethodInvokeQueue()) {
+			executeRoute(exe, (Object) cmdContext);
 		}
 	}
 
-	private void executeRoute(ActionExecutionRoute route, Object... args) throws Exception {
+	protected void executeRoute(ActionExecutionRoute route, Object... args) throws Exception {
 		route.getMethod().invoke(route.getBean(), args);
 	}
+
+	// ------------------------------------------------------------------------
 
 	@Override
 	public void afterPropertiesSet() throws Exception {

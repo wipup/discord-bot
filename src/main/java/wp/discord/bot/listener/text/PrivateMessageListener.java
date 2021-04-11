@@ -15,8 +15,7 @@ public class PrivateMessageListener extends DiscordEventListener<MessageReceived
 	@Override
 	public void handleEvent(MessageReceivedEvent event) throws Exception {
 		User user = event.getAuthor();
-		log.info("[PM] {}: {}", user, event.getMessage().getContentDisplay());
-		log.info("       : {}", event.getMessage().getContentRaw());
+		log.info("[PM] {}: {}", user, event.getMessage().getContentRaw());
 	}
 
 	@Override

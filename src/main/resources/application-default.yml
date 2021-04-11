@@ -1,69 +1,69 @@
 start-state: &startState start
-start-event: &startEvent start
-final-state: &endState end
-finish-event: &endEvent finish
-terminate-event: &errorEvent error 
+error-state: &errorEvent error 
 
 transition: 
-# log out
-  - from-state: start
-    to-state: log-out
+  - from-state: *startState
+    to-state: &bot bot
+    on-strings: 
+      - "<@!814147231568887828>"
     on-events: 
-      - log-out
-      - sign-out
-      - get-out
-      - shutdown
-    call-method: logOut
+      - type: equals-ignore-case
+        value: bot
+      - type: equals-ignore-case
+        value: paimon
+ 
+##### log out
+  - from-state: *bot
+    to-state: do.log-out
+    on-strings: 
+      - shutdown 
+      - log out
+    call-actions: 
+      - do.log-out
 
-# join voice channel
-  - from-state: start
-    to-state: join.where?
-    on-events: 
+##### join current voice channel
+  - from-state: *bot
+    to-state: join.author.voiceChannel
+    on-strings: 
+      - come here
+    call-actions:
+      - get.authorVoiceChannel     
+      - do.join-authorVoiceChannel
+    
+  - from-state: *bot
+    to-state: &join join.channel
+    on-strings: 
       - join 
-    call-method: setAction
+      - enter
     
-  - from-state: join.where?
-    to-state: channel.id?
-    on-events:
-      - channel
-      - id
-    
-  - from-state: join.where?
-    to-state: channel
-    on-events:
-      - author
+  - from-state: *join
+    to-state: join.author.voiceChannel
+    on-strings: 
       - here
       - me
+      - current channel
+      - this channel
+    call-actions:
+      - get.authorVoiceChannel     
+      - do.join-authorVoiceChannel
 
 ##### leave voice channel
-#  - from-state: start
-#    to-state: leave.what?
-#    on-events: 
-#      - leave
-#      - exit
-#      - quit
-#    call-method: leave
-#    
-#  - from-state: leave.what?
-#    to-state: leave.guild
-#    on-events:
-#      - guild
-#      
-#  - from-state: leave.what?
-#    to-state: leave.channel
-#    on-events:
-#      - channel
-    
-on-entry: 
-  - state: channel
-    call-method: setChannel
-  - state: channel.id?
-    call-method: setChannelById
-  - state: *endState
-    call-method: end
+  - from-state: *bot
+    to-state: &leave leave.channel
+    on-strings: 
+      - leave
+      - get out
+    call-actions: 
+      - do.leave-voiceChannel
+      
+#### tell someone
 
-on-exit: 
-  - state: *startState
-    call-method: start
+#### schedule alert
+
+#### query alert
+
+
+
+
 
 

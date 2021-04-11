@@ -12,6 +12,9 @@ import net.dv8tion.jda.api.hooks.EventListener;
 public abstract class DiscordEventListener<T extends GenericEvent> implements EventListener, ThreadContextAware {
 
 	@Autowired
+	private DiscordJDABot bot;
+	
+	@Autowired
 	private Tracer tracer;
 
 	@SuppressWarnings("unchecked")
@@ -21,6 +24,7 @@ public abstract class DiscordEventListener<T extends GenericEvent> implements Ev
 			sp = tracer.newTrace().start();
 			try {
 				if (accept(event)) {
+					prepareHandleEvent((T) event);
 					handleEvent((T) event);
 				}
 			} catch (Exception e) {
@@ -57,6 +61,10 @@ public abstract class DiscordEventListener<T extends GenericEvent> implements Ev
 		log.error("error: {}", event, e);
 	}
 
+	public void prepareHandleEvent(T event) throws Exception {
+		bot.newDriver(event);
+	}
+	
 	abstract public void handleEvent(T event) throws Exception;
 
 	abstract public Class<T> eventClass();
