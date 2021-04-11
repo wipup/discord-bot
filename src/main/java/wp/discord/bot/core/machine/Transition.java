@@ -1,4 +1,6 @@
-package wp.discord.bot.core.graph;
+package wp.discord.bot.core.machine;
+
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -15,15 +17,16 @@ import wp.discord.bot.util.ToStringUtils;
  */
 @Getter
 @Setter(value = AccessLevel.PROTECTED)
-public class Route implements Acceptable<String> {
+public class Transition implements Acceptable<String> {
 
 	private String value;
 	private Type type;
-	private int weight = 0;
 
 	@JsonIgnore
-	private transient Node to;
+	private transient State to;
 	private String toNodeName;
+
+	private List<StateChangeListener> listeners;
 
 	@Override
 	public boolean canAccept(String arg) {

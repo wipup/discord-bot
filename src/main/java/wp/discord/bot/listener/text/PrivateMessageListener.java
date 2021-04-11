@@ -1,30 +1,27 @@
-package wp.discord.bot.service.text;
+package wp.discord.bot.listener.text;
 
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.core.DiscordEventListener;
 
 @Component
 @Slf4j
-public class GuildTextMessageListener extends DiscordEventListener<MessageReceivedEvent> {
+public class PrivateMessageListener extends DiscordEventListener<MessageReceivedEvent> {
 
 	@Override
 	public void handleEvent(MessageReceivedEvent event) throws Exception {
-		MessageChannel channel = event.getChannel();
-		Message message = event.getMessage();
-		String msg = message.getContentDisplay();
-
-		log.info("[{}][{}] {}: {}", event.getGuild().getName(), channel.getName(), event.getAuthor(), msg);
+		User user = event.getAuthor();
+		log.info("[PM] {}: {}", user, event.getMessage().getContentDisplay());
+		log.info("       : {}", event.getMessage().getContentRaw());
 	}
 
 	@Override
 	public boolean acceptCondition(MessageReceivedEvent event) {
-		return event.isFromType(ChannelType.TEXT);
+		return event.isFromType(ChannelType.PRIVATE);
 	}
 
 	@Override

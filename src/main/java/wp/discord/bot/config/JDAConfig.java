@@ -29,9 +29,8 @@ public class JDAConfig {
 	private DiscordProperties discordProperties;
 
 	@Bean
-	public JDA discordJDA(Collection<DiscordEventListener<?>> eventListeners) throws Exception {
+	public JDA discordJDA() throws Exception {
 		log.debug("configuration: {}", discordProperties);
-		log.debug("event listener: {}", eventListeners);
 		DiscordStatus status = discordProperties.getStatus();
 
 		JDABuilder builder = JDABuilder.createDefault(discordProperties.getToken());
@@ -43,8 +42,15 @@ public class JDAConfig {
 //		builder.setCallbackPool(null, false) 
 //		builder.setEventPool(null, false)
 
-		eventListeners.stream().forEach(builder::addEventListeners);
 		return builder.build().awaitReady();
+	}
+
+	@Autowired
+	public void setJdaEventListener(JDA jda, Collection<DiscordEventListener<?>> eventListeners) {
+		log.debug("event listener: {}", eventListeners);
+		for (DiscordEventListener<?> listener : eventListeners) {
+			jda.addEventListener(listener);
+		}
 	}
 
 	@Bean

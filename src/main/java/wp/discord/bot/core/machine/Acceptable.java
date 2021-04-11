@@ -1,4 +1,4 @@
-package wp.discord.bot.core.graph;
+package wp.discord.bot.core.machine;
 
 public interface Acceptable<T> {
 

@@ -1,4 +1,4 @@
-package wp.discord.bot.service;
+package wp.discord.bot.listener;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.GatewayPingEvent;

@@ -1,10 +1,10 @@
-package wp.discord.bot.core.robot;
+package wp.discord.bot.core.action;
 
-public class RobotAction {
+public class ActionConstant {
 	// value
-	public static final String ACTION_GREET_AUTHOR = "action.greet.author";
-	public static final String ACTION_LOG_OUT = "action.log-out";
-	public static final String ACTION_JOIN_VOICE_CHANNEL = "action.join.voiceChannel";
+	public static final String ACTION_GREET_AUTHOR = "do.greet-author";
+	public static final String ACTION_LOG_OUT = "do.log-out";
+	public static final String ACTION_JOIN_VOICE_CHANNEL = "do.join-voiceChannel";
 	
 
 //	// key

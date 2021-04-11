@@ -1,4 +1,4 @@
-package wp.discord.bot.core.graph;
+package wp.discord.bot.core.machine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,24 +21,24 @@ import wp.discord.bot.util.ToStringUtils;
 @Getter
 @Setter(value = AccessLevel.PROTECTED)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Node {
+public class State {
 
 	@EqualsAndHashCode.Include
 	private String name;
 
-	private List<Route> routes = new ArrayList<>();
+	private List<Transition> rules = new ArrayList<>();
 
-	public Node(String name) {
+	public State(String name) {
 		super();
 		this.name = name;
 	}
 
-	public boolean hasMoreRoute() {
-		return CollectionUtils.isNotEmpty(routes);
+	public boolean hasMoreTransitionRules() {
+		return CollectionUtils.isNotEmpty(rules);
 	}
 
-	public Route findFirstRoute(String value) {
-		for (Route r : routes) {
+	public Transition findFirstTransition(String value) {
+		for (Transition r : rules) {
 			if (r.canAccept(value)) {
 				return r;
 			}
@@ -46,8 +46,8 @@ public class Node {
 		return null;
 	}
 
-	public List<Route> findAllRoutes(String value) {
-		return routes.stream().filter((r) -> r.canAccept(value)).collect(Collectors.toList());
+	public List<Transition> findAllTransitionRules(String value) {
+		return rules.stream().filter((r) -> r.canAccept(value)).collect(Collectors.toList());
 	}
 
 	@Override

@@ -1,28 +1,15 @@
 package wp.discord.bot.config.properties;
 
+import lombok.Getter;
+import lombok.Setter;
 import wp.discord.bot.util.ToStringUtils;
 
+@Getter
+@Setter
 public class RobotStateChangeProperties {
 
 	private String state;
-
-	private String callMethod;
-
-	public String getState() {
-		return state;
-	}
-
-	public void setState(String state) {
-		this.state = state;
-	}
-
-	public String getCallMethod() {
-		return callMethod;
-	}
-
-	public void setCallMethod(String callMethod) {
-		this.callMethod = callMethod;
-	}
+	private String callAction;
 
 	@Override
 	public String toString() {

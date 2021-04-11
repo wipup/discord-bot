@@ -1,4 +1,4 @@
-package wp.discord.bot.core.graph;
+package wp.discord.bot.core.machine;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,11 +9,15 @@ import wp.discord.bot.util.ToStringUtils;
 
 @Getter
 @AllArgsConstructor
-public class Graph {
+public class StateMachine {
 
-	private Node startNode = null;
-	private Map<String, Node> allNodes = new HashMap<>(); // key = name, value = node
+	private State startNode = null;
+	private Map<String, State> allStates = new HashMap<>(); // key = name, value = node
 
+	public StateDriver newTraveler() {
+		return new StateDriver(this);
+	}
+	
 	@Override
 	public String toString() {
 		return ToStringUtils.toString(this);

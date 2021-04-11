@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import brave.Span;
 import brave.Tracer;
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 
+@Slf4j
 public abstract class DiscordEventListener<T extends GenericEvent> implements EventListener, ThreadContextAware {
 
 	@Autowired
@@ -52,12 +54,10 @@ public abstract class DiscordEventListener<T extends GenericEvent> implements Ev
 	}
 
 	public void handleError(GenericEvent event, Exception e) {
-		e.printStackTrace(System.out); // TODO
+		log.error("error: {}", event, e);
 	}
 
-	public void handleEvent(T event) throws Exception {
-
-	}
+	abstract public void handleEvent(T event) throws Exception;
 
 	abstract public Class<T> eventClass();
 

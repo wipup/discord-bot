@@ -1,0 +1,88 @@
+package wp.discord.bot.core.machine;
+
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import wp.discord.bot.util.ToStringUtils;
+
+@Getter
+@Slf4j
+public class StateDriver implements Acceptable<String> {
+
+	private StateMachine machine;
+	private State currentState;
+	private State previousState;
+	private List<StateChangeListener> changeListeners;
+	private List<StateNotChangeListener> notChangeListeners;
+
+	public StateDriver(StateMachine graph) {
+		reset(graph);
+	}
+
+	public void accept(String value) {
+		Transition transition = findTransition(value);
+		if (transition != null) {
+			previousState = currentState;
+			currentState = transition.getTo();
+
+			log.debug("Transition from: {}, to: {}, using: {}", previousState.getName(), currentState.getName(), value);
+			callStateChangeListeners(previousState, currentState, value, transition);
+		} else {
+			log.debug("Transition not accepted value: {}", value);
+			callStateNotChangeListeners(currentState, value);
+		}
+	}
+
+	@Override
+	public boolean canAccept(String value) {
+		Transition r = findTransition(value);
+		if (r == null) {
+			return false;
+		}
+		return true;
+	}
+
+	private Transition findTransition(String value) {
+		return currentState.findFirstTransition(value); // TODO maybe find all routes
+	}
+
+	public void reset(StateMachine machine) {
+		if (machine != null) {
+			this.machine = machine;
+		}
+		reset();
+	}
+
+	public void reset() {
+		currentState = machine.getStartNode();
+		previousState = null;
+	}
+
+	public boolean isEnd() {
+		return !currentState.hasMoreTransitionRules();
+	}
+
+	protected void callStateChangeListeners(State from, State to, String value, Transition transition) {
+		if (CollectionUtils.isNotEmpty(transition.getListeners())) {
+			transition.getListeners().stream().forEach((l) -> l.onStateChange(this, from, to, value, transition));
+		}
+		if (CollectionUtils.isNotEmpty(changeListeners)) {
+			changeListeners.stream().forEach((l) -> l.onStateChange(this, from, to, value, transition));
+		}
+	}
+
+	protected void callStateNotChangeListeners(State current, String value) {
+		if (CollectionUtils.isNotEmpty(notChangeListeners)) {
+			notChangeListeners.stream().forEach((l) -> l.onStateNotChange(this, current, value));
+		}
+	}
+
+	@Override
+	public String toString() {
+		return ToStringUtils.toString(this);
+	}
+
+}
