@@ -3,11 +3,11 @@ package wp.discord.bot.listener;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.GatewayPingEvent;
 import net.dv8tion.jda.api.events.GenericEvent;
-import wp.discord.bot.core.DiscordEventListener;
+import wp.discord.bot.core.AbstractDiscordEventListener;
 
 //@Component
 @Slf4j
-public class GenericEventListener extends DiscordEventListener<GenericEvent> {
+public class GenericEventListener extends AbstractDiscordEventListener<GenericEvent> {
 
 	@Override
 	public void handleEvent(GenericEvent event) throws Exception {

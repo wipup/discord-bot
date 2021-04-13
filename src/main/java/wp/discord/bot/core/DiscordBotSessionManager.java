@@ -1,5 +1,8 @@
 package wp.discord.bot.core;
 
+import java.util.Map;
+
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,15 +13,19 @@ import net.dv8tion.jda.api.entities.Message.MentionType;
 import net.dv8tion.jda.api.events.GenericEvent;
 import wp.discord.bot.core.machine.StateDriver;
 import wp.discord.bot.core.machine.StateMachine;
+import wp.discord.bot.model.BotSession;
 import wp.discord.bot.model.CommandContext;
 
 @Component
 @Slf4j
-public class DiscordJDABot implements ThreadContextAware {
+public class DiscordBotSessionManager implements ThreadContextAware, InitializingBean {
 
 //	@Autowired
 //	private MessageLanguageResolver languageResolver;
 
+	private BotSession nonGuildSession;
+	private Map<String, BotSession> guildSessions;
+	
 	@Autowired
 	private StateMachine stateMachine;
 
@@ -50,6 +57,11 @@ public class DiscordJDABot implements ThreadContextAware {
 
 	public JDA getJda() {
 		return jda;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		
 	}
 
 //	@Deprecated

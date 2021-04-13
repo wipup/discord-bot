@@ -22,27 +22,40 @@ import wp.discord.bot.util.ToStringUtils;
 
 @Slf4j
 @Component
-public class ActionSelector implements ThreadContextAware, InitializingBean {
+public class ActionRouter implements ThreadContextAware, InitializingBean {
 
 	@Autowired
 	private ConfigurableApplicationContext applicationContext;
 
-	private Map<String, List<ActionExecutionRoute>> executionRoute;
+	private Map<String, List<ActionExecutionRoute>> executionRoutes;
 
-	public void queueExecuteAction(String action) {
-		List<ActionExecutionRoute> routes = executionRoute.get(action);
+	public void queueExecuteAction(ActionExecutionInfo info) {
+		List<ActionExecutionRoute> routes = executionRoutes.get(info.getAction());
 		if (CollectionUtils.isEmpty(routes)) {
-			log.error("No route register for action={}", action);
+			log.error("No route register for action={}", info.getAction());
 			return;
 		}
 
-		getCurrentContext().getMethodInvokeQueue().addAll(routes);
+		info.setRoutes(routes);
+		getCurrentContext().getMethodInvokeQueue().add(info);
 	}
 
 	public void executeQueuedActions() throws Exception {
 		CommandContext cmdContext = getCurrentContext().getCommandContext();
-		for (ActionExecutionRoute exe : getCurrentContext().getMethodInvokeQueue()) {
-			executeRoute(exe, (Object) cmdContext);
+		for (ActionExecutionInfo info : getCurrentContext().getMethodInvokeQueue()) {
+
+			cmdContext.setAction(info.getAction());
+			cmdContext.setActionValue(info.getEventValue());
+
+			for (ActionExecutionRoute route : info.getRoutes()) {
+				log.debug("execute action: {}, with: {}", info.getAction(), info.getEventValue());
+				executeRoute(route, (Object) cmdContext);
+
+				if (cmdContext.isActionError()) {
+					log.debug("action ends with error: {}", info.getAction(), info.getEventValue());
+					return;
+				}
+			}
 		}
 	}
 
@@ -54,7 +67,7 @@ public class ActionSelector implements ThreadContextAware, InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Collection<Object> beans = applicationContext.getBeansWithAnnotation(ActionExecutorService.class).values();
+		Collection<Object> beans = applicationContext.getBeansWithAnnotation(ActionExecutor.class).values();
 		registerActionExecutors(beans);
 	}
 
@@ -76,7 +89,7 @@ public class ActionSelector implements ThreadContextAware, InitializingBean {
 			}
 		}
 
-		executionRoute = Collections.unmodifiableMap(routeMap);
+		executionRoutes = Collections.unmodifiableMap(routeMap);
 	}
 
 	private void registerRoute(Map<String, List<ActionExecutionRoute>> routeMap, Action action, ActionExecutionRoute route) {

@@ -5,18 +5,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import wp.discord.bot.core.action.ActionSelector;
+import wp.discord.bot.core.action.ActionRouter;
+import wp.discord.bot.locale.MessageKey;
+import wp.discord.bot.locale.MessageLanguageResolver;
+import wp.discord.bot.model.CommandContext;
+import wp.discord.bot.util.SafeUtil;
 
 @Component
 @Slf4j
 public class CommandProcessor implements ThreadContextAware {
 
 	@Autowired
-	private DiscordJDABot bot;
+	private DiscordBotSessionManager bot;
 
 	@Autowired
-	private ActionSelector actionSelector;
-	
+	private ActionRouter actionSelector;
+
+	@Autowired
+	private MessageLanguageResolver languageResolver;
+
 	public void handleCommand(String command) throws Exception {
 		String current = "";
 
@@ -28,24 +35,47 @@ public class CommandProcessor implements ThreadContextAware {
 			current = current + fragment;
 
 			if (bot.canAccept(current)) {
-				log.debug("accept: {}", current);
 				bot.fireEvent(current);
 
 				current = "";
-				log.debug("--------------------");
+//				log.debug("--------------------");
 			} else {
-//				log.debug("reject: {}", current);
-				// terminate
 				current += " ";
 			}
 		}
-		
+
 		if (StringUtils.isNotEmpty(current)) {
 			// error
 			log.debug("not accept: {}", current);
-		} 
-		
+		}
+
 		actionSelector.executeQueuedActions();
+		sendReply();
+		log.debug("=============================================================");
 	}
 
+	public void sendReply() {
+		CommandContext ctx = getCurrentContext().getCommandContext();
+		if (ctx == null) {
+			return;
+		}
+
+		if (StringUtils.isNotEmpty(ctx.getReplyMessage())) {
+			ctx.getMessageReceivedEvent().getChannel().sendMessage(ctx.getReplyMessage()).queue();
+			return;
+		}
+
+		if (ctx.isActionDone()) {
+			return;
+		}
+		
+		String replyKey = SafeUtil.get(() -> ctx.getReplyMessageKey());
+		if (StringUtils.isEmpty(replyKey)) {
+			replyKey = MessageKey.REPLY_GREETING;
+		}
+
+		String replyMessage = languageResolver.getMessage(replyKey, ctx.getMessageReceivedEvent().getAuthor().getName());
+		ctx.getMessageReceivedEvent().getChannel().sendMessage(replyMessage).queue();
+
+	}
 }

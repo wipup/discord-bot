@@ -15,7 +15,10 @@ public class StateDriver implements Acceptable<String> {
 	private StateMachine machine;
 	private State currentState;
 	private State previousState;
+	
+	@Deprecated
 	private List<StateChangeListener> changeListeners;
+	@Deprecated
 	private List<StateNotChangeListener> notChangeListeners;
 
 	public StateDriver(StateMachine graph) {
@@ -30,11 +33,12 @@ public class StateDriver implements Acceptable<String> {
 			callStateNotChangeListeners(currentState, value);
 			return;
 		}
-
+		
 		previousState = currentState;
 		currentState = transition.getTo();
 
-		log.debug("Transition from: {}, to: {}, using: {}", previousState.getName(), currentState.getName(), value);
+//		log.debug("Transition from: {}, to: {}, using: {}", previousState.getName(), currentState.getName(), value);
+		log.debug("to-state: {}, using: {}", currentState.getName(), value);
 		callStateChangeListeners(previousState, currentState, value, transition);
 	}
 

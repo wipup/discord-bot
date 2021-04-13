@@ -16,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.config.properties.RobotStateProperties;
 import wp.discord.bot.config.properties.RobotStateTransitionProperties;
 import wp.discord.bot.config.properties.RobotTransitEventProperties;
-import wp.discord.bot.core.action.ActionSelector;
+import wp.discord.bot.core.ThreadContextAware;
+import wp.discord.bot.core.action.ActionExecutionInfo;
+import wp.discord.bot.core.action.ActionRouter;
 import wp.discord.bot.core.machine.State;
 import wp.discord.bot.core.machine.StateChangeListener;
 import wp.discord.bot.core.machine.StateDriver;
@@ -38,11 +40,11 @@ public class RobotConfig {
 	@Autowired
 	private ConfigurableApplicationContext applicationContext;
 
-	private Collection<ActionSelector> router;
+	private Collection<ActionRouter> router;
 
 	@Bean
 	public StateMachine machine() throws Exception {
-		log.debug("Robot Properties: {}", robotProperties);
+		log.trace("Robot Properties: {}", robotProperties);
 
 		StateMachineBuilder builder = new StateMachineBuilder();
 		builder.startAt(robotProperties.getStartState());
@@ -64,12 +66,12 @@ public class RobotConfig {
 						OnBuilder ob = tb.on(on.getType(), on.getValue());
 
 						if (CollectionUtils.isEmpty(callActions)) {
-							log.debug("from: {}, to: {}, on: {}", from, to, on);
+							log.trace("from: {}, to: {}, on: {}", from, to, on);
 							continue;
 						}
 						// else
 
-						log.debug("from: {}, to: {}, on: {}, action: {}", from, to, on, callActions);
+						log.trace("from: {}, to: {}, on: {}, action: {}", from, to, on, callActions);
 						List<StateChangeListener> actionListeners = callActions.stream()//
 								.filter(StringUtils::isNotEmpty) //
 								.map((action) -> (StateChangeListener) new TransitionActionListener(action))//
@@ -84,7 +86,7 @@ public class RobotConfig {
 		return builder.build();
 	}
 
-	public class TransitionActionListener implements StateChangeListener {
+	public class TransitionActionListener implements StateChangeListener, ThreadContextAware {
 
 		private final String action;
 
@@ -94,9 +96,15 @@ public class RobotConfig {
 
 		@Override
 		public void onStateChange(StateDriver driver, State from, State to, String value, Transition transition) {
-			Collection<ActionSelector> routers = getActionRouters();
-			for (ActionSelector router : routers) {
-				router.queueExecuteAction(getAction());
+			Collection<ActionRouter> routers = getActionRouters();
+			for (ActionRouter router : routers) {
+				ActionExecutionInfo info = new ActionExecutionInfo();
+				info.setFromState(from);
+				info.setToState(to);
+				info.setEventValue(value);
+				info.setAction(getAction());
+				
+				router.queueExecuteAction(info);
 			}
 		}
 
@@ -105,9 +113,9 @@ public class RobotConfig {
 		}
 	}
 
-	private synchronized Collection<ActionSelector> getActionRouters() {
+	private synchronized Collection<ActionRouter> getActionRouters() {
 		if (router == null) {
-			router = applicationContext.getBeansOfType(ActionSelector.class).values();
+			router = applicationContext.getBeansOfType(ActionRouter.class).values();
 		}
 		return router;
 	}

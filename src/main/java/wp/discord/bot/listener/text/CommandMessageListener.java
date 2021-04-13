@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.core.CommandProcessor;
-import wp.discord.bot.core.DiscordEventListener;
+import wp.discord.bot.core.AbstractDiscordEventListener;
 
 @Component
 @Slf4j
-public class CommandMessageListener extends DiscordEventListener<MessageReceivedEvent> {
+public class CommandMessageListener extends AbstractDiscordEventListener<MessageReceivedEvent> {
 
 	@Autowired
 	private CommandProcessor cmdRunner;

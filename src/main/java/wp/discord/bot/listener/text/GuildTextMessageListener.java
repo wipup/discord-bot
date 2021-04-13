@@ -7,11 +7,11 @@ import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import wp.discord.bot.core.DiscordEventListener;
+import wp.discord.bot.core.AbstractDiscordEventListener;
 
 @Component
 @Slf4j
-public class GuildTextMessageListener extends DiscordEventListener<MessageReceivedEvent> {
+public class GuildTextMessageListener extends AbstractDiscordEventListener<MessageReceivedEvent> {
 
 	@Override
 	public void handleEvent(MessageReceivedEvent event) throws Exception {

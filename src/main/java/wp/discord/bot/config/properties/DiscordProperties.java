@@ -1,5 +1,6 @@
 package wp.discord.bot.config.properties;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -16,6 +17,8 @@ public class DiscordProperties {
 	private Integer largeThreshold;
 	private DiscordStatus status;
 	private Set<DiscordUserProperties> users;
+
+	private List<DiscordAudioProperties> audios;
 
 	@Override
 	public String toString() {

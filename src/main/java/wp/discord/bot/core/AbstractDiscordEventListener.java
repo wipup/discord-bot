@@ -7,12 +7,16 @@ import brave.Tracer;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
+/**
+ * try not to use {@link ListenerAdapter} 
+ */
 @Slf4j
-public abstract class DiscordEventListener<T extends GenericEvent> implements EventListener, ThreadContextAware {
+public abstract class AbstractDiscordEventListener<T extends GenericEvent> implements EventListener, ThreadContextAware {
 
 	@Autowired
-	private DiscordJDABot bot;
+	private DiscordBotSessionManager bot;
 	
 	@Autowired
 	private Tracer tracer;

@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.core.action.Action;
 import wp.discord.bot.core.action.ActionConstant;
-import wp.discord.bot.core.action.ActionExecutorService;
+import wp.discord.bot.core.action.ActionExecutor;
 import wp.discord.bot.locale.MessageKey;
 import wp.discord.bot.locale.MessageLanguageResolver;
 import wp.discord.bot.model.CommandContext;
@@ -17,7 +17,7 @@ import wp.discord.bot.util.SafeUtil;
 
 @Component
 @Slf4j
-@ActionExecutorService
+@ActionExecutor
 public class BasicActionService {
 
 	@Autowired
@@ -43,13 +43,7 @@ public class BasicActionService {
 	public void shutdown(CommandContext context) {
 		MessageReceivedEvent event = (MessageReceivedEvent) context.getJdaEvent();
 		log.debug("shutting down from user: {}", event.getAuthor());
-
-		String adminId = "743921134944124989"; // TODO FIXME
-		if (event.getAuthor().getId().equals(adminId)) {
-			jda.shutdownNow();
-		} else {
-			// error
-		}
+		jda.shutdownNow();
 	}
 
 }
