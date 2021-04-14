@@ -3,19 +3,38 @@ package wp.discord.bot.core.bot;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import wp.discord.bot.util.SafeUtil;
 
 public class CommandTokenizer {
 
-	public static List<List<String>> tokenizeMultiLines(String command) {
-		List<List<String>> cmdLines = new ArrayList<>();
+	public static List<List<String>> tokenizeMultiLines(String multilines) {
+		List<List<String>> allLines = new ArrayList<>();
 
-		for (String line : command.split("\n")) {
+		for (String line : multilines.split("([\n]|[\r][\n])")) {
 			List<String> tokens = tokenize(line);
-			cmdLines.add(tokens);
+
+			// handle newline escape
+			List<String> previous = SafeUtil.get(() -> allLines.get(allLines.size() - 1));
+			if (hasEscapeNewLine(previous)) {
+				previous.remove(previous.size() - 1);
+				previous.addAll(tokens);
+			} else {
+				allLines.add(tokens);
+			}
 		}
 
-		return cmdLines;
+		return allLines;
+	}
+
+	private static boolean hasEscapeNewLine(List<String> tokens) {
+		if (CollectionUtils.isEmpty(tokens)) {
+			return false;
+		}
+		String lastToken = tokens.get(tokens.size() - 1);
+		return "\\".equals(lastToken.trim());
 	}
 
 	public static List<String> tokenize(String command) {
