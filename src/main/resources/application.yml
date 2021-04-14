@@ -18,4 +18,10 @@ discord:
       role: owner
     - alias: P'Ake
       snowflake-id: ""
-      role: admin 
+      role: admin
+    - alias: P'Ake
+      snowflake-id: ""
+      role: admin      
+  audios:
+    - name: dig-mineral
+      path: "C:/Users/PC/Documents/workspace-spring-tool-suite-4/discord-bot/src/main/resources/audio/th/th-time-to-dig-mineral.mp3"
