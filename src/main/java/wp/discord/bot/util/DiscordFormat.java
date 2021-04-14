@@ -19,7 +19,7 @@ public class DiscordFormat {
 	}
 
 	public static String mentionUser(String id) {
-		return MessageFormat.format("'<@!'{0}'>'", id);
+		return MessageFormat.format("'<@!'{0}'>'", extractId(id));
 	}
 
 	public static String mention(Role role) {
@@ -27,7 +27,7 @@ public class DiscordFormat {
 	}
 
 	public static String mentionRole(String id) {
-		return MessageFormat.format("'<@&'{0}'>'", id);
+		return MessageFormat.format("'<@&'{0}'>'", extractId(id));
 	}
 
 	public static String mention(GuildChannel channel) {
@@ -35,7 +35,7 @@ public class DiscordFormat {
 	}
 
 	public static String mentionChannel(String id) {
-		return MessageFormat.format("'<#'{0}'>'", id);
+		return MessageFormat.format("'<#'{0}'>'", extractId(id));
 	}
 
 	public static String reaction(String name) {

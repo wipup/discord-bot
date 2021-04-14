@@ -10,14 +10,11 @@ import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 /**
- * try not to use {@link ListenerAdapter} 
+ * try not to use {@link ListenerAdapter}
  */
 @Slf4j
-public abstract class AbstractDiscordEventListener<T extends GenericEvent> implements EventListener, ThreadContextAware {
+public abstract class AbstractDiscordEventListener<T extends GenericEvent> implements EventListener {
 
-	@Autowired
-	private DiscordBotSessionManager bot;
-	
 	@Autowired
 	private Tracer tracer;
 
@@ -34,7 +31,7 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 			} catch (Exception e) {
 				handleError(event, e);
 			} finally {
-				clearCurrentContext();
+//				clearCurrentContext();
 			}
 		} finally {
 			if (sp != null) {
@@ -66,9 +63,8 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 	}
 
 	public void prepareHandleEvent(T event) throws Exception {
-		bot.newDriver(event);
 	}
-	
+
 	abstract public void handleEvent(T event) throws Exception;
 
 	abstract public Class<T> eventClass();

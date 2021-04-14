@@ -5,22 +5,31 @@ import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import wp.discord.bot.core.CommandProcessor;
 import wp.discord.bot.core.AbstractDiscordEventListener;
+import wp.discord.bot.core.CommandLineProcessor;
+import wp.discord.bot.exception.BotException;
+import wp.discord.bot.util.SafeUtil;
 
 @Component
 @Slf4j
 public class CommandMessageListener extends AbstractDiscordEventListener<MessageReceivedEvent> {
 
 	@Autowired
-	private CommandProcessor cmdRunner;
+	private CommandLineProcessor cmdProcessor;
 
 	@Override
 	public void handleEvent(MessageReceivedEvent event) throws Exception {
-		String cmd = event.getMessage().getContentRaw();
-		log.debug("[CMD] {}", cmd);
+		try {
+			String cmd = event.getMessage().getContentRaw();
+			log.debug("[CMD] {}", cmd);
 
-		cmdRunner.handleCommand(cmd);
+			cmdProcessor.handleCommand(event, cmd);
+		} catch (BotException e) {
+			String reply = SafeUtil.get(() -> e.getReplyMessage().toString());
+			if (reply != null) {
+				event.getChannel().sendMessage(reply).queue();;
+			}
+		}
 	}
 
 	@Override
