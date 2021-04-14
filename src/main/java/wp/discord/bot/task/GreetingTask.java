@@ -1,27 +1,24 @@
-package wp.discord.bot.service;
+package wp.discord.bot.task;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.core.ActionHandler;
 import wp.discord.bot.model.bot.BotAction;
 
 @Component
-public class ShutdownService implements ActionHandler {
-
-	@Autowired
-	private JDA jda;
+public class GreetingTask implements ActionHandler {
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
-		jda.shutdownNow();
+		MessageReceivedEvent event = action.getMessageReceivedEvent();
+		event.getChannel().sendMessage("hello").queue();;
 	}
 
 	@Override
 	public CmdAction getAcceptedAction() {
-		return CmdAction.SHUTDOWN;
+		return CmdAction.GREET;
 	}
 
 }

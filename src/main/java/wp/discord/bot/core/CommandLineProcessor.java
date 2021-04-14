@@ -17,7 +17,7 @@ import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.bot.BotAction;
-import wp.discord.bot.service.helper.ReplyHelper;
+import wp.discord.bot.task.helper.ReplyHelper;
 import wp.discord.bot.util.DiscordFormat;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
@@ -30,6 +30,9 @@ public class CommandLineProcessor implements InitializingBean {
 	private JDA jda;
 
 	@Autowired
+	private BotSessionManager sessionManager;
+	
+	@Autowired
 	private ActionHandleManager actionManager;
 
 	@Autowired
@@ -37,16 +40,23 @@ public class CommandLineProcessor implements InitializingBean {
 
 	private List<Pattern> botInitCommands;
 
+	public void handleMultiLineCommand(MessageReceivedEvent event, String multiLines) throws Exception {
+		List<List<String>> multiCommands = CommandTokenizer.tokenizeMultiLines(multiLines);
+		for (List<String> command : multiCommands) {
+			handleTokenizedCommand(event, command.toArray(new String[command.size()]));
+		}
+	}
+
 	public void handleCommand(MessageReceivedEvent event, String command) throws Exception {
 		List<String> tokenizedCommand = CommandTokenizer.tokenize(command);
-		handleCommand(event, tokenizedCommand.toArray(new String[tokenizedCommand.size()]));
+		handleTokenizedCommand(event, tokenizedCommand.toArray(new String[tokenizedCommand.size()]));
 	}
 
-	public void handleCommand(MessageReceivedEvent event, String[] commands) throws Exception {
-		handleCommand(event.getAuthor().getId(), event, commands);
+	public void handleTokenizedCommand(MessageReceivedEvent event, String[] commands) throws Exception {
+		handleTokenizedCommand(event.getAuthor().getId(), event, commands);
 	}
 
-	public void handleCommand(String authorId, GenericEvent event, String[] commands) throws Exception {
+	public void handleTokenizedCommand(String authorId, GenericEvent event, String[] commands) throws Exception {
 		String firstWord = SafeUtil.get(() -> commands[0]);
 		if (!isBotCommand(firstWord)) {
 			return;
@@ -56,6 +66,7 @@ public class CommandLineProcessor implements InitializingBean {
 		BotAction action = new BotAction();
 		action.setEvent(event);
 		action.setAuthorId(authorId);
+		action.setSession(sessionManager.getBotSession(event));
 
 		for (int index = 1; index < commands.length; index++) {
 			String frag = commands[index];

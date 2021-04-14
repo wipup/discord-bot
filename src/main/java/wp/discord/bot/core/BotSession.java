@@ -30,6 +30,18 @@ public class BotSession implements AudioSendHandler, AudioEventListener {
 	private AudioFrame lastFrame;
 	private AudioPlayer audioPlayer;
 
+	public void playTrackAndLeaveChannel(AudioTrack track) {
+		playTrack(track, (event) -> {
+			getAudioPlayer().removeListener(this);
+			leaveVoiceChannel();
+		});
+	}
+
+	public void playTrack(AudioTrack track, AudioEventListener listener) {
+		getAudioPlayer().addListener(listener);
+		playTrack(track);
+	}
+
 	public void playTrack(AudioTrack track) {
 		getAudioPlayer().playTrack(track);
 	}
@@ -48,17 +60,29 @@ public class BotSession implements AudioSendHandler, AudioEventListener {
 
 	public void joinVoiceChannel(VoiceChannel vc) {
 		audioManager.openAudioConnection(vc);
-		status = BotStatus.VOICE_CHANNEL_IDLE;
+		setStatus(BotStatus.VOICE_CHANNEL_IDLE);
 	}
 
 	public void leaveVoiceChannel() {
 		if (audioManager.isConnected()) {
 			audioManager.closeAudioConnection();
-			status = BotStatus.NOT_IN_VOICE_CHANNEL;
+			setStatus(BotStatus.NOT_IN_VOICE_CHANNEL);
 		}
 	}
 
 	// ------------------------------------
+
+	public BotStatus getStatus() {
+		synchronized (this) {
+			return this.status;
+		}
+	}
+
+	public void setStatus(BotStatus status) {
+		synchronized (this) {
+			this.status = status;
+		}
+	}
 
 	@Override
 	public boolean canProvide() {
@@ -79,14 +103,14 @@ public class BotSession implements AudioSendHandler, AudioEventListener {
 	@Override
 	public void onEvent(AudioEvent event) {
 		if (event instanceof TrackEndEvent) {
-			status = BotStatus.VOICE_CHANNEL_IDLE;
+			setStatus(BotStatus.VOICE_CHANNEL_IDLE);
 
 		} else if (event instanceof TrackStartEvent) {
-			status = BotStatus.PLAYING_AUDIO;
+			setStatus(BotStatus.PLAYING_AUDIO);
 
 		} else if (event instanceof TrackExceptionEvent) {
 			stopTrack();
-			status = BotStatus.VOICE_CHANNEL_IDLE;
+			setStatus(BotStatus.VOICE_CHANNEL_IDLE);
 		}
 	}
 

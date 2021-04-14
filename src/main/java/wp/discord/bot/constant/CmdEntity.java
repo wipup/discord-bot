@@ -9,8 +9,10 @@ public enum CmdEntity {
 	CHANNEL("channel", 1), //
 	USER("user", 1), //
 	AUDIO("audio", 1), //
-
 	MESSAGE("message", 1), //
+	
+	//internal
+	SESSION("session", -1), //
 	;
 
 	private String cmd;

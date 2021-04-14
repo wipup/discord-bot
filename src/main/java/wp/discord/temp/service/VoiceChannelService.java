@@ -7,8 +7,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
-import wp.discord.bot.core.AudioTrackHandler;
-import wp.discord.bot.service.helper.VoiceChannelHelper;
+import wp.discord.bot.core.AudioTrackHolder;
+import wp.discord.bot.task.helper.VoiceChannelHelper;
 import wp.discord.bot.util.DiscordFormat;
 import wp.discord.temp.core.action.Action;
 import wp.discord.temp.core.action.ActionConstant;
@@ -27,7 +27,7 @@ public class VoiceChannelService {
 	private VoiceChannelHelper helper;
 
 	@Autowired
-	private AudioTrackHandler audioService;
+	private AudioTrackHolder audioService;
 
 	@Action(ActionConstant.ACTION_JOIN_VOICE_CHANNEL)
 	public void joinVoiceChannel(CommandContext context) {

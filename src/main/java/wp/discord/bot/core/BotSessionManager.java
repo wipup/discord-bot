@@ -1,5 +1,6 @@
 package wp.discord.bot.core;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -10,12 +11,14 @@ import org.springframework.stereotype.Component;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.GenericEvent;
 import wp.discord.bot.constant.BotStatus;
 import wp.discord.bot.util.SafeUtil;
 
+@Slf4j
 @Component
 public class BotSessionManager implements InitializingBean {
 
@@ -26,6 +29,10 @@ public class BotSessionManager implements InitializingBean {
 	private AudioPlayerManager playerManager;
 
 	private Map<String, BotSession> guildSessions;
+
+	public Collection<BotSession> getAllSessions() {
+		return guildSessions.values();
+	}
 
 	public BotSession getBotSession(Guild guild) {
 		if (guild == null) {
@@ -42,6 +49,7 @@ public class BotSessionManager implements InitializingBean {
 	public void afterPropertiesSet() throws Exception {
 		guildSessions = new HashedMap<>();
 		updateGuildSessions();
+		log.debug("Guilds: {}", guildSessions);
 	}
 
 	public synchronized void updateGuildSessions() {
@@ -50,7 +58,7 @@ public class BotSessionManager implements InitializingBean {
 			BotSession bs = newBotSession(guild);
 			map.put(guild.getId(), bs);
 		}
-		map = Collections.unmodifiableMap(guildSessions);
+		guildSessions = Collections.unmodifiableMap(map);
 	}
 
 	public BotSession newBotSession(Guild guild) {
@@ -60,11 +68,10 @@ public class BotSessionManager implements InitializingBean {
 		bs.setAudioPlayer(playerManager.createPlayer());
 		bs.setAudioManager(guild.getAudioManager());
 		bs.getAudioManager().setSendingHandler(bs);
-		
+
 		boolean connected = bs.getAudioManager().isConnected();
 		bs.setStatus(connected ? BotStatus.VOICE_CHANNEL_IDLE : BotStatus.NOT_IN_VOICE_CHANNEL);
-		
-		
+
 		return bs;
 	}
 }

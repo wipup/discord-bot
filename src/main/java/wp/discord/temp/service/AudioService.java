@@ -10,8 +10,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.managers.AudioManager;
-import wp.discord.bot.core.AudioTrackHandler;
-import wp.discord.bot.service.helper.AudioTrackEndListener;
+import wp.discord.bot.core.AudioTrackHolder;
+import wp.discord.bot.task.helper.AudioTrackEndListener;
 import wp.discord.bot.util.DiscordFormat;
 import wp.discord.bot.util.SafeUtil;
 import wp.discord.temp.core.action.Action;
@@ -25,7 +25,7 @@ import wp.discord.temp.model.CommandContext;
 public class AudioService {
 
 	@Autowired
-	private AudioTrackHandler audioService;
+	private AudioTrackHolder audioService;
 
 	@Autowired
 	private VoiceChannelService voiceChannelService;

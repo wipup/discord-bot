@@ -42,6 +42,13 @@ public class Reply {
 		return this;
 	}
 
+	public Reply mentionChannel(String channelId) {
+		if (StringUtils.isNotEmpty(channelId)) {
+			stringBuilder.append(DiscordFormat.mentionChannel(channelId));
+		}
+		return this;
+	}
+
 	public Reply mention(GuildChannel channel) {
 		if (channel != null) {
 			stringBuilder.append(DiscordFormat.mention(channel));

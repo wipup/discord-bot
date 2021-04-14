@@ -1,4 +1,4 @@
-package wp.discord.bot.service.helper;
+package wp.discord.bot.task.helper;
 
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventListener;

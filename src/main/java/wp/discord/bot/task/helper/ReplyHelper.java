@@ -1,4 +1,4 @@
-package wp.discord.bot.service.helper;
+package wp.discord.bot.task.helper;
 
 import org.springframework.stereotype.Component;
 

@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.core.BotSession;
 import wp.discord.bot.util.SafeUtil;
 
 @Data
@@ -21,6 +22,7 @@ public class BotAction {
 	private GenericEvent event;
 	private Map<CmdEntity, String> entities;
 
+	private BotSession session;
 	private String authorId;
 	
 	public BotAction() {

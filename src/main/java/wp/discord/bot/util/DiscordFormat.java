@@ -43,6 +43,9 @@ public class DiscordFormat {
 	}
 
 	public static String extractId(String mention) {
+		if (StringUtils.isEmpty(mention)) {
+			return "";
+		}
 		return mention.replaceAll("[^\\d]", "").trim();
 	}
 

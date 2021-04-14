@@ -1,4 +1,4 @@
-package wp.discord.bot.service;
+package wp.discord.bot.task;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import wp.discord.bot.util.DiscordFormat;
 import wp.discord.bot.util.Reply;
 
 @Component
-public class PrivateTextChannelService implements ActionHandler {
+public class PrivateTextChannelTask implements ActionHandler {
 
 	@Autowired
 	private JDA jda;
