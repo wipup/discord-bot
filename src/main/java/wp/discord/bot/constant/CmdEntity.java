@@ -10,9 +10,7 @@ public enum CmdEntity {
 	USER("user", 1), //
 	AUDIO("audio", 1), //
 	MESSAGE("message", 1), //
-	
-	//internal
-	SESSION("session", -1), //
+	ME("me"), //
 	;
 
 	private String cmd;
@@ -26,7 +24,7 @@ public enum CmdEntity {
 		this.cmd = cmd;
 		this.parameterCount = paramCount;
 	}
-
+	
 	public boolean accept(String command) {
 		return cmd.equalsIgnoreCase(command);
 	}

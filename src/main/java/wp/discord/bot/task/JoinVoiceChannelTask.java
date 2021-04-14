@@ -10,11 +10,11 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
-import wp.discord.bot.core.ActionHandler;
-import wp.discord.bot.core.BotSession;
-import wp.discord.bot.core.BotSessionManager;
+import wp.discord.bot.core.action.ActionHandler;
+import wp.discord.bot.core.bot.BotSession;
+import wp.discord.bot.core.bot.BotSessionManager;
 import wp.discord.bot.exception.BotException;
-import wp.discord.bot.model.bot.BotAction;
+import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.helper.VoiceChannelHelper;
 import wp.discord.bot.util.DiscordFormat;
 import wp.discord.bot.util.Reply;
@@ -45,7 +45,7 @@ public class JoinVoiceChannelTask implements ActionHandler {
 			action.getEntities().put(CmdEntity.USER, userId);
 			log.debug("set default user-id to author: {}", userId);
 		}
-		
+
 		if (StringUtils.isNotEmpty(channelId)) {
 			joinChannelByChannelId(action);
 
@@ -102,6 +102,7 @@ public class JoinVoiceChannelTask implements ActionHandler {
 			throw new BotException(reply);
 		}
 
+		action.setSession(bs);
 		bs.joinVoiceChannel(vc);
 	}
 

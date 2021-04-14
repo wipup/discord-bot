@@ -4,8 +4,8 @@ import org.springframework.stereotype.Component;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.core.ActionHandler;
-import wp.discord.bot.model.bot.BotAction;
+import wp.discord.bot.core.action.ActionHandler;
+import wp.discord.bot.model.BotAction;
 
 @Component
 public class GreetingTask implements ActionHandler {
@@ -13,7 +13,7 @@ public class GreetingTask implements ActionHandler {
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		MessageReceivedEvent event = action.getMessageReceivedEvent();
-		event.getChannel().sendMessage("hello").queue();;
+		event.getChannel().sendMessage("hello").queue();
 	}
 
 	@Override

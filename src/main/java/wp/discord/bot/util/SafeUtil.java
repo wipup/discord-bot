@@ -30,4 +30,19 @@ public class SafeUtil {
 		}
 		return fallbackValue;
 	}
+
+	@SafeVarargs
+	public static final <T> T firstNonNull(SafeSupplier<T> supplier, SafeSupplier<T>... suppliers) {
+		T value = nonNull(supplier, null);
+		if (value != null) {
+			return value;
+		}
+		for (SafeSupplier<T> sup : suppliers) {
+			value = nonNull(sup, null);
+			if (value != null) {
+				return value;
+			}
+		}
+		return null;
+	}
 }

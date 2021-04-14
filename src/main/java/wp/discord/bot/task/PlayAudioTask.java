@@ -5,26 +5,23 @@ import org.springframework.stereotype.Component;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
-import lombok.extern.slf4j.Slf4j;
-import wp.discord.bot.constant.BotStatus;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
-import wp.discord.bot.core.ActionHandler;
-import wp.discord.bot.core.AudioTrackHolder;
-import wp.discord.bot.core.BotSession;
+import wp.discord.bot.core.action.ActionHandler;
+import wp.discord.bot.core.action.AudioTrackHolder;
+import wp.discord.bot.core.bot.BotSession;
 import wp.discord.bot.exception.BotException;
-import wp.discord.bot.model.bot.BotAction;
+import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
 
 @Component
-@Slf4j
 public class PlayAudioTask implements ActionHandler {
 
 	@Autowired
 	private AudioTrackHolder audioHolder;
 
 	@Autowired
-	private JoinVoiceChannelTask joinChannelService;
+	private JoinVoiceChannelTask joinChannelTask;
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
@@ -37,13 +34,20 @@ public class PlayAudioTask implements ActionHandler {
 		}
 
 		BotSession session = action.getSession();
-		if (session.getStatus() == BotStatus.NOT_IN_VOICE_CHANNEL) {
-			log.debug("join voice channel");
-			joinChannelService.handleAction(action);
+		joinChannelTask.handleAction(action);
+
+		if (session != null) {
+			session.playTrack(track);
+			session.playTrack(track);
+			session.leaveVoiceChannel();
+			
+
+		} else { // unknown session
+			Reply reply = Reply.of().literal("Unknown voice-channel ").newline() //
+					.mentionUser(action.getAuthorId()).literal(" please re-check");
+			throw new BotException(reply);
 		}
-		
-		log.debug("join voice channel");
-		session.playTrackAndLeaveChannel(track);
+
 	}
 
 	@Override
