@@ -1,5 +1,6 @@
-package wp.discord.bot.core.action;
+package wp.discord.bot.core;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,8 +31,8 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 	@Autowired
 	private DiscordProperties discordProperties;
 
-	private DiscordAudioProperties currentLoadedTrack;
-	private Map<String, AudioTrack> audioTracks;
+	private Map<String, AudioTrack> audioTracks; // key = name
+	private transient Map<String, DiscordAudioProperties> trackProperties; // key = path
 
 	public String getAudioTrackName(AudioTrack track) {
 		Entry<String, AudioTrack> found = audioTracks.entrySet().stream() //
@@ -57,24 +58,28 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 
 	private void loadAudioTracks() {
 		audioTracks = new LinkedHashMap<>();
+		trackProperties = new HashMap<>();
 
 		if (CollectionUtils.isEmpty(discordProperties.getAudios())) {
 			log.warn("Audio path is empty");
 			return;
 		}
 
-		for (DiscordAudioProperties a : discordProperties.getAudios()) {
-			currentLoadedTrack = a;
-			log.debug("loading: {}", currentLoadedTrack);
-			audioPlayerManager.loadItem(currentLoadedTrack.getPath(), this);
+		for (DiscordAudioProperties audioProperty : discordProperties.getAudios()) {
+			String path = audioProperty.getPath();
+			trackProperties.put(path, audioProperty);
+
+			log.debug("loading: {}", path);
+			audioPlayerManager.loadItem(path, this);
 		}
 	}
 
 	@Override
 	public void trackLoaded(AudioTrack track) {
-		log.info("loaded track: {}", track.getIdentifier());
+		String path = track.getIdentifier();
+		log.info("loaded track: {}", path);
 
-		String trackName = currentLoadedTrack.getName();
+		String trackName = trackProperties.get(path).getName();
 		if (audioTracks.containsKey(trackName)) {
 			throw new IllegalStateException("duplicated track name: " + trackName);
 		}
