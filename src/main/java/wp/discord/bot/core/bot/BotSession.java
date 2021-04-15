@@ -44,15 +44,20 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 
 	@ToString.Exclude
 	private final ExecutorService executorService;
+	@ToString.Exclude
 	private final JDA jda;
 
 	private String guildId;
 	private Guild guild;
 	private BotStatus status;
+	
+	@ToString.Exclude
 	private AudioManager audioManager;
 
 	// audio
+	@ToString.Exclude
 	private AudioFrame lastFrame;
+	@ToString.Exclude
 	private AudioPlayer audioPlayer;
 
 	public BotSession(JDA jda) {

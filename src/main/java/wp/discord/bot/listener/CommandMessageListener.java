@@ -21,15 +21,15 @@ public class CommandMessageListener extends AbstractDiscordEventListener<Message
 	public void handleEvent(MessageReceivedEvent event) throws Exception {
 		try {
 			String cmd = event.getMessage().getContentRaw();
-			log.debug("[CMD] {}", cmd);
+			log.info("[CMD] {}", cmd);
 
 			cmdProcessor.handleMultiLineCommand(event, cmd);
 		} catch (BotException e) {
 			log.error("error", e);
+			
 			String reply = SafeUtil.get(() -> e.getReplyMessage().toString());
 			if (reply != null) {
 				event.getChannel().sendMessage(reply).queue();
-				;
 			}
 		}
 	}
