@@ -6,7 +6,7 @@ import lombok.Getter;
 public enum CmdAction {
 
 	GREET("hello"), SHUTDOWN("shutdown"), UPDATE_STATUS("set", 2), //
-	HELP("help"),
+	HELP("help", 1),
 
 	// ------------------
 

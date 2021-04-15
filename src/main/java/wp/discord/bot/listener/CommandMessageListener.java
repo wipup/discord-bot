@@ -28,7 +28,8 @@ public class CommandMessageListener extends AbstractDiscordEventListener<Message
 			log.error("error", e);
 			String reply = SafeUtil.get(() -> e.getReplyMessage().toString());
 			if (reply != null) {
-				event.getChannel().sendMessage(reply).queue();;
+				event.getChannel().sendMessage(reply).queue();
+				;
 			}
 		}
 	}

@@ -13,13 +13,53 @@ public class Reply {
 		return new Reply();
 	}
 
+	public Reply strikethrough(String s) {
+		stringBuilder.append(DiscordFormat.strikethrough(s));
+		return this;
+	}
+
+	public Reply bold(String s) {
+		stringBuilder.append(DiscordFormat.bold(s));
+		return this;
+	}
+
+	public Reply underlined(String s) {
+		stringBuilder.append(DiscordFormat.underlined(s));
+		return this;
+	}
+
+	public Reply italic(String s) {
+		stringBuilder.append(DiscordFormat.italic(s));
+		return this;
+	}
+
+	public Reply spoiler(String s) {
+		stringBuilder.append(DiscordFormat.wrapSpoiler(s));
+		return this;
+	}
+
+	public Reply startSpoiler() {
+		stringBuilder.append(DiscordFormat.startSpoiler());
+		return this;
+	}
+
+	public Reply endSpoiler() {
+		stringBuilder.append(DiscordFormat.endSpoiler());
+		return this;
+	}
+
 	public Reply literal(String s) {
-		stringBuilder.append(s);
+		stringBuilder.append(DiscordFormat.literal(s));
 		return this;
 	}
 
 	public Reply quote(String s) {
 		stringBuilder.append(DiscordFormat.quote(s));
+		return this;
+	}
+
+	public Reply codeBlock(String s) {
+		stringBuilder.append(DiscordFormat.codeBlock(s));
 		return this;
 	}
 

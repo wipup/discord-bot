@@ -24,7 +24,7 @@ public class GuildTextMessageListener extends AbstractDiscordEventListener<Messa
 
 	@Override
 	public boolean acceptCondition(MessageReceivedEvent event) {
-		return event.isFromType(ChannelType.TEXT);
+		return event.isFromType(ChannelType.TEXT) && !event.getAuthor().isBot();
 	}
 
 	@Override

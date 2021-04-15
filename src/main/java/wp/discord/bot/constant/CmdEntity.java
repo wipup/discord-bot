@@ -11,6 +11,7 @@ public enum CmdEntity {
 	AUDIO("audio", 1), //
 	MESSAGE("message", 1), //
 	ME("me"), //
+	ID("id"), //
 	;
 
 	private String cmd;

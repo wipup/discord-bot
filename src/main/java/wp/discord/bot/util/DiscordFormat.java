@@ -10,6 +10,46 @@ import net.dv8tion.jda.api.entities.User;
 
 public class DiscordFormat {
 
+	/**
+	 * Escape all mark down
+	 */
+	public static String literal(String text) {
+		return text.replaceAll("[\\\\]", "\\\\\\\\") //
+				.replaceAll("_", "\\\\_") //
+				.replaceAll("[*]", "\\\\*") //
+				.replaceAll("[~]", "\\\\~") //
+				.replaceAll("[`]", "\\\\`") //
+				.replaceAll("[|]", "\\\\|");
+	}
+
+	public static String strikethrough(String text) {
+		return "~~" + text + "~~";
+	}
+
+	public static String bold(String text) {
+		return "**" + text + "**";
+	}
+
+	public static String underlined(String text) {
+		return "__" + text + "__";
+	}
+
+	public static String italic(String text) {
+		return "*" + text + "*";
+	}
+
+	public static String startSpoiler() {
+		return "|| ";
+	}
+
+	public static String endSpoiler() {
+		return " ||";
+	}
+
+	public static String wrapSpoiler(String text) {
+		return startSpoiler() + text + endSpoiler();
+	}
+
 	public static String mentionEveryone() {
 		return "@everyone";
 	}

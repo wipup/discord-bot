@@ -21,7 +21,7 @@ public class PrivateMessageListener extends AbstractDiscordEventListener<Message
 
 	@Override
 	public boolean acceptCondition(MessageReceivedEvent event) {
-		return event.isFromType(ChannelType.PRIVATE);
+		return event.isFromType(ChannelType.PRIVATE) && !event.getAuthor().isBot();
 	}
 
 	@Override

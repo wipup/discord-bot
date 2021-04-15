@@ -2,8 +2,11 @@ package wp.discord.bot.core.bot;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -31,6 +34,10 @@ public class UserRoleManager implements InitializingBean {
 	private Map<DiscordUserRole, Set<DiscordUser>> roleUserMap;
 	private Map<String, DiscordUser> userIdMap;
 
+	public List<DiscordUser> getUsersOf(DiscordUserRole role) {
+		return Optional.ofNullable(roleUserMap.get(role)).orElseGet(() -> new HashSet<>()).stream().collect(Collectors.toList());
+	}
+
 	public DiscordUserRole getRoleOf(DiscordUser user) {
 		return user.getRole();
 	}
@@ -53,6 +60,11 @@ public class UserRoleManager implements InitializingBean {
 		for (DiscordUserProperties userProp : discordProperties.getUsers()) {
 			DiscordUser user = convertUser(userProp);
 			registerUser(user);
+		}
+		
+		DiscordUser user = Optional.of(getUsersOf(DiscordUserRole.OWNER)).filter((l) -> !l.isEmpty()).map((l)-> l.get(0)).orElse(null);
+		if (user == null) {
+			throw new IllegalStateException("There must be at least one OWNER user");
 		}
 	}
 
