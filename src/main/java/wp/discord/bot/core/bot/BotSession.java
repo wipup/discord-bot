@@ -7,8 +7,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
-import org.apache.commons.lang3.builder.ToStringExclude;
-
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventListener;
@@ -42,10 +40,9 @@ import wp.discord.bot.constant.BotStatus;
 public class BotSession implements AudioSendHandler, AudioEventListener, ThreadFactory, EventListener {
 
 	// internal-core
-	@ToStringExclude
-	private static final AtomicInteger seqGenerator = new AtomicInteger(0);
+	private static final AtomicInteger SEQ_GENERATOR = new AtomicInteger(0);
 
-	@ToStringExclude
+	@ToString.Exclude
 	private final ExecutorService executorService;
 	private final JDA jda;
 
@@ -66,54 +63,64 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 
 	// ---------- queue
 	public void queue(Runnable r) {
-		try {
-			executorService.submit(r);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		synchronized (executorService) {
+			try {
+				executorService.submit(r);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
-	public synchronized void playTrack(AudioTrack track) {
-		log.trace("queue playTrack");
+	public void playTrack(AudioTrack track) {
+		synchronized (executorService) {
+			log.trace("queue playTrack");
 
-		queue(() -> {
-			log.trace("do playTrack");
-			getAudioPlayer().playTrack(track.makeClone());
-		});
+			queue(() -> {
+				log.trace("do playTrack");
+				getAudioPlayer().playTrack(track.makeClone());
+			});
 
-		waitUntil("track start", (b) -> BotStatus.PLAYING_AUDIO == b.getStatus());
-		waitUntil("track end", (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
+			waitUntil("track start", (b) -> BotStatus.PLAYING_AUDIO == b.getStatus());
+			waitUntil("track end", (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
+		}
 	}
 
-	public synchronized void stopTrack() {
-		log.trace("queue stopTrack");
+	public void stopTrack() {
+		synchronized (executorService) {
+			log.trace("queue stopTrack");
 
-		queue(() -> {
-			log.trace("do stopTrack");
-			getAudioPlayer().stopTrack();
-		});
+			queue(() -> {
+				log.trace("do stopTrack");
+				getAudioPlayer().stopTrack();
+			});
 
-		waitUntil("track stop", (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
+			waitUntil("track stop", (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
+		}
 	}
 
-	public synchronized void joinVoiceChannel(VoiceChannel vc) {
-		log.trace("queue joinVoiceChannel");
-		queue(() -> {
-			log.trace("do joinVoiceChannel");
-			audioManager.openAudioConnection(vc);
-		});
+	public void joinVoiceChannel(VoiceChannel vc) {
+		synchronized (executorService) {
+			log.trace("queue joinVoiceChannel");
+			queue(() -> {
+				log.trace("do joinVoiceChannel");
+				audioManager.openAudioConnection(vc);
+			});
 
-		waitUntil("joined voiceChannel", (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
+			waitUntil("joined voiceChannel", (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
+		}
 	}
 
-	public synchronized void leaveVoiceChannel() {
-		log.trace("queue leaveVoiceChannel");
-		queue(() -> {
-			log.trace("do leaveVoiceChannel");
-			audioManager.closeAudioConnection();
-		});
+	public void leaveVoiceChannel() {
+		synchronized (executorService) {
+			log.trace("queue leaveVoiceChannel");
+			queue(() -> {
+				log.trace("do leaveVoiceChannel");
+				audioManager.closeAudioConnection();
+			});
 
-		waitUntil("left channel", (b) -> BotStatus.NOT_IN_VOICE_CHANNEL == b.getStatus());
+			waitUntil("left channel", (b) -> BotStatus.NOT_IN_VOICE_CHANNEL == b.getStatus());
+		}
 	}
 
 	public void waitUntil(String reason, Predicate<BotSession> condition) {
@@ -217,7 +224,7 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 
 	@Override
 	public Thread newThread(Runnable r) {
-		return new Thread(r, guildId + "-" + seqGenerator.incrementAndGet());
+		return new Thread(r, guildId + "-" + SEQ_GENERATOR.incrementAndGet());
 	}
 
 	/**

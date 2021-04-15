@@ -62,7 +62,7 @@ public class Reply {
 	}
 
 	public String build() {
-		return build();
+		return toString();
 	}
 
 	@Override

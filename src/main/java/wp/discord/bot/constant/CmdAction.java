@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum CmdAction {
 
-	GREET("hello"), SHUTDOWN("shutdown"), UPDATE_STATUS("update"), //
+	GREET("hello"), SHUTDOWN("shutdown"), UPDATE_STATUS("set", 2), //
+	HELP("help"),
 
 	// ------------------
 
@@ -15,8 +16,9 @@ public enum CmdAction {
 
 	// -----------------
 
-	COMPILE_CRON("cron"), GET("get", 1), ADD("add", 1), DELETE("delete", 1)
-
+	COMPILE_CRON("cron", 6), //
+	GET("get", 1), ADD("add", 1), DELETE("delete", 1), UPDATE("update", 1), //
+	CMD("cmd", 10), //
 	;
 
 	private String cmd;
