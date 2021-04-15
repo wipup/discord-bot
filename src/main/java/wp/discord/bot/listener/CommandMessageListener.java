@@ -25,7 +25,7 @@ public class CommandMessageListener extends AbstractDiscordEventListener<Message
 
 			cmdProcessor.handleMultiLineCommand(event, cmd);
 		} catch (BotException e) {
-			log.error("error", e);
+			log.error("bot error: {}", e.getMessage(), e);
 			
 			String reply = SafeUtil.get(() -> e.getReplyMessage().toString());
 			if (reply != null) {

@@ -1,15 +1,20 @@
 package wp.discord.bot.core.bot;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
+import org.slf4j.MDC;
+
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventListener;
+import com.sedmelluq.discord.lavaplayer.player.event.PlayerPauseEvent;
+import com.sedmelluq.discord.lavaplayer.player.event.PlayerResumeEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.TrackEndEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.TrackExceptionEvent;
 import com.sedmelluq.discord.lavaplayer.player.event.TrackStartEvent;
@@ -42,17 +47,18 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 	// internal-core
 	private static final AtomicInteger SEQ_GENERATOR = new AtomicInteger(0);
 
+	// bean or whatever
 	@ToString.Exclude
 	private final ExecutorService executorService;
 	@ToString.Exclude
 	private final JDA jda;
+	@ToString.Exclude
+	private AudioManager audioManager;
 
+	// attribute
 	private String guildId;
 	private Guild guild;
 	private BotStatus status;
-	
-	@ToString.Exclude
-	private AudioManager audioManager;
 
 	// audio
 	@ToString.Exclude
@@ -70,7 +76,15 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 	public void queue(Runnable r) {
 		synchronized (executorService) {
 			try {
-				executorService.submit(r);
+				final Map<String, String> mdc = MDC.getCopyOfContextMap();
+				executorService.submit(() -> {
+					try {
+						MDC.setContextMap(mdc);
+						r.run();
+					} finally {
+						MDC.clear();
+					}
+				});
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -79,15 +93,15 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 
 	public void playTrack(AudioTrack track) {
 		synchronized (executorService) {
-			log.trace("queue playTrack");
+			log.trace("queue playTrack: {}", track.getUserData());
 
 			queue(() -> {
-				log.trace("do playTrack");
+				log.debug("do playTrack: {}", track.getUserData());
 				getAudioPlayer().playTrack(track.makeClone());
 			});
 
-			waitUntil("track start", (b) -> BotStatus.PLAYING_AUDIO == b.getStatus());
-			waitUntil("track end", (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
+			waitUntil("track started: " + track.getUserData(), (b) -> BotStatus.PLAYING_AUDIO == b.getStatus());
+			waitUntil("track ended: " + track.getUserData(), (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
 		}
 	}
 
@@ -96,23 +110,23 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 			log.trace("queue stopTrack");
 
 			queue(() -> {
-				log.trace("do stopTrack");
+				log.debug("do stopTrack");
 				getAudioPlayer().stopTrack();
 			});
 
-			waitUntil("track stop", (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
+			waitUntil("track stopped", (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
 		}
 	}
 
 	public void joinVoiceChannel(VoiceChannel vc) {
 		synchronized (executorService) {
-			log.trace("queue joinVoiceChannel");
+			log.trace("queue joinVoiceChannel: {}", vc);
 			queue(() -> {
-				log.trace("do joinVoiceChannel");
+				log.debug("do joinVoiceChannel: {}", vc);
 				audioManager.openAudioConnection(vc);
 			});
 
-			waitUntil("joined voiceChannel", (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
+			waitUntil("joined voiceChannel: " + vc, (b) -> BotStatus.VOICE_CHANNEL_IDLE == b.getStatus());
 		}
 	}
 
@@ -120,7 +134,7 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 		synchronized (executorService) {
 			log.trace("queue leaveVoiceChannel");
 			queue(() -> {
-				log.trace("do leaveVoiceChannel");
+				log.debug("do leaveVoiceChannel");
 				audioManager.closeAudioConnection();
 			});
 
@@ -138,9 +152,9 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 
 	// ---------- blocking
 	private void doWait(String reason, Predicate<BotSession> condition) {
-		log.trace("do waiting until: {}", reason);
+		log.debug("do waiting until: {}", reason);
 
-		final long sleepTime = 100;
+		final long sleepTime = 50; // ms
 		long accumulatedWaitTime = 0;
 
 		boolean sucess = condition.test(this);
@@ -154,7 +168,7 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 					break;
 				}
 			} catch (Exception e) {
-				log.warn("sleep interupted", e);
+				log.warn("wait sleep interupted", e);
 				break;
 			}
 			sucess = condition.test(this);
@@ -218,12 +232,20 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 			setStatus(BotStatus.VOICE_CHANNEL_IDLE);
 
 		} else if (event instanceof TrackStuckEvent) {
-
 			log.debug("audioEvent: TrackStuckEvent: {}", ((TrackStuckEvent) event).track.getUserData());
 			getAudioPlayer().stopTrack();
 			setStatus(BotStatus.VOICE_CHANNEL_IDLE);
+
+		} else if (event instanceof PlayerPauseEvent) {
+			log.debug("audioEvent: Player Pause");
+			setStatus(BotStatus.VOICE_CHANNEL_IDLE);
+
+		} else if (event instanceof PlayerResumeEvent) {
+			log.debug("audioEvent: Player Resume");
+			setStatus(BotStatus.PLAYING_AUDIO);
+
 		} else {
-			log.debug("audioEvent: {}", event.getClass().getSimpleName());
+			log.info("Unknown AudioEvent: {}", event.getClass().getSimpleName());
 		}
 	}
 

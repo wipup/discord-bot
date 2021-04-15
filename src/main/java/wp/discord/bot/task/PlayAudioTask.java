@@ -28,7 +28,7 @@ public class PlayAudioTask implements ActionHandler {
 		String trackName = action.getEntities().get(CmdEntity.AUDIO);
 		AudioTrack track = audioHolder.getAudioTrack(trackName);
 		if (track == null) {
-			Reply reply = Reply.of().literal("Invalid audio ").code(trackName).newline() //
+			Reply reply = Reply.of().literal("Invalid audio-id ").code(trackName).newline() //
 					.mentionUser(action.getAuthorId()).literal(" please re-check");
 			throw new BotException(reply);
 		}
