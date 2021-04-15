@@ -1,4 +1,4 @@
-package wp.discord.bot.task;
+package wp.discord.bot.task.audio;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

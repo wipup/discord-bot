@@ -1,4 +1,4 @@
-package wp.discord.bot.listener;
+package wp.discord.bot.listener.user;
 
 import org.springframework.stereotype.Component;
 

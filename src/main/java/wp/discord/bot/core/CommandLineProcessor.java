@@ -1,4 +1,4 @@
-package wp.discord.bot.core.bot;
+package wp.discord.bot.core;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +16,11 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.action.ActionHandleManager;
+import wp.discord.bot.core.bot.BotSessionManager;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.helper.ReplyHelper;
+import wp.discord.bot.util.CommandLineTokenizer;
 import wp.discord.bot.util.DiscordFormat;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
@@ -42,14 +44,14 @@ public class CommandLineProcessor implements InitializingBean {
 	private List<Pattern> botInitCommands;
 
 	public void handleMultiLineCommand(MessageReceivedEvent event, String multiLines) throws Exception {
-		List<List<String>> multiCommands = CommandTokenizer.tokenizeMultiLines(multiLines);
+		List<List<String>> multiCommands = CommandLineTokenizer.tokenizeMultiLines(multiLines);
 		for (List<String> command : multiCommands) {
 			handleTokenizedCommand(event, command.toArray(new String[command.size()]));
 		}
 	}
 
 	public void handleCommand(MessageReceivedEvent event, String command) throws Exception {
-		List<String> tokenizedCommand = CommandTokenizer.tokenize(command);
+		List<String> tokenizedCommand = CommandLineTokenizer.tokenize(command);
 		handleTokenizedCommand(event, tokenizedCommand.toArray(new String[tokenizedCommand.size()]));
 	}
 

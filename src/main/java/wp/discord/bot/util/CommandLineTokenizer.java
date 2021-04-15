@@ -1,4 +1,4 @@
-package wp.discord.bot.core.bot;
+package wp.discord.bot.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,9 +6,7 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import wp.discord.bot.util.SafeUtil;
-
-public class CommandTokenizer {
+public class CommandLineTokenizer {
 
 	public static List<List<String>> tokenizeMultiLines(String multilines) {
 		List<List<String>> allLines = new ArrayList<>();

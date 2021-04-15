@@ -1,4 +1,4 @@
-package wp.discord.bot.listener;
+package wp.discord.bot.listener.text;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.core.AbstractDiscordEventListener;
-import wp.discord.bot.core.bot.CommandLineProcessor;
+import wp.discord.bot.core.CommandLineProcessor;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.util.SafeUtil;
 
