@@ -93,13 +93,25 @@ public class DiscordFormat {
 		return MessageFormat.format("`{0}`", message);
 	}
 
+	public static String startCodeBlock() {
+		return startCodeBlock("");
+	}
+
+	public static String startCodeBlock(String language) {
+		language = StringUtils.defaultString(language);
+		return MessageFormat.format("```{0}\n", language);
+	}
+
+	public static String endCodeBlock() {
+		return "\n```";
+	}
+
 	public static String codeBlock(String message) {
 		return codeBlock(message, null);
 	}
 
 	public static String codeBlock(String message, String language) {
-		language = StringUtils.defaultString(language);
-		return MessageFormat.format("```{0}\n{1}\n```\n", language, message);
+		return MessageFormat.format("{0}{1}{2}", startCodeBlock(language), message, endCodeBlock());
 	}
 
 	public static String quote(String message) {

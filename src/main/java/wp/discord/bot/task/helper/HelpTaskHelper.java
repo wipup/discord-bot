@@ -6,7 +6,7 @@ import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
 
 import net.dv8tion.jda.api.JDA;
-import wp.discord.bot.core.bot.UserRoleManager;
+import wp.discord.bot.core.bot.UserManager;
 import wp.discord.bot.model.DiscordUser;
 import wp.discord.bot.model.DiscordUserRole;
 import wp.discord.bot.util.Reply;
@@ -15,7 +15,7 @@ import wp.discord.bot.util.Reply;
 public class HelpTaskHelper {
 
 	@Autowired
-	private UserRoleManager userManager;
+	private UserManager userManager;
 
 	@Autowired
 	private JDA jda;

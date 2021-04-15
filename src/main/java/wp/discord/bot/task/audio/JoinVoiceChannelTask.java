@@ -13,6 +13,7 @@ import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.core.bot.BotSession;
 import wp.discord.bot.core.bot.BotSessionManager;
+import wp.discord.bot.core.bot.UserManager;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.helper.VoiceChannelHelper;
@@ -30,19 +31,21 @@ public class JoinVoiceChannelTask implements ActionHandler {
 	private VoiceChannelHelper helper;
 
 	@Autowired
+	private UserManager userManager;
+
+	@Autowired
 	private JDA jda;
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
-		String channelId = action.getEntities().get(CmdEntity.CHANNEL);
-		String userId = action.getEntities().get(CmdEntity.USER);
+		String channelId = action.getFirstEntitiesParam(CmdEntity.CHANNEL);
+		String userId = userManager.getUserEntityId(action);
 
-		userId = DiscordFormat.extractId(userId);
 		channelId = DiscordFormat.extractId(channelId);
-
 		if (StringUtils.isEmpty(userId)) {
 			userId = action.getAuthorId();
-			action.getEntities().put(CmdEntity.USER, userId);
+			action.getEntities(CmdEntity.USER).clear();
+			action.getEntities(CmdEntity.USER).add(userId);
 			log.debug("set default user-id to author: {}", userId);
 		}
 
@@ -53,19 +56,18 @@ public class JoinVoiceChannelTask implements ActionHandler {
 			joinChannelByUserId(action);
 
 		} else {
-			Reply reply = Reply.of().literal("Invalid voice-channel ").mentionChannel(channelId).newline() //
+			Reply reply = Reply.of().literal("Unknown voice-channel ").mentionChannel(channelId).newline() //
 					.mentionUser(action.getAuthorId()).literal(" please try again");
 			throw new BotException(reply);
 		}
 	}
 
-	protected void joinChannelByUserId(BotAction action) throws Exception {
-		String userId = action.getEntities().get(CmdEntity.USER);
-		userId = DiscordFormat.extractId(userId);
+	public void joinChannelByUserId(BotAction action) throws Exception {
+		String userId = userManager.getUserEntityId(action);
 
-		User user = jda.retrieveUserById(userId).complete();
+		User user = userManager.getUserEntity(userId);
 		if (user == null) {
-			Reply reply = Reply.of().literal("Not Found ").mention(user).newline() //
+			Reply reply = Reply.of().literal("Not Found ").mentionUser(userId).newline() //
 					.mentionUser(action.getAuthorId()).literal(" please try again");
 			throw new BotException(reply);
 		}
@@ -80,8 +82,8 @@ public class JoinVoiceChannelTask implements ActionHandler {
 		joinVoiceChannel(action, vc);
 	}
 
-	protected void joinChannelByChannelId(BotAction action) throws Exception {
-		String channelId = action.getEntities().get(CmdEntity.CHANNEL);
+	public void joinChannelByChannelId(BotAction action) throws Exception {
+		String channelId = action.getFirstEntitiesParam(CmdEntity.CHANNEL);
 		channelId = DiscordFormat.extractId(channelId);
 
 		VoiceChannel vc = jda.getVoiceChannelById(channelId);

@@ -52,7 +52,9 @@ public class CommandLineTokenizer {
 
 			if (literal) {
 				if (c == '\\') {
-					sb.append(array[++i]);
+					if (i + 1 < array.length) {
+						sb.append(array[++i]);
+					}
 				} else {
 					sb.append(c);
 				}

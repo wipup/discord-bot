@@ -17,8 +17,7 @@ public enum CmdAction {
 	// -----------------
 
 	COMPILE_CRON("cron", 6), //
-	GET("get", 1), ADD("add", 1), DELETE("delete", 1), UPDATE("update", 1), //
-	CMD("cmd", 10), //
+	GET("get", 1), ADD("add", 1), DELETE("delete", 1), UPDATE("update", 1), // CRUD
 	;
 
 	private String cmd;

@@ -21,6 +21,8 @@ public class VoiceChannelHelper {
 	@Autowired
 	private JDA jda;
 
+	// no one used
+	@Deprecated
 	public VoiceChannel findVoiceChannelOfBot() {
 		for (AudioManager am : jda.getAudioManagerCache()) {
 			if (am.getConnectedChannel() != null) {
@@ -52,13 +54,15 @@ public class VoiceChannelHelper {
 				}
 			}
 		} catch (Exception e) {
-			log.error("error findVoiceChannelOfUser: {}", id, e);
+			log.error("error findVoiceChannelOfUser: {}", user, e);
 		} finally {
-			log.debug("findVoiceChannelOfUser: {}, return: {}", id, result);
+			log.debug("findVoiceChannelOfUser: {}, return: {}", user, result);
 		}
 		return null;
 	}
 
+	// no one used
+	@Deprecated
 	public VoiceChannel findAuthorVoiceChannel(MessageReceivedEvent event) {
 		return findVoiceChannelOfUser(event.getAuthor());
 	}

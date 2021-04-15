@@ -18,12 +18,16 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import wp.discord.bot.config.properties.DiscordProperties;
 import wp.discord.bot.config.properties.DiscordUserProperties;
+import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.model.BotAction;
 import wp.discord.bot.model.DiscordUser;
 import wp.discord.bot.model.DiscordUserRole;
+import wp.discord.bot.util.DiscordFormat;
+import wp.discord.bot.util.SafeUtil;
 
 @Slf4j
 @Component
-public class UserRoleManager implements InitializingBean {
+public class UserManager implements InitializingBean {
 
 	@Autowired
 	private DiscordProperties discordProperties;
@@ -33,6 +37,10 @@ public class UserRoleManager implements InitializingBean {
 
 	private Map<DiscordUserRole, Set<DiscordUser>> roleUserMap;
 	private Map<String, DiscordUser> userIdMap;
+
+	public DiscordUser getOwnerUser() {
+		return Optional.of(getUsersOf(DiscordUserRole.OWNER)).filter((l) -> !l.isEmpty()).map((l) -> l.get(0)).orElse(null);
+	}
 
 	public List<DiscordUser> getUsersOf(DiscordUserRole role) {
 		return Optional.ofNullable(roleUserMap.get(role)).orElseGet(() -> new HashSet<>()).stream().collect(Collectors.toList());
@@ -50,6 +58,27 @@ public class UserRoleManager implements InitializingBean {
 		return userIdMap.get(id).getRole();
 	}
 
+	public User getUserEntity(String userId) {
+		return SafeUtil.get(() -> jda.retrieveUserById(userId).complete());
+	}
+
+	public User getUserEntity(BotAction action) {
+		return getUserEntity(getUserEntityId(action));
+	}
+
+	public String getUserEntityId(BotAction action) {
+		String userId = action.getFirstEntitiesParam(CmdEntity.USER);
+		if ("me".equalsIgnoreCase(userId)) {
+			return action.getAuthorId();
+		}
+
+		if ("bot".equalsIgnoreCase(userId)) {
+			return jda.getSelfUser().getId();
+		}
+
+		return DiscordFormat.extractId(userId);
+	}
+
 	// -----------------------------------------------------------------------------------
 
 	@Override
@@ -61,8 +90,8 @@ public class UserRoleManager implements InitializingBean {
 			DiscordUser user = convertUser(userProp);
 			registerUser(user);
 		}
-		
-		DiscordUser user = Optional.of(getUsersOf(DiscordUserRole.OWNER)).filter((l) -> !l.isEmpty()).map((l)-> l.get(0)).orElse(null);
+
+		DiscordUser user = getOwnerUser();
 		if (user == null) {
 			throw new IllegalStateException("There must be at least one OWNER user");
 		}

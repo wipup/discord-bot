@@ -22,7 +22,7 @@ public class PublicTextChannelTask implements ActionHandler {
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
-		String channelMention = action.getEntities().get(CmdEntity.CHANNEL);
+		String channelMention = action.getFirstEntitiesParam(CmdEntity.CHANNEL);
 		String channelId = DiscordFormat.extractId(channelMention);
 
 		TextChannel channel = jda.getTextChannelById(channelId);
@@ -32,7 +32,7 @@ public class PublicTextChannelTask implements ActionHandler {
 			throw new BotException(reply);
 		}
 
-		String message = action.getEntities().get(CmdEntity.MESSAGE);
+		String message = action.getFirstEntitiesParam(CmdEntity.MESSAGE);
 		if (StringUtils.isEmpty(message)) {
 			Reply reply = Reply.of().literal("Empty text-message ").code(channelMention).newline()//
 					.mentionUser(action.getAuthorId()).literal(" please try again");

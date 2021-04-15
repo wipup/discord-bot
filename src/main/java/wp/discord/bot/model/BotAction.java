@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.bot.BotSession;
+import wp.discord.bot.util.EventUtil;
 import wp.discord.bot.util.SafeUtil;
 
 @Getter
@@ -29,7 +30,7 @@ public class BotAction {
 	private List<String> actionParams;
 
 	private GenericEvent event;
-	private Map<CmdEntity, String> entities;
+	private Map<CmdEntity, List<String>> entities;
 
 	private BotSession session;
 	private String authorId;
@@ -39,12 +40,29 @@ public class BotAction {
 		entities = new LinkedHashMap<>();
 	}
 
+	public String getFirstEntitiesParam(CmdEntity e) {
+		List<String> list = getEntities(e);
+		if (list.isEmpty()) {
+			return null;
+		}
+		return list.get(0);
+	}
+
+	public List<String> getEntities(CmdEntity e) {
+		List<String> list = entities.get(e);
+		if (list == null) {
+			list = new ArrayList<>(e.getParameterCount());
+			entities.put(e, list);
+		}
+		return list;
+	}
+
 	public User getEventAuthor() {
-		return SafeUtil.get(() -> (User) event.getClass().getMethod("getAuthor").invoke(event));
+		return EventUtil.getAuthor(event);
 	}
 
 	public MessageChannel getEventMessageChannel() {
-		return SafeUtil.get(() -> (MessageChannel) event.getClass().getMethod("getChannel").invoke(event));
+		return EventUtil.getChannel(event);
 	}
 
 	public MessageReceivedEvent getMessageReceivedEvent() {

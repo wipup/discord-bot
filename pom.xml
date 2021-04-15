@@ -71,7 +71,14 @@
 			<version>1.9</version>
 		</dependency>
 
-
+		<!-- free text-to-speech -->
+		<!-- https://stackoverflow.com/questions/27808248/java-freetts-missing-voice -->
+		<!-- https://freetts.sourceforge.io/ -->
+		<!-- <dependency> -->
+		<!-- <groupId>net.sf.sociaal</groupId> -->
+		<!-- <artifactId>freetts</artifactId> -->
+		<!-- <version>1.2.2</version> -->
+		<!-- </dependency> -->
 
 		<!-- Utility -->
 		<dependency>

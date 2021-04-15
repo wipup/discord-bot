@@ -3,7 +3,6 @@ package wp.discord.bot.core;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import brave.Span;
-import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -11,11 +10,13 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 /**
  * try not to use {@link ListenerAdapter}
  */
-@Slf4j
 public abstract class AbstractDiscordEventListener<T extends GenericEvent> implements EventListener {
 
 	@Autowired
 	private TracingHandler tracing;
+
+	@Autowired
+	private EventErrorHandler errorHandler;
 
 	@SuppressWarnings("unchecked")
 	public void onEvent(GenericEvent event) {
@@ -29,6 +30,9 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 				}
 			} catch (Exception e) {
 				handleError(event, e);
+			} catch (Throwable t) {
+				handleError(event, t);
+				throw t;
 			} finally {
 				tracing.clearTraceContext();
 			}
@@ -57,8 +61,8 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 		return true;
 	}
 
-	public void handleError(GenericEvent event, Exception e) {
-		log.error("error: {}", event, e);
+	public void handleError(GenericEvent event, Throwable e) {
+		errorHandler.handleEventError(event, e);
 	}
 
 	public void prepareHandleEvent(T event) throws Exception {

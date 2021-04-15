@@ -17,7 +17,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
 import wp.discord.bot.constant.BotStatus;
-import wp.discord.bot.util.SafeUtil;
+import wp.discord.bot.util.EventUtil;
 
 @Slf4j
 @Component
@@ -43,9 +43,9 @@ public class BotSessionManager implements InitializingBean {
 	}
 
 	public BotSession getBotSession(GenericEvent event) {
-		Guild guild = SafeUtil.get(() -> (Guild) event.getClass().getMethod("getGuild").invoke(event));
+		Guild guild = EventUtil.getGuild(event);
 		if (guild == null) {
-			User user = SafeUtil.get(() -> (User) event.getClass().getMethod("getAuthor").invoke(event));
+			User user = EventUtil.getAuthor(event);
 			if (user != null) {
 				guild = jda.getMutualGuilds(user).stream().findFirst().orElse(null);
 			}

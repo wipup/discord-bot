@@ -13,6 +13,11 @@ public class Reply {
 		return new Reply();
 	}
 
+	public Reply append(String s) {
+		stringBuilder.append(s);
+		return this;
+	}
+
 	public Reply strikethrough(String s) {
 		stringBuilder.append(DiscordFormat.strikethrough(s));
 		return this;
@@ -55,6 +60,20 @@ public class Reply {
 
 	public Reply quote(String s) {
 		stringBuilder.append(DiscordFormat.quote(s));
+		return this;
+	}
+
+	public Reply startCodeBlock() {
+		return startCodeBlock("");
+	}
+
+	public Reply startCodeBlock(String language) {
+		stringBuilder.append(DiscordFormat.startCodeBlock(language));
+		return this;
+	}
+
+	public Reply endCodeBlock() {
+		stringBuilder.append(DiscordFormat.endCodeBlock());
 		return this;
 	}
 
@@ -101,12 +120,16 @@ public class Reply {
 		return this;
 	}
 
+	public String buildUnquoted() {
+		return stringBuilder.toString();
+	}
+
 	public String build() {
 		return toString();
 	}
 
 	@Override
 	public String toString() {
-		return DiscordFormat.quote(stringBuilder.toString());
+		return DiscordFormat.quote(buildUnquoted());
 	}
 }

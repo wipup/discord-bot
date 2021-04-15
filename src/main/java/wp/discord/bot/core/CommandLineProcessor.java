@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
-import wp.discord.bot.core.action.ActionHandleManager;
 import wp.discord.bot.core.bot.BotSessionManager;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.BotAction;
@@ -34,90 +33,99 @@ public class CommandLineProcessor implements InitializingBean {
 
 	@Autowired
 	private BotSessionManager sessionManager;
-	
-	@Autowired
-	private ActionHandleManager actionManager;
 
 	@Autowired
 	private ReplyHelper replyHelper;
 
 	private List<Pattern> botInitCommands;
 
-	public void handleMultiLineCommand(MessageReceivedEvent event, String multiLines) throws Exception {
+	public List<BotAction> handleMultiLineCommand(MessageReceivedEvent event, String multiLines) throws Exception {
+		List<BotAction> result = new ArrayList<>();
 		List<List<String>> multiCommands = CommandLineTokenizer.tokenizeMultiLines(multiLines);
 		for (List<String> command : multiCommands) {
-			handleTokenizedCommand(event, command.toArray(new String[command.size()]));
+			BotAction action = handleTokenizedCommand(event, command.toArray(new String[command.size()]));
+			if (action != null) {
+				result.add(action);
+			}
 		}
+		return result;
 	}
 
-	public void handleCommand(MessageReceivedEvent event, String command) throws Exception {
+	public BotAction handleCommand(MessageReceivedEvent event, String command) throws Exception {
 		List<String> tokenizedCommand = CommandLineTokenizer.tokenize(command);
-		handleTokenizedCommand(event, tokenizedCommand.toArray(new String[tokenizedCommand.size()]));
+		return handleTokenizedCommand(event, tokenizedCommand.toArray(new String[tokenizedCommand.size()]));
 	}
 
-	public void handleTokenizedCommand(MessageReceivedEvent event, String[] commands) throws Exception {
-		handleTokenizedCommand(event.getAuthor().getId(), event, commands);
+	public BotAction handleTokenizedCommand(MessageReceivedEvent event, String[] commands) throws Exception {
+		return handleTokenizedCommand(event.getAuthor().getId(), event, commands);
 	}
 
-	public void handleTokenizedCommand(String authorId, GenericEvent event, String[] commands) throws Exception {
+	public BotAction handleTokenizedCommand(String authorId, GenericEvent event, String[] commands) throws Exception {
 		String firstWord = SafeUtil.get(() -> commands[0]);
 		if (!isBotCommand(firstWord)) {
-			return;
+			return null;
 		}
+		
 		log.debug("Received Command: {}", (Object) commands);
+		BotAction action = null;
+		try {
+			action = new BotAction();
+			action.setEvent(event);
+			action.setAuthorId(authorId);
+			action.setSession(sessionManager.getBotSession(event));
 
-		BotAction action = new BotAction();
-		action.setEvent(event);
-		action.setAuthorId(authorId);
-		action.setSession(sessionManager.getBotSession(event));
-
-		for (int index = 1; index < commands.length; index++) {
-			String frag = commands[index];
-			if (StringUtils.isEmpty(frag)) {
-				continue;
-			}
-
-			if (action.getAction() == null) {
-				CmdAction cmdAction = CmdAction.getMatchingAction(frag);
-				if (cmdAction == null) {
-					Reply reply = replyHelper.literal("Unknown action: ").code(frag).newline() //
-							.mentionUser(authorId).literal(" Please try again.");
-					throw new BotException(reply);
-				}
-				action.setAction(cmdAction);
-
-				index = collectActionParams(action, commands, index, cmdAction);
-			} else {
-				CmdEntity entity = CmdEntity.getMatchingEntity(frag);
-				if (entity == null) {
-					Reply reply = replyHelper.literal("Unknown option: ").code(frag).newline() //
-							.mentionUser(authorId).literal(" Please try again.");
-					throw new BotException(reply);
+			for (int index = 1; index < commands.length; index++) {
+				String frag = commands[index];
+				if (StringUtils.isEmpty(frag)) {
+					continue;
 				}
 
-				action.getEntities().put(entity, frag);
-				index = collectEntityOption(action, commands, index, entity);
+				if (action.getAction() == null) {
+					CmdAction cmdAction = CmdAction.getMatchingAction(frag);
+					if (cmdAction == null) {
+						Reply reply = replyHelper.literal("Unknown action: ").code(frag).newline() //
+								.mentionUser(authorId).literal(" Please try again.");
+						throw new BotException(reply);
+					}
+					action.setAction(cmdAction);
+
+					index = collectActionParams(action, commands, index, cmdAction);
+				} else {
+					CmdEntity entity = CmdEntity.getMatchingEntity(frag);
+					if (entity == null) {
+						Reply reply = replyHelper.literal("Unknown option: ").code(frag).newline() //
+								.mentionUser(authorId).literal(" Please try again.");
+						throw new BotException(reply);
+					}
+
+					index = collectEntityOption(action, commands, index, entity);
+				}
 			}
+
+			
+			return action;
+		} finally {
+			log.debug("action: {}", action);
 		}
-
-		log.debug("action: {}", action);
-		actionManager.executeAction(action);
 	}
 
 	private int collectActionParams(BotAction action, String[] tokens, int currentIndex, CmdAction cmdAction) {
+		int count = 0;
 		for (int i = currentIndex + 1; i < currentIndex + 1 + cmdAction.getParameterCount() && i < tokens.length; i++) {
+			count++;
 			String token = tokens[i];
 			action.getActionParams().add(token);
 		}
-		return currentIndex + cmdAction.getParameterCount();
+		return currentIndex + count;
 	}
 
 	private int collectEntityOption(BotAction action, String[] tokens, int currentIndex, CmdEntity entity) {
+		int count = 0;
 		for (int i = currentIndex + 1; i < currentIndex + 1 + entity.getParameterCount() && i < tokens.length; i++) {
-			String token = tokens[i];
-			action.getEntities().put(entity, token);
+			count++;
+			action.getEntities(entity).add(tokens[i]);
 		}
-		return currentIndex + entity.getParameterCount();
+		return currentIndex + count;
 	}
 
 	@Override
