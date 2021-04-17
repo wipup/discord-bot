@@ -1,4 +1,4 @@
-FROM openjdk:11-alpine
+FROM openjdk:8-alpine
 
 COPY target/*.jar application.jar
 COPY src/main/resources/audio/ /audio/
