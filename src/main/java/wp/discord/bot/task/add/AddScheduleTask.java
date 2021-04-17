@@ -134,6 +134,9 @@ public class AddScheduleTask {
 	}
 
 	private void isAllowSchedulingAction(BotAction action) throws Exception {
+		if (action == null) {
+			return;
+		}
 		CmdAction act = action.getAction();
 		for (CmdAction allow : ScheduledAction.SCHEDULABLE_ACTIONS) {
 			if (act == allow) {
