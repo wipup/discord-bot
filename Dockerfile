@@ -11,4 +11,4 @@ RUN ls -l
 RUN cat pom.xml
 COPY target/discord-bot-1.0.0.jar /application.jar
 COPY src/main/resources/audio/ /audio/
-CMD ["java", "-jar", "application.jar"] 
+CMD ["java", "-jar", "/application.jar"] 
