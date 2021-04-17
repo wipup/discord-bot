@@ -30,19 +30,20 @@ public class JDAConfig {
 
 	@Bean
 	public JDA discordJDA() throws Exception {
-		log.debug("configuration: {}", discordProperties);
-		DiscordStatus status = discordProperties.getStatus();
+		try {
+			log.debug("configuration: {}", discordProperties);
+			DiscordStatus status = discordProperties.getStatus();
 
-		JDABuilder builder = JDABuilder.createDefault(discordProperties.getToken());
-		builder.setActivity(Activity.of(status.getType(), status.getName()));
-		builder.setLargeThreshold(SafeUtil.nonNull(() -> discordProperties.getLargeThreshold(), 50));
-		builder.setStatus(status.getStatus());
+			JDABuilder builder = JDABuilder.createDefault(discordProperties.getToken());
+			builder.setActivity(Activity.of(status.getType(), status.getName()));
+			builder.setLargeThreshold(SafeUtil.nonNull(() -> discordProperties.getLargeThreshold(), 50));
+			builder.setStatus(status.getStatus());
 
-//		https://stackoverflow.com/questions/21156599/javas-fork-join-vs-executorservice-when-to-use-which
-//		builder.setCallbackPool(null, false) 
-//		builder.setEventPool(null, false)
-
-		return builder.build().awaitReady();
+			return builder.build().awaitReady();
+		} catch (Exception e) {
+			log.error("error: ", e);
+			throw e;
+		}
 	}
 
 	@Autowired
