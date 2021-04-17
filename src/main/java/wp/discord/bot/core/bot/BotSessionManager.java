@@ -53,7 +53,7 @@ public class BotSessionManager implements InitializingBean {
 
 		if (guild == null) {
 			BotSession defaultSession = guildSessions.values().stream().findFirst().get();
-			log.debug("return defaut session: {}", defaultSession.getGuild());
+			log.trace("return defaut session: {}", defaultSession.getGuild());
 			return defaultSession;
 		}
 		return getBotSession(guild);

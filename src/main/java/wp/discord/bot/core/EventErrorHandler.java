@@ -23,11 +23,11 @@ public class EventErrorHandler {
 
 	public void handleEventError(GenericEvent event, Throwable e) {
 		log.error("event error: ", e);
-		notifyOwner(event, e);
+		notifyOwnerNow(event, e);
 	}
 
-	public void notifyOwner(GenericEvent event, Throwable e) {
-		Reply rep = createReply(event, e);
+	public void notifyOwnerNow(GenericEvent event, Throwable e) {
+		Reply rep = createReply(e);
 		if (event != null) {
 			rep.newline().literal("Event: ").code(String.valueOf(event));
 
@@ -52,10 +52,12 @@ public class EventErrorHandler {
 			}
 		}
 
-		userManager.getOwnerUser().getUser().openPrivateChannel().complete().sendMessage(rep.toString()).queue();
+		userManager.getOwnerUser().getUser().openPrivateChannel().queue((pc) -> {
+			pc.sendMessage(rep.toString()).queue();
+		});
 	}
 
-	public Reply createReply(GenericEvent event, Throwable e) {
+	public Reply createReply(Throwable e) {
 		Throwable rootCause = ExceptionUtils.getRootCause(e);
 		Reply rep = Reply.of().literal("Error detected: ").code(e.getClass().getName()).literal(" : ").code(e.getMessage()); //
 		if (rootCause != null && rootCause != e) {

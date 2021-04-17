@@ -1,6 +1,7 @@
 package wp.discord.bot.task.add;
 
 import java.util.List;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -8,7 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import net.dv8tion.jda.api.entities.User;
+import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.core.CommandLineProcessor;
+import wp.discord.bot.core.EntityReferenceHandler;
+import wp.discord.bot.core.ScheduledActionManager;
 import wp.discord.bot.core.bot.UserManager;
 import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.db.repository.ScheduleRepository;
@@ -27,23 +32,50 @@ public class AddScheduleTask {
 	private UserManager userManager;
 
 	@Autowired
+	private EntityReferenceHandler refHandler;
+
+	@Autowired
 	private CompileCronTask cronTask;
+
+	@Autowired
+	private ScheduledActionManager scheduledActionManager;
+
+	@Autowired
+	private CommandLineProcessor cmdProcessor;
 
 	public void addAlert(BotAction action) throws Exception {
 		ScheduledAction sch = newScheduledAction(action);
 		saveAlertToRepository(sch, action);
 
-		applyAlert(sch, action);
-		
-		Reply rep = Reply.of().bold("Scheduled Command Added").newline() //
+		if (isActivateSchedule(action)) {
+			applyAlert(sch, action);
+		}
+
+		Reply rep = Reply.of().bold("Scheduled Command Added").literal(refHandler.generateEncodedReferenceCode(sch)).newline() //
 				.append(sch.reply().buildUnquoted());
 		action.getEventMessageChannel().sendMessage(rep.toString()).queue();
 	}
 
-	public void applyAlert(ScheduledAction sch, BotAction action) {
-		// TODO later
+	public boolean isActivateSchedule(BotAction action) {
+		String status = action.getFirstEntitiesParam(CmdEntity.ACTIVE);
+		if (StringUtils.isEmpty(status)) {
+			status = Boolean.TRUE.toString();
+		}
+		return Boolean.TRUE.toString().equalsIgnoreCase(status);
 	}
-	
+
+	public void applyAlert(ScheduledAction sch, BotAction action) throws Exception {
+		try {
+			ScheduledFuture<?> future = scheduledActionManager.scheduleCronTask(sch);
+			sch.setScheduledTask(future);
+
+		} catch (Exception e) {
+			sch.setScheduledTask(null);
+			saveAlertToRepository(sch, action);
+			throw e;
+		}
+	}
+
 	public void saveAlertToRepository(ScheduledAction sch, BotAction action) throws Exception {
 		if (repository.isFull(action.getEventAuthor())) {
 			Reply rep = Reply.of().literal("You have too many scheduled commands!").newline() //
@@ -70,14 +102,18 @@ public class AddScheduleTask {
 			Reply rep = Reply.of().literal("Commands must not be empty ").code("(cmd)");
 			throw new BotException(rep);
 		}
-		if (sch.getCommands().size() > 20) {
+		if (sch.getCommands().size() > ScheduledAction.MAX_COMMAND_LINES) {
 			Reply rep = Reply.of().literal("Too many commands!");
 			throw new BotException(rep);
 		}
 
-		if (StringUtils.length(sch.getName()) > 50) {
+		if (StringUtils.length(sch.getName()) > ScheduledAction.MAX_NAME) {
 			Reply rep = Reply.of().literal("Name is too long!");
 			throw new BotException(rep);
+		}
+
+		for (String cmd : sch.getCommands()) {
+			isAllowSchedulingAction(cmdProcessor.handleCommand(null, cmd));
 		}
 	}
 
@@ -86,13 +122,8 @@ public class AddScheduleTask {
 		String name = action.getFirstEntitiesParam(CmdEntity.NAME);
 		List<String> cmds = action.getEntities(CmdEntity.CMD);
 		String authorId = action.getAuthorId();
-		String status = action.getFirstEntitiesParam(CmdEntity.ACTIVE);
-		if (StringUtils.isEmpty(status)) {
-			status = Boolean.TRUE.toString();
-		}
 
 		ScheduledAction sch = new ScheduledAction();
-		sch.setActive(Boolean.TRUE.toString().equalsIgnoreCase(status));
 		sch.setAuthorId(authorId);
 		sch.setCommands(cmds);
 		sch.setCron(cron);
@@ -100,5 +131,17 @@ public class AddScheduleTask {
 		sch.setId(repository.nextSeqId());
 
 		return sch;
+	}
+
+	private void isAllowSchedulingAction(BotAction action) throws Exception {
+		CmdAction act = action.getAction();
+		for (CmdAction allow : ScheduledAction.SCHEDULABLE_ACTIONS) {
+			if (act == allow) {
+				return;
+			}
+		}
+
+		Reply r = Reply.of().literal("Error! Command not allow for scheduling: ").code(act.getCmd());
+		throw new BotException(r);
 	}
 }

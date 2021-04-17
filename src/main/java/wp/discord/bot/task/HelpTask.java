@@ -56,6 +56,41 @@ public class HelpTask implements ActionHandler {
 			return;
 		}
 
+		if (cmd == CmdAction.GET) {
+			// TODO
+			return;
+		}
+		
+		if (cmd == CmdAction.ADD) {
+			// TODO
+			return;
+		}
+		
+		if (cmd == CmdAction.JOIN_VOICE_CHANNEL) {
+			// TODO
+			return;
+		}
+		
+		if (cmd == CmdAction.LEAVE_VOICE_CHANNEL) {
+			// TODO
+			return;
+		}
+		
+		if (cmd == CmdAction.PLAY_AUDIO) {
+			// TODO
+			return;
+		}
+		
+		if (cmd == CmdAction.SEND_MESSAGE_TO_TEXT_CHANNEL) {
+			// TODO
+			return;
+		}
+		
+		if (cmd == CmdAction.SEND_MESSAGE_TO_PRIVATE_CHANNEL) {
+			// TODO
+			return;
+		}
+		
 		replyDefault(action, channel);
 	}
 
@@ -65,7 +100,7 @@ public class HelpTask implements ActionHandler {
 
 	public void replyDefault(BotAction action, MessageChannel channel) {
 		log.debug("sending default reply for help");
-		Reply rep = helper.getCreatorInfo();
+		Reply rep = helper.getAvailableCommandsTemp();
 		channel.sendMessage(rep.build()).queue();
 	}
 

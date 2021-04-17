@@ -2,8 +2,9 @@ package wp.discord.bot.core;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -34,19 +35,28 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 	private Map<String, AudioTrack> audioTracks; // key = name
 	private transient Map<String, DiscordAudioProperties> trackProperties; // key = path
 
-	public String getAudioTrackName(AudioTrack track) {
-		Entry<String, AudioTrack> found = audioTracks.entrySet().stream() //
-				.filter((t) -> t.getValue().getIdentifier().equals(track.getIdentifier())) //
-				.findFirst().orElse(null);
-		return SafeUtil.get(() -> found.getKey());
-	}
-
 	public AudioTrack getAudioTrack(String name) {
 		AudioTrack track = audioTracks.get(name);
 		if (track == null) {
 			log.error("audio-tracking not found: {}", name);
 		}
 		return track;
+	}
+
+	public List<AudioTrack> getAllAudioTracks() {
+		return audioTracks.values().stream().collect(Collectors.toList());
+	}
+
+	public void setAudioTrackName(AudioTrack track, String name) {
+		track.setUserData(name);
+	}
+	
+	public String getAudioTrackName(AudioTrack track) {
+		return SafeUtil.get(() -> track.getUserData().toString());
+	}
+
+	public String getAudioTrackFilePath(AudioTrack track) {
+		return SafeUtil.get(() -> track.getIdentifier());
 	}
 
 	// ------------------------------------------
@@ -76,7 +86,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 
 	@Override
 	public void trackLoaded(AudioTrack track) {
-		String path = track.getIdentifier();
+		String path = getAudioTrackFilePath(track);
 		log.info("loaded track: {}", path);
 
 		String trackName = trackProperties.get(path).getName();
@@ -84,7 +94,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 			throw new IllegalStateException("duplicated track name: " + trackName);
 		}
 
-		track.setUserData(trackName);
+		setAudioTrackName(track, trackName);
 		audioTracks.put(trackName, track);
 	}
 

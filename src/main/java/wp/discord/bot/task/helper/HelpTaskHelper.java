@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
 
-import net.dv8tion.jda.api.JDA;
 import wp.discord.bot.core.bot.UserManager;
 import wp.discord.bot.model.DiscordUser;
 import wp.discord.bot.model.DiscordUserRole;
@@ -16,9 +15,6 @@ public class HelpTaskHelper {
 
 	@Autowired
 	private UserManager userManager;
-
-	@Autowired
-	private JDA jda;
 
 	/**
 	 * Copied from {@link CronExpression#parse(String)}
@@ -52,12 +48,36 @@ public class HelpTaskHelper {
 		return rep;
 	}
 
+	public Reply getAvailableCommandsTemp() {
+		Reply rep = Reply.of() //
+				.code("bot shutdown").newline() //
+				
+				.code("bot help cron").newline() //
+				.code("bot cron <cron-expr>").newline() //
+
+				.code("bot add schedule [name <any-name>] [active <true/false>] cron <cron-expr> cmd <command1 command2 command3...>").newline() //
+				.code("bot get schedule [id <schedule-id>]").newline() //
+				.code("bot update schedule [id <schedule-id>] [cron <cron>] [name <any-name>] [active <true/false>]").newline() //
+				.code("bot delete schedule id <schedule-id>").newline() //
+
+				.code("bot get audio").newline() //
+				.code("bot play audio <audio-name> [channel <channel-id>] [user <user-id>]").newline() //
+				.code("bot pm [channel <channel-id>] [user <user-id>] message <any-message>").newline() //
+				.code("bot send [channel <channel-id>] message <any-message>").newline() //
+				.code("bot join [channel <channel-id>] [user <user-id>] ").newline() //
+				.code("bot leave [channel <channel-id>]  ").newline() //
+		;
+
+		return rep;
+	}
+
 	public Reply getCreatorInfo() {
 		Reply rep = Reply.of() //
 				.startSpoiler() //
-				.mention(jda.getSelfUser()).literal(" created by ") //
+				.mention(userManager.getThisBotUser()).literal(" created by ") //
 				.mention(userManager.getUsersOf(DiscordUserRole.OWNER).stream().map(DiscordUser::getUser).findFirst().orElse(null))//
 				.endSpoiler();
+
 		return rep;
 	}
 }

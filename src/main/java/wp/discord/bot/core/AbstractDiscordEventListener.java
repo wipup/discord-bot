@@ -20,26 +20,22 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 
 	@SuppressWarnings("unchecked")
 	public void onEvent(GenericEvent event) {
-		Span sp = null;
+		Span sp = tracing.startNewTrace();
 		try {
-			sp = tracing.startNewTrace();
-			try {
-				if (accept(event)) {
-					prepareHandleEvent((T) event);
-					handleEvent((T) event);
-				}
-			} catch (Exception e) {
-				handleError(event, e);
-			} catch (Throwable t) {
-				handleError(event, t);
-				throw t;
-			} finally {
-				tracing.clearTraceContext();
+			if (accept(event)) {
+				prepareHandleEvent((T) event);
+				handleEvent((T) event);
 			}
+
+		} catch (Exception e) {
+			handleError(event, e);
+
+		} catch (Throwable t) {
+			handleError(event, t);
+			throw t;
+
 		} finally {
-			if (sp != null) {
-				sp.finish();
-			}
+			tracing.clearTraceContext(sp);
 		}
 	}
 

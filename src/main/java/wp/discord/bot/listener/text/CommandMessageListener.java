@@ -2,12 +2,12 @@ package wp.discord.bot.listener.text;
 
 import java.util.List;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.core.AbstractDiscordEventListener;
 import wp.discord.bot.core.CommandLineProcessor;
@@ -31,19 +31,8 @@ public class CommandMessageListener extends AbstractDiscordEventListener<Message
 	public void handleEvent(MessageReceivedEvent event) throws Exception {
 		try {
 			String cmd = event.getMessage().getContentRaw();
-			if (StringUtils.isBlank(cmd)) {
-				return;
-			}
-			log.info("[CMD] {}", cmd);
+			executeCommand(event, cmd);
 
-			List<BotAction> actions = cmdProcessor.handleMultiLineCommand(event, cmd);
-			if (CollectionUtils.isEmpty(actions)) {
-				return;
-			}
-
-			for (BotAction action : actions) {
-				actionManager.executeAction(action);
-			}
 		} catch (RuntimeException e) {
 			Reply reply = Reply.of().literal("Sorry ").mention(event.getAuthor()).literal(", I couldn't understand your request.");
 			event.getChannel().sendMessage(reply.build()).queue();
@@ -58,6 +47,16 @@ public class CommandMessageListener extends AbstractDiscordEventListener<Message
 				throw e;
 			}
 		}
+	}
+
+	public void executeCommand(GenericEvent relatedEvent, String cmd) throws Exception {
+		if (StringUtils.isBlank(cmd)) {
+			return;
+		}
+		log.info("[CMD] {}", cmd);
+
+		List<BotAction> actions = cmdProcessor.handleMultiLineCommand(relatedEvent, cmd);
+		actionManager.executeActions(actions);
 	}
 
 	@Override

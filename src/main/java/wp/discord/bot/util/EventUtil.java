@@ -11,6 +11,10 @@ public class EventUtil {
 		return SafeUtil.get(() -> (User) event.getClass().getMethod("getAuthor").invoke(event));
 	}
 
+	public static String getAuthorId(GenericEvent event) {
+		return SafeUtil.get(() -> getAuthor(event).getId());
+	}
+
 	public static Guild getGuild(GenericEvent event) {
 		return SafeUtil.get(() -> (Guild) event.getClass().getMethod("getGuild").invoke(event));
 	}

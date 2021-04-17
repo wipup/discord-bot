@@ -38,6 +38,18 @@ public class UserManager implements InitializingBean {
 	private Map<DiscordUserRole, Set<DiscordUser>> roleUserMap;
 	private Map<String, DiscordUser> userIdMap;
 
+	public User getThisBotUser() {
+		return jda.getSelfUser();
+	}
+
+	public boolean isThisBot(String userId) {
+		return jda.getSelfUser().getId().equals(userId);
+	}
+
+	public boolean isThisBot(User user) {
+		return isThisBot(user.getId());
+	}
+
 	public DiscordUser getOwnerUser() {
 		return Optional.of(getUsersOf(DiscordUserRole.OWNER)).filter((l) -> !l.isEmpty()).map((l) -> l.get(0)).orElse(null);
 	}
@@ -55,7 +67,11 @@ public class UserManager implements InitializingBean {
 	}
 
 	public DiscordUserRole getRoleOf(String id) {
-		return userIdMap.get(id).getRole();
+		DiscordUserRole role = SafeUtil.get(() -> userIdMap.get(id).getRole());
+		if (role == null) {
+			role = DiscordUserRole.NORMAL_USER;
+		}
+		return role;
 	}
 
 	public User getUserEntity(String userId) {
@@ -115,7 +131,7 @@ public class UserManager implements InitializingBean {
 			user.setUser(actualUser);
 			return user;
 		} finally {
-			log.debug("user-id={} : {}", id, actualUser);
+			log.debug("user-id={} [{}]: {}", id, user.getRole(), actualUser);
 		}
 	}
 

@@ -12,15 +12,14 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.bot.BotSessionManager;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.BotAction;
-import wp.discord.bot.task.helper.ReplyHelper;
 import wp.discord.bot.util.CommandLineTokenizer;
 import wp.discord.bot.util.DiscordFormat;
+import wp.discord.bot.util.EventUtil;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 
@@ -34,16 +33,18 @@ public class CommandLineProcessor implements InitializingBean {
 	@Autowired
 	private BotSessionManager sessionManager;
 
-	@Autowired
-	private ReplyHelper replyHelper;
-
 	private List<Pattern> botInitCommands;
 
-	public List<BotAction> handleMultiLineCommand(MessageReceivedEvent event, String multiLines) throws Exception {
+	public List<BotAction> handleMultiLineCommand(GenericEvent event, String multiLines) throws Exception {
 		List<BotAction> result = new ArrayList<>();
 		List<List<String>> multiCommands = CommandLineTokenizer.tokenizeMultiLines(multiLines);
 		for (List<String> command : multiCommands) {
 			BotAction action = handleTokenizedCommand(event, command.toArray(new String[command.size()]));
+			if (result.isEmpty() && !command.isEmpty()) { // first non-empty line
+				if (!isBotCommand(command)) {
+					return result;
+				}
+			}
 			if (action != null) {
 				result.add(action);
 			}
@@ -51,28 +52,32 @@ public class CommandLineProcessor implements InitializingBean {
 		return result;
 	}
 
-	public BotAction handleCommand(MessageReceivedEvent event, String command) throws Exception {
+	public BotAction handleCommand(GenericEvent event, String command) throws Exception {
 		List<String> tokenizedCommand = CommandLineTokenizer.tokenize(command);
 		return handleTokenizedCommand(event, tokenizedCommand.toArray(new String[tokenizedCommand.size()]));
 	}
 
-	public BotAction handleTokenizedCommand(MessageReceivedEvent event, String[] commands) throws Exception {
-		return handleTokenizedCommand(event.getAuthor().getId(), event, commands);
+	public BotAction newBotAction(GenericEvent event) {
+		BotAction action = new BotAction();
+		action.setEvent(event);
+		action.setAuthorId(EventUtil.getAuthorId(event));
+		action.setSession(sessionManager.getBotSession(event));
+		return action;
 	}
 
-	public BotAction handleTokenizedCommand(String authorId, GenericEvent event, String[] commands) throws Exception {
-		String firstWord = SafeUtil.get(() -> commands[0]);
-		if (!isBotCommand(firstWord)) {
+	public BotAction handleTokenizedCommand(GenericEvent event, String[] commands) throws Exception {
+		return handleTokenizedCommand(newBotAction(event), commands);
+	}
+
+	public BotAction handleTokenizedCommand(BotAction botAction, String[] commands) throws Exception {
+		if (!isBotCommand(commands)) {
 			return null;
 		}
-		
+
 		log.debug("Received Command: {}", (Object) commands);
-		BotAction action = null;
+		BotAction action = botAction;
 		try {
-			action = new BotAction();
-			action.setEvent(event);
-			action.setAuthorId(authorId);
-			action.setSession(sessionManager.getBotSession(event));
+			String authorId = action.getAuthorId();
 
 			for (int index = 1; index < commands.length; index++) {
 				String frag = commands[index];
@@ -83,7 +88,7 @@ public class CommandLineProcessor implements InitializingBean {
 				if (action.getAction() == null) {
 					CmdAction cmdAction = CmdAction.getMatchingAction(frag);
 					if (cmdAction == null) {
-						Reply reply = replyHelper.literal("Unknown action: ").code(frag).newline() //
+						Reply reply = Reply.of().literal("Unknown action: ").code(frag).newline() //
 								.mentionUser(authorId).literal(" Please try again.");
 						throw new BotException(reply);
 					}
@@ -93,7 +98,7 @@ public class CommandLineProcessor implements InitializingBean {
 				} else {
 					CmdEntity entity = CmdEntity.getMatchingEntity(frag);
 					if (entity == null) {
-						Reply reply = replyHelper.literal("Unknown option: ").code(frag).newline() //
+						Reply reply = Reply.of().literal("Unknown option: ").code(frag).newline() //
 								.mentionUser(authorId).literal(" Please try again.");
 						throw new BotException(reply);
 					}
@@ -102,7 +107,6 @@ public class CommandLineProcessor implements InitializingBean {
 				}
 			}
 
-			
 			return action;
 		} finally {
 			log.debug("action: {}", action);
@@ -140,6 +144,16 @@ public class CommandLineProcessor implements InitializingBean {
 		for (String s : botInitString) {
 			botInitCommands.add(Pattern.compile(Pattern.quote(s)));
 		}
+	}
+
+	private boolean isBotCommand(List<String> commands) {
+		String firstWord = SafeUtil.get(() -> commands.get(0));
+		return isBotCommand(firstWord);
+	}
+
+	private boolean isBotCommand(String[] commands) {
+		String firstWord = SafeUtil.get(() -> commands[0]);
+		return isBotCommand(firstWord);
 	}
 
 	private boolean isBotCommand(String s) {

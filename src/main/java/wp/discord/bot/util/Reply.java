@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.User;
+import wp.discord.bot.constant.Reaction;
 
 public class Reply {
 
@@ -11,6 +12,16 @@ public class Reply {
 
 	public static Reply of() {
 		return new Reply();
+	}
+
+	public Reply reaction(Reaction r) {
+		stringBuilder.append(r.getCode());
+		return this;
+	}
+
+	public Reply append(Reply reply) {
+		stringBuilder.append(reply.stringBuilder);
+		return this;
 	}
 
 	public Reply append(String s) {

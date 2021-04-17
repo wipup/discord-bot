@@ -19,6 +19,8 @@ public enum CmdEntity {
 	CRON("cron", 6), // cron
 	NAME("name", 1), //
 	CMD("cmd", 10), //
+	REACTION("reaction", 1), //
+	ID("id", 1), //
 	;
 
 	private String cmd;

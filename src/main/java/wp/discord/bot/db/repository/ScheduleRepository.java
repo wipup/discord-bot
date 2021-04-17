@@ -19,16 +19,16 @@ import wp.discord.bot.util.SafeUtil;
 public class ScheduleRepository {
 
 	public static final AtomicInteger SEQ_ID = new AtomicInteger(0);
-	public static final int MAX_SCHEDULED_PER_USER = 50;
+	public static final int MAX_SCHEDULED_PER_USER = 20;
 
-	private Map<String, Map<BigInteger, ScheduledAction>> inMemoryrepository = new ConcurrentHashMap<>();
+	private Map<String, Map<BigInteger, ScheduledAction>> inMemoryRepository = new ConcurrentHashMap<>();
 
 	public BigInteger nextSeqId() {
 		return BigInteger.valueOf(SEQ_ID.incrementAndGet());
 	}
 
 	public ScheduledAction find(String userId, BigInteger scheduleId) throws Exception {
-		return SafeUtil.get(() -> inMemoryrepository.get(userId).get(scheduleId));
+		return SafeUtil.get(() -> inMemoryRepository.get(userId).get(scheduleId));
 	}
 
 	public ScheduledAction find(User user, BigInteger scheduleId) throws Exception {
@@ -36,12 +36,24 @@ public class ScheduleRepository {
 	}
 
 	public List<ScheduledAction> findAll(String userId) throws Exception {
-		Map<BigInteger, ScheduledAction> userRepo = inMemoryrepository.get(userId);
+		Map<BigInteger, ScheduledAction> userRepo = inMemoryRepository.get(userId);
 		if (userRepo == null) {
 			userRepo = new ConcurrentHashMap<>();
-			inMemoryrepository.put(userId, userRepo);
+			inMemoryRepository.put(userId, userRepo);
 		}
 		return userRepo.values().stream().sorted().collect(Collectors.toList());
+	}
+
+	public void delete(ScheduledAction schedule) {
+		delete(schedule.getAuthorId(), schedule.getId());
+	}
+
+	public void delete(String userId, BigInteger scheduleId) {
+		Map<BigInteger, ScheduledAction> userRepo = inMemoryRepository.get(userId);
+		if (userRepo == null) {
+			return;
+		}		
+		userRepo.remove(scheduleId);
 	}
 
 	public List<ScheduledAction> findAll(User user) throws Exception {
@@ -49,7 +61,7 @@ public class ScheduleRepository {
 	}
 
 	public List<ScheduledAction> findAll() throws Exception {
-		return inMemoryrepository.values().stream() //
+		return inMemoryRepository.values().stream() //
 				.map((userActions) -> userActions.values().stream().collect(Collectors.toList())) //
 				.flatMap((l) -> l.stream()) //
 				.sorted() //
@@ -65,10 +77,10 @@ public class ScheduleRepository {
 	}
 
 	public void save(ScheduledAction schedule) throws Exception {
-		Map<BigInteger, ScheduledAction> userRepo = inMemoryrepository.get(schedule.getAuthorId());
+		Map<BigInteger, ScheduledAction> userRepo = inMemoryRepository.get(schedule.getAuthorId());
 		if (userRepo == null) {
 			userRepo = new ConcurrentHashMap<>();
-			inMemoryrepository.put(schedule.getAuthorId(), userRepo);
+			inMemoryRepository.put(schedule.getAuthorId(), userRepo);
 		}
 
 		log.info("save Schedule: {}", schedule);
