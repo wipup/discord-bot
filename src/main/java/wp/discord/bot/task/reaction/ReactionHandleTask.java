@@ -8,8 +8,8 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
 import wp.discord.bot.constant.CmdEntity;
-import wp.discord.bot.core.EntityReferenceHandler;
 import wp.discord.bot.core.bot.UserManager;
+import wp.discord.bot.core.cmd.EntityReferenceHandler;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.model.Reference;
 

@@ -21,6 +21,7 @@ public enum CmdEntity {
 	CMD("cmd", 10), //
 	REACTION("reaction", 1), //
 	ID("id", 1), //
+	ALL("all", 2), // //e.g. bot play audio <time-to-xxx> user all 3
 	;
 
 	private String cmd;

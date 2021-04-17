@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.AbstractDiscordEventListener;
-import wp.discord.bot.core.CommandLineProcessor;
+import wp.discord.bot.core.cmd.CommandLineProcessor;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.reaction.ReactionHandleTask;
 

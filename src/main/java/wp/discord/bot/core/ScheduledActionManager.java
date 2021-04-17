@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.config.AsyncConfig;
 import wp.discord.bot.core.action.ActionHandleManager;
+import wp.discord.bot.core.cmd.CommandLineProcessor;
 import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.BotAction;
@@ -53,6 +54,7 @@ public class ScheduledActionManager {
 					BotAction action = cmdProcessor.handleCommand(null, cmd);
 					if (action != null) {
 						action.setAuthorId(scheduleAction.getAuthorId());
+						action.setFromScheduler(true);
 						actionManager.executeAction(action);
 					}
 				} catch (BotException e) {
@@ -65,7 +67,7 @@ public class ScheduledActionManager {
 	}
 
 	private void notifyAuthor(BotException e, ScheduledAction scheduleAction) {
-		errorHandler.notifyOwnerNow(null, e);
+//		errorHandler.notifyOwnerNow(null, e);
 	}
 
 	private void notifyOwner(Throwable e) {

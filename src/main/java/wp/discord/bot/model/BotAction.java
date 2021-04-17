@@ -34,6 +34,9 @@ public class BotAction {
 
 	private BotSession session;
 	private String authorId;
+	
+	private boolean isFromScheduler = false;
+	private boolean isFromTrigger = false;
 
 	public BotAction() {
 		actionParams = new ArrayList<>();

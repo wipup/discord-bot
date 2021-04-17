@@ -52,8 +52,17 @@ public class CommandLineTokenizer {
 
 			if (literal) {
 				if (c == '\\') {
-					if (i + 1 < array.length) {
-						sb.append(array[++i]);
+					if (i + 1 >= array.length) {
+						// do nothing
+					} else {
+						char nextValue = array[++i];
+						if (nextValue == 'n') { // \n
+							sb.append('\n');
+						} else if (nextValue == 't') {
+							sb.append('\t');
+						} else {
+							sb.append(nextValue);
+						}
 					}
 				} else {
 					sb.append(c);

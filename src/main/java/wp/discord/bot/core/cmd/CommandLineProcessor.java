@@ -1,6 +1,7 @@
-package wp.discord.bot.core;
+package wp.discord.bot.core.cmd;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -32,6 +33,10 @@ public class CommandLineProcessor implements InitializingBean {
 
 	@Autowired
 	private BotSessionManager sessionManager;
+
+	private Collection<CommandLineEntityReader> entityReaders;
+
+	private Collection<CommandLineActionParameterReader> paramReaders;
 
 	private List<Pattern> botInitCommands;
 
@@ -132,19 +137,7 @@ public class CommandLineProcessor implements InitializingBean {
 		return currentIndex + count;
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		String botMentionString = DiscordFormat.mention(jda.getSelfUser());
-
-		String[] botInitString = new String[] { //
-				"bot", "/bot", "!bot", botMentionString //
-		};
-
-		botInitCommands = new ArrayList<>();
-		for (String s : botInitString) {
-			botInitCommands.add(Pattern.compile(Pattern.quote(s)));
-		}
-	}
+	// -------------------------------------
 
 	private boolean isBotCommand(List<String> commands) {
 		String firstWord = SafeUtil.get(() -> commands.get(0));
@@ -161,6 +154,26 @@ public class CommandLineProcessor implements InitializingBean {
 			return false;
 		}
 		return botInitCommands.stream().anyMatch((p) -> s.matches(p.pattern()));
+	}
+
+	// -------------------------------------
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		cacheBotMentionString();
+	}
+
+	private void cacheBotMentionString() {
+		String botMentionString = DiscordFormat.mention(jda.getSelfUser());
+
+		String[] botInitString = new String[] { //
+				"bot", "/bot", "!bot", botMentionString //
+		};
+
+		botInitCommands = new ArrayList<>();
+		for (String s : botInitString) {
+			botInitCommands.add(Pattern.compile(Pattern.quote(s)));
+		}
 	}
 
 }

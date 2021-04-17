@@ -1,5 +1,8 @@
 
 spring: 
+  profiles:
+    active:
+     - cloud
   application:
     name: Discord-Bot
   main:

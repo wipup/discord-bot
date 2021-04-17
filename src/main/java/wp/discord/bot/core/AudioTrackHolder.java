@@ -1,12 +1,16 @@
 package wp.discord.bot.core;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +22,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import lombok.extern.slf4j.Slf4j;
-import wp.discord.bot.config.properties.DiscordAudioProperties;
 import wp.discord.bot.config.properties.DiscordProperties;
 import wp.discord.bot.util.SafeUtil;
 
@@ -33,7 +36,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 	private DiscordProperties discordProperties;
 
 	private Map<String, AudioTrack> audioTracks; // key = name
-	private transient Map<String, DiscordAudioProperties> trackProperties; // key = path
+	private transient Map<String, String> trackProperties; // key = path
 
 	public AudioTrack getAudioTrack(String name) {
 		AudioTrack track = audioTracks.get(name);
@@ -50,7 +53,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 	public void setAudioTrackName(AudioTrack track, String name) {
 		track.setUserData(name);
 	}
-	
+
 	public String getAudioTrackName(AudioTrack track) {
 		return SafeUtil.get(() -> track.getUserData().toString());
 	}
@@ -66,21 +69,32 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 		loadAudioTracks();
 	}
 
-	private void loadAudioTracks() {
+	private void loadAudioTracks() throws Exception {
 		audioTracks = new LinkedHashMap<>();
 		trackProperties = new HashMap<>();
 
-		if (CollectionUtils.isEmpty(discordProperties.getAudios())) {
+		String audioDir = discordProperties.getAudioFolder();
+		if (StringUtils.isEmpty(audioDir)) {
 			log.warn("Audio path is empty");
 			return;
 		}
+		Path audioPath = Paths.get(audioDir);
+		if (!Files.isDirectory(audioPath)) {
+			throw new IllegalStateException("Not Directory: Audio path: " + audioPath);
+		}
 
-		for (DiscordAudioProperties audioProperty : discordProperties.getAudios()) {
-			String path = audioProperty.getPath();
-			trackProperties.put(path, audioProperty);
+		try (Stream<Path> pathStream = Files.list(audioPath)) {
+			pathStream.filter(Files::isRegularFile) //
+					.filter(Files::isReadable) //
+					.filter((p) -> StringUtils.endsWithIgnoreCase(p.getFileName().toString(), ".mp3")) //
+					.map((p) -> p.toAbsolutePath()).forEach((absPath) -> {
+						String absolutePath = absPath.toString();
+						String fileName = absPath.getFileName().toString();
 
-			log.debug("loading: {}", path);
-			audioPlayerManager.loadItem(path, this);
+						trackProperties.put(absolutePath, fileName);
+						log.debug("loading: {}", fileName);
+						audioPlayerManager.loadItem(absolutePath, this);
+					});
 		}
 	}
 
@@ -89,7 +103,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 		String path = getAudioTrackFilePath(track);
 		log.info("loaded track: {}", path);
 
-		String trackName = trackProperties.get(path).getName();
+		String trackName = trackProperties.get(path);
 		if (audioTracks.containsKey(trackName)) {
 			throw new IllegalStateException("duplicated track name: " + trackName);
 		}

@@ -1,4 +1,4 @@
-package wp.discord.bot.core;
+package wp.discord.bot.core.cmd;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
