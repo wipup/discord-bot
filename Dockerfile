@@ -4,6 +4,6 @@ RUN mvn clean package
 
 
 FROM openjdk:8-alpine
-COPY target/*.jar application.jar
+COPY target/discord-bot-1.0.0.jar  application.jar
 COPY src/main/resources/audio/ /audio/
 CMD ["java", "-jar", "application.jar"] 
