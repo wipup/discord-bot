@@ -7,5 +7,4 @@ RUN mvn clean package
 FROM openjdk:8-oracle
 COPY --from=builder /tmp/maven/target/discord-bot-1.0.0.jar /application.jar
 COPY --from=builder /tmp/maven/src/main/resources/audio/ /audio/
-RUN apt-get update
 CMD ["java", "-jar", "/application.jar"] 
