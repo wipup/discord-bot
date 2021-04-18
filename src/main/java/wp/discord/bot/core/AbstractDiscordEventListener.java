@@ -1,8 +1,11 @@
 package wp.discord.bot.core;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import brave.Span;
+import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -10,13 +13,17 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 /**
  * try not to use {@link ListenerAdapter}
  */
-public abstract class AbstractDiscordEventListener<T extends GenericEvent> implements EventListener {
+@Slf4j
+public abstract class AbstractDiscordEventListener<T extends GenericEvent> implements EventListener, InitializingBean {
 
 	@Autowired
 	private TracingHandler tracing;
 
 	@Autowired
 	private EventErrorHandler errorHandler;
+
+	@Autowired
+	private JDA jda;
 
 	@SuppressWarnings("unchecked")
 	public void onEvent(GenericEvent event) {
@@ -68,4 +75,9 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 
 	abstract public Class<T> eventClass();
 
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		log.info("Adding JDA event listener: {}", this);
+		jda.addEventListener(this);
+	}
 }

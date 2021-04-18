@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +44,11 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 	// temporary
 	private transient Map<String, String> trackFilePathMap; // key = path
 
-	@PostConstruct
-	public void init() {
+	public AudioTrackHolder() {
+		init();
+	}
+
+	private void init() {
 		audioPlayerManager = new DefaultAudioPlayerManager();
 		AudioSourceManagers.registerLocalSource(audioPlayerManager);
 
