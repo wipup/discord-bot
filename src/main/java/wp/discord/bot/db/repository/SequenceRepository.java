@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.core.persist.AbstractFileBasedRepository;
 import wp.discord.bot.db.entity.ScheduledAction;
@@ -62,6 +63,7 @@ public class SequenceRepository extends AbstractFileBasedRepository<SequenceEnti
 
 	@Data
 	@AllArgsConstructor
+	@NoArgsConstructor
 	public static class SequenceEntity {
 		private String name;
 		private BigInteger value;
