@@ -22,6 +22,9 @@ public class GetTask implements ActionHandler {
 	@Autowired
 	private GetScheduleTask getScheduleTask;
 
+	@Autowired
+	private GetLogTask getLogTask;
+
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		String targetEntity = SafeUtil.get(() -> action.getActionParams().get(0));
@@ -39,6 +42,11 @@ public class GetTask implements ActionHandler {
 
 		if (entity == CmdEntity.SCHEDULE) {
 			getScheduleTask.handleGetSchedule(action);
+			return;
+		}
+
+		if (entity == CmdEntity.LOG) {
+			getLogTask.getLogs(action);
 			return;
 		}
 

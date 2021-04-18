@@ -5,20 +5,22 @@ import lombok.Getter;
 @Getter
 public enum CmdEntity {
 
-	// entity
+	// discord entity
 	CHANNEL("channel", 1), //
 	USER("user", 1), //
 	AUDIO("audio", 1), //
 	MESSAGE("message", 1), //
 
-	// feature
-	VALUE("value", 100), //
+	// robot entity
 	SCHEDULE("schedule", 1), //
 	AUTO_REPLY("reply", 1), //
-	ACTIVE("active", 1), //
 	CRON("cron", 6), // cron
-	NAME("name", 1), //
+	
+	// feature
+	VALUE("value", 100), //
+	ACTIVE("active", 1), //
 	CMD("cmd", 10), //
+	NAME("name", 1), //
 	REACTION("reaction", 1), //
 	ID("id", 1), //
 	COUNT("count", 1), //
@@ -26,6 +28,8 @@ public enum CmdEntity {
 	ALL("all", 2), // //e.g. bot play audio <time-to-xxx> user all 3
 
 	// system
+	// TODO
+	LOG("log", 1), // get log name <path> -> found many files = show log files, or found 1 files => zip -> download  
 	STATUS("status", 1), //
 	ACTIVITY("activity", 2), //
 	;

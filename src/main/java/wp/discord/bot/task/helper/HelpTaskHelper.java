@@ -52,6 +52,7 @@ public class HelpTaskHelper {
 		Reply rep = Reply.of() //
 				.code("bot set status value <status>").newline() //
 				.code("bot set activity value <activity> <name>").newline() //
+				.code("bot get log [name <pattern>]").newline() //
 				.code("bot update audio").newline() //
 				.code("bot shutdown").newline() //
 				

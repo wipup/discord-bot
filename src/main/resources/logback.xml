@@ -3,7 +3,6 @@
 
 	<include resource="org/springframework/boot/logging/logback/base.xml" />
 
-
 	<property name="consoleLogPattern" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr([%15.15t]){faint} %clr([%16X{x-b3-traceId}]) %clr(%-30.30class{30}){cyan} %clr([%3line]){magenta}%clr(:){faint} %m%n%wEx" />
 	<property name="logFilePatter" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%15.15t][%16X{x-b3-traceId}] %-30.30class{30}[%3line]: %m%n%wEx" />
 	<property name="applicationName" value="discord-bot" />
@@ -27,7 +26,7 @@
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<fileNamePattern>${log.dir}/${applicationName}-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
 			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-				<maxFileSize>10MB</maxFileSize>
+				<maxFileSize>5MB</maxFileSize>
 			</timeBasedFileNamingAndTriggeringPolicy>
 		</rollingPolicy>
 	</appender>
