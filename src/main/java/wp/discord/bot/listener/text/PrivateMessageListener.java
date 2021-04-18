@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import wp.discord.bot.core.AbstractDiscordEventListener;
+import wp.discord.bot.core.bot.AbstractDiscordEventListener;
 
 @Component
 @Slf4j

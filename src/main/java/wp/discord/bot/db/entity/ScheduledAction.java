@@ -4,6 +4,9 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 import lombok.ToString;
 import wp.discord.bot.constant.CmdAction;
@@ -20,8 +23,11 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 			CmdAction.JOIN_VOICE_CHANNEL, CmdAction.LEAVE_VOICE_CHANNEL, CmdAction.PLAY_AUDIO, //
 			CmdAction.SEND_MESSAGE_TO_PRIVATE_CHANNEL, CmdAction.SEND_MESSAGE_TO_TEXT_CHANNEL, //
 	};
+
 	public static final int MAX_COMMAND_LINES = 20;
 	public static final int MAX_NAME = 50;
+
+	private static final String INFINITY_SIGN = "\u221e";
 
 	private BigInteger id;
 	private String authorId;
@@ -29,8 +35,15 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 	private String cron;
 	private List<String> commands;
 
+	private BigInteger desiredRunCount;
+	private BigInteger actualRunCount;
+
 	@ToString.Exclude
+	@JsonIgnore
 	private transient ScheduledFuture<?> scheduledTask;
+
+	@JsonAlias({ "active" })
+	private transient Boolean shouldRescheduleAfterReload;
 
 	@Override
 	public Reply reply() {
@@ -42,8 +55,12 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 		for (String cmd : getCommands()) {
 			rep.literal(cmd).newline();
 		}
+		String desiredRun = getDesiredRunCount() == null ? INFINITY_SIGN : String.valueOf(getDesiredRunCount());
 		rep.endCodeBlock()//
-				.literal("Active:  ").code(String.valueOf(isActive())).newline();
+				.literal("Active:  ").code(String.valueOf(isActive())).newline() //
+				.literal("Run:  ").code(String.format("%d/%s", getActualRunCount(), desiredRun)).newline() //
+		;
+
 		return rep;
 	}
 

@@ -56,6 +56,7 @@ public class UpdateScheduleTask {
 
 		synchronized (found) {
 			updateSchedule(action, found);
+			repository.save(found);
 
 			Reply rep = Reply.of().bold("Update Schedule Task Completed").newline().append(found.reply());
 			action.getEventMessageChannel().sendMessage(rep.build()).queue();

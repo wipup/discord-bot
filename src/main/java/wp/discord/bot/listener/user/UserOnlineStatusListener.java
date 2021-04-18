@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.user.update.UserUpdateOnlineStatusEvent;
-import wp.discord.bot.core.AbstractDiscordEventListener;
+import wp.discord.bot.core.bot.AbstractDiscordEventListener;
 
 @Component
 @Slf4j

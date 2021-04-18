@@ -1,4 +1,4 @@
-package wp.discord.bot.core;
+package wp.discord.bot.core.bot;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import wp.discord.bot.core.EventErrorHandler;
+import wp.discord.bot.core.TracingHandler;
 
 /**
  * try not to use {@link ListenerAdapter}

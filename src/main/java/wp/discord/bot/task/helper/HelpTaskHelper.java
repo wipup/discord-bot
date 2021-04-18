@@ -58,7 +58,7 @@ public class HelpTaskHelper {
 				.code("bot help cron").newline() //
 				.code("bot cron <cron-expr>").newline() //
 
-				.code("bot add schedule [name <any-name>] [active <true/false>] cron <cron-expr> cmd <command1 command2 command3...>").newline() //
+				.code("bot add schedule [name <any-name>] [active <true/false>] [count <desired-count>] cron <cron-expr> cmd <command1 command2 command3...>").newline() //
 				.code("bot get schedule [id <schedule-id>]").newline() //
 				.code("bot update schedule [id <schedule-id>] [cron <cron>] [name <any-name>] [active <true/false>]").newline() //
 				.code("bot delete schedule id <schedule-id>").newline() //

@@ -1,5 +1,7 @@
 package wp.discord.bot.config;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,12 +24,24 @@ public class AsyncConfig {
 
 	public static final String BEAN_CRON_TASK_EXECUTOR = "cronTaskExecutor";
 	public static final String BEAN_CRON_TASK_SCHEDULER = "cronTaskScheduler";
+	public static final String BEAN_GENERIC_EXECUTOR = "genericSingleThreadExecutor";
+	public static final String BEAN_UNLIMIT_EXECUTOR = "genericUnlimitThreadExecutor";
 
 	private static final AtomicInteger THREAD_COUNT = new AtomicInteger(0);
 
 	@Autowired
 	private TracingHandler tracing;
 
+	@Bean(BEAN_GENERIC_EXECUTOR)
+	public ExecutorService genericSingleThreadExecutor() {
+		return Executors.newSingleThreadExecutor();
+	}
+
+	@Bean(BEAN_UNLIMIT_EXECUTOR)
+	public ExecutorService genericUnlimitThreadExecutor() {
+		return Executors.newCachedThreadPool();
+	}
+	
 	@Bean(BEAN_CRON_TASK_EXECUTOR)
 	public ScheduledExecutorService cronThreadExecutor() {
 		final int TOTAL_THREAD = 1;

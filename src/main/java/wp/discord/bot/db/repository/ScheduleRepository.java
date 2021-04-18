@@ -4,28 +4,31 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
+import wp.discord.bot.core.persist.AbstractFileBasedRepository;
 import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.util.SafeUtil;
 import wp.discord.bot.util.ToStringUtils;
 
 @Repository
 @Slf4j
-public class ScheduleRepository {
+public class ScheduleRepository extends AbstractFileBasedRepository<ScheduledAction> {
 
-	public static final AtomicInteger SEQ_ID = new AtomicInteger(0);
+	@Autowired
+	private SequenceRepository seqRepository;
+
 	public static final int MAX_SCHEDULED_PER_USER = 20;
 
 	private Map<String, Map<BigInteger, ScheduledAction>> inMemoryRepository = new ConcurrentHashMap<>();
 
-	public BigInteger nextSeqId() {
-		return BigInteger.valueOf(SEQ_ID.incrementAndGet());
+	public BigInteger nextSeqId() throws Exception {
+		return seqRepository.nextValSeqScheduleAction();
 	}
 
 	public ScheduledAction find(String userId, BigInteger scheduleId) throws Exception {
@@ -45,18 +48,19 @@ public class ScheduleRepository {
 		return userRepo.values().stream().sorted().collect(Collectors.toList());
 	}
 
-	public void delete(ScheduledAction schedule) {
+	public void delete(ScheduledAction schedule) throws Exception {
 		delete(schedule.getAuthorId(), schedule.getId());
 	}
 
-	public void delete(String userId, BigInteger scheduleId) {
+	public void delete(String userId, BigInteger scheduleId) throws Exception {
 		Map<BigInteger, ScheduledAction> userRepo = inMemoryRepository.get(userId);
 		if (userRepo == null) {
 			return;
 		}
-		
+
 		ScheduledAction removed = userRepo.remove(scheduleId);
 		if (removed != null) {
+			asyncUnpersist(removed);
 			log.info("[DEL] Schedule: {}", ToStringUtils.toJsonString(removed));
 		}
 	}
@@ -89,7 +93,23 @@ public class ScheduleRepository {
 		}
 
 		log.info("save Schedule: {}", ToStringUtils.toJsonString(schedule));
+		asyncPersist(schedule);
 		userRepo.put(schedule.getId(), schedule);
+	}
+
+	@Override
+	public Class<ScheduledAction> getEntityClass() {
+		return ScheduledAction.class;
+	}
+
+	@Override
+	protected String getFileName(ScheduledAction entity) {
+		return ScheduledAction.class.getSimpleName() + "_" + entity.getAuthorId() + "_" + entity.getId();
+	}
+
+	@Override
+	public void doReload(ScheduledAction entity) throws Exception {
+		save(entity);
 	}
 
 }

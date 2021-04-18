@@ -7,10 +7,10 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
 import wp.discord.bot.constant.Reaction;
-import wp.discord.bot.db.entity.CronEntity;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.model.Reference;
-import wp.discord.bot.task.CompileCronTask;
+import wp.discord.bot.task.cron.CompileCronTask;
+import wp.discord.bot.task.cron.CronEntity;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 

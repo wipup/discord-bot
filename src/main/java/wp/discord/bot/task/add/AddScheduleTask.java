@@ -1,5 +1,6 @@
 package wp.discord.bot.task.add;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
@@ -19,8 +20,9 @@ import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.db.repository.ScheduleRepository;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.BotAction;
-import wp.discord.bot.task.CompileCronTask;
+import wp.discord.bot.task.cron.CompileCronTask;
 import wp.discord.bot.util.Reply;
+import wp.discord.bot.util.SafeUtil;
 
 @Component
 public class AddScheduleTask {
@@ -95,6 +97,7 @@ public class AddScheduleTask {
 			throw new BotException(rep);
 		}
 
+		BigInteger runCount = sch.getDesiredRunCount();
 		String cron = sch.getCron();
 		cronTask.parse(authorId, cron);
 
@@ -115,9 +118,18 @@ public class AddScheduleTask {
 		for (String cmd : sch.getCommands()) {
 			isAllowSchedulingAction(cmdProcessor.handleCommand(null, cmd));
 		}
+
+		if (runCount != null) {
+//			if (runCount <= 0) {
+			if (runCount.compareTo(BigInteger.ZERO) <= 0) {
+				Reply rep = Reply.of().literal("Desired run count must more than zero! " + runCount);
+				throw new BotException(rep);
+			}
+		}
 	}
 
 	public ScheduledAction newScheduledAction(BotAction action) throws Exception {
+		BigInteger runCount = parseDesiredRunCount(action);
 		String cron = StringUtils.join(action.getEntities(CmdEntity.CRON), " ");
 		String name = action.getFirstEntitiesParam(CmdEntity.NAME);
 		List<String> cmds = action.getEntities(CmdEntity.CMD);
@@ -129,8 +141,24 @@ public class AddScheduleTask {
 		sch.setCron(cron);
 		sch.setName(StringUtils.defaultString(name));
 		sch.setId(repository.nextSeqId());
-
+		sch.setActualRunCount(BigInteger.ZERO);
+		if (runCount != null) {
+			sch.setDesiredRunCount(runCount);
+		}
 		return sch;
+	}
+
+	private BigInteger parseDesiredRunCount(BotAction action) throws Exception {
+		String desiredRunCount = action.getFirstEntitiesParam(CmdEntity.COUNT);
+		BigInteger runCount = null;
+		if (StringUtils.isNotEmpty(desiredRunCount)) {
+			runCount = SafeUtil.get(() -> new BigInteger(desiredRunCount));
+			if (runCount == null) {
+				Reply reply = Reply.of().literal("Error! ").literal("Invalid run count: ").code(desiredRunCount);
+				throw new BotException(reply);
+			}
+		}
+		return runCount;
 	}
 
 	private void isAllowSchedulingAction(BotAction action) throws Exception {

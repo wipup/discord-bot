@@ -7,6 +7,18 @@ public class SafeUtil {
 		public T get() throws Exception;
 	}
 
+	@FunctionalInterface
+	public static interface SafeSuppresser {
+		public void call() throws Exception;
+	}
+
+	public static void suppress(SafeSuppresser supplier) {
+		try {
+			supplier.call();	
+		} catch (Exception e) {
+		}
+	}
+
 	public static <T> T get(SafeSupplier<T> supplier) {
 		try {
 			return supplier.get();

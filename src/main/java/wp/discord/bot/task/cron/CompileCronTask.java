@@ -1,4 +1,4 @@
-package wp.discord.bot.task;
+package wp.discord.bot.task.cron;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,6 @@ import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.Reaction;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.core.cmd.EntityReferenceHandler;
-import wp.discord.bot.db.entity.CronEntity;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;

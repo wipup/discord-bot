@@ -1,4 +1,4 @@
-package wp.discord.bot.db.entity;
+package wp.discord.bot.task.cron;
 
 import java.util.ArrayList;
 import java.util.Date;
