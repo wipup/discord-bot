@@ -53,7 +53,7 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 		}
 		String desiredRun = getDesiredRunCount() == null ? INFINITY_SIGN : String.valueOf(getDesiredRunCount());
 		rep.endCodeBlock()//
-				.literal("Active:  ").code(String.valueOf(isActive())).newline() //
+				.literal("Active:  ").code(String.valueOf(isActive())).literal("   ") //
 				.literal("Run:  ").code(String.format("%d/%s", getActualRunCount(), desiredRun)).newline() //
 		;
 

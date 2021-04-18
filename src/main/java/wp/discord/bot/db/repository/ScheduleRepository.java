@@ -23,7 +23,7 @@ public class ScheduleRepository extends AbstractFileBasedRepository<ScheduledAct
 	@Autowired
 	private SequenceRepository seqRepository;
 
-	public static final int MAX_SCHEDULED_PER_USER = 20;
+	public static final int MAX_SCHEDULED_PER_USER = 100;
 
 	private Map<String, Map<BigInteger, ScheduledAction>> inMemoryRepository = new ConcurrentHashMap<>();
 
