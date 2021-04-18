@@ -1,5 +1,8 @@
 package wp.discord.bot.util;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class SafeUtil {
 
 	@FunctionalInterface
@@ -16,6 +19,7 @@ public class SafeUtil {
 		try {
 			return supplier.get();
 		} catch (Exception e) {
+			log.error("Runtime Error: {}", e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
@@ -24,6 +28,7 @@ public class SafeUtil {
 		try {
 			supplier.call();
 		} catch (Exception e) {
+			log.error("Runtime Error: {}", e);
 			throw new RuntimeException(e.getMessage(), e);
 		}
 	}
