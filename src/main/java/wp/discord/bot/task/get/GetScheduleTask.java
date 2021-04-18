@@ -52,7 +52,7 @@ public class GetScheduleTask {
 
 	public void getAllSchedules(BotAction action, boolean adminMode) throws Exception {
 		String author = action.getAuthorId();
-		List<ScheduledAction> allSchedules = repository.findAll(author);
+		List<ScheduledAction> allSchedules = adminMode ? repository.findAll() : repository.findAll(author);
 
 		if (CollectionUtils.isEmpty(allSchedules)) {
 			Reply r = Reply.of().mentionUser(author).literal(", you don't have any scheduled action.");
