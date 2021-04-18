@@ -9,6 +9,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,10 @@ import wp.discord.bot.util.SafeUtil;
 @Component
 @Slf4j
 public class ScheduledActionManager implements DisposableBean {
+
+	@Autowired
+	@Qualifier(AsyncConfig.BEAN_CRON_TASK_DECORATOR)
+	private TaskDecorator taskDecorator;
 
 	@Autowired
 	@Qualifier(AsyncConfig.BEAN_CRON_TASK_EXECUTOR)
@@ -50,7 +55,8 @@ public class ScheduledActionManager implements DisposableBean {
 	public ScheduledFuture<?> scheduleCronTask(ScheduledAction scheduleAction) {
 		CronTrigger cron = new CronTrigger(scheduleAction.getCron());
 
-		ScheduledFuture<?> future = cronScheduler.schedule(newRunnableScheduledAction(scheduleAction), cron);
+		Runnable runnable = taskDecorator.decorate(newRunnableScheduledAction(scheduleAction));
+		ScheduledFuture<?> future = cronScheduler.schedule(runnable, cron);
 		scheduleAction.setScheduledTask(future);
 		scheduleAction.setActive(true);
 		return future;
@@ -73,8 +79,10 @@ public class ScheduledActionManager implements DisposableBean {
 						actionManager.executeAction(action);
 					}
 				} catch (BotException e) {
+					log.debug("Error executing schedule: {}", scheduleAction.getId(), e);
 					notifyAuthor(e, scheduleAction);
 				} catch (Throwable e) {
+					log.debug("Fatal Error executing schedule: {}", scheduleAction.getId(), e);
 					notifyOwner(e);
 				}
 			}
@@ -110,7 +118,7 @@ public class ScheduledActionManager implements DisposableBean {
 	}
 
 	private void notifyAuthor(BotException e, ScheduledAction scheduleAction) {
-//		errorHandler.notifyOwnerNow(null, e);
+		errorHandler.notifyOwnerNow(null, e);
 	}
 
 	private void notifyOwner(Throwable e) {

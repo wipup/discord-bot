@@ -22,6 +22,7 @@ import wp.discord.bot.core.TracingHandler;
 @Configuration
 public class AsyncConfig {
 
+	public static final String BEAN_CRON_TASK_DECORATOR = "taskDecorator";
 	public static final String BEAN_CRON_TASK_EXECUTOR = "cronTaskExecutor";
 	public static final String BEAN_CRON_TASK_SCHEDULER = "cronTaskScheduler";
 	public static final String BEAN_GENERIC_EXECUTOR = "genericSingleThreadExecutor";
@@ -41,29 +42,32 @@ public class AsyncConfig {
 	public ExecutorService genericUnlimitThreadExecutor() {
 		return Executors.newCachedThreadPool();
 	}
-	
+
 	@Bean(BEAN_CRON_TASK_EXECUTOR)
 	public ScheduledExecutorService cronThreadExecutor() {
 		final int TOTAL_THREAD = 1;
 		return new ScheduledThreadPoolExecutor(TOTAL_THREAD, (r) -> new Thread(r, "cron-" + THREAD_COUNT.incrementAndGet()));
 	}
 
+	@Bean(BEAN_CRON_TASK_DECORATOR)
+	public TaskDecorator decorator() {
+		return (runnable) -> {
+			return () -> {
+				Span span = tracing.startNewTrace();
+				try {
+					runnable.run();
+				} finally {
+					tracing.clearTraceContext(span);
+				}
+			};
+		};
+	}
+
 	@Bean(BEAN_CRON_TASK_SCHEDULER)
-	public TaskScheduler cronTaskScheduler(@Qualifier(BEAN_CRON_TASK_EXECUTOR) ScheduledExecutorService cronExecutor) {
+	public TaskScheduler cronTaskScheduler(@Qualifier(BEAN_CRON_TASK_EXECUTOR) ScheduledExecutorService cronExecutor, //
+			@Qualifier(BEAN_CRON_TASK_DECORATOR) TaskDecorator decorator) {
 		ConcurrentTaskScheduler cts = new ConcurrentTaskScheduler(cronExecutor);
-		cts.setTaskDecorator(new TaskDecorator() {
-			@Override
-			public Runnable decorate(Runnable runnable) {
-				return () -> {
-					Span span = tracing.startNewTrace();
-					try {
-						runnable.run();
-					} finally {
-						tracing.clearTraceContext(span);
-					}
-				};
-			}
-		});
+		cts.setTaskDecorator(decorator);
 		return cts;
 	}
 }

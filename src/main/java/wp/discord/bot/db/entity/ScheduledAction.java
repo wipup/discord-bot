@@ -45,7 +45,7 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 	public Reply reply() {
 		Reply rep = Reply.of() //
 				.literal("ID:  ").code(String.format("%06d", getId())).literal("\t Owner: ").mentionUser(getAuthorId()).newline() //
-				.literal("Name:  ").literal(getName()).newline() //
+				.literal("Name:  ").code(getName()).newline() //
 				.literal("Cron:  ").code(getCron()).newline() //
 				.startCodeBlock("bash");
 		for (String cmd : getCommands()) {

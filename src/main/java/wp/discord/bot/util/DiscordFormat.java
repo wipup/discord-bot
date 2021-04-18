@@ -114,6 +114,9 @@ public class DiscordFormat {
 	}
 
 	public static String codeBlock(String message, String language) {
+		if (StringUtils.isBlank(message)) {
+			message = " - ";
+		}
 		return MessageFormat.format("{0}{1}{2}", startCodeBlock(language), message, endCodeBlock());
 	}
 

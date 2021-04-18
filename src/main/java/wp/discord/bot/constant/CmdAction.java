@@ -16,6 +16,7 @@ public enum CmdAction {
 
 	// -----------------
 
+	RUN("run", 1), //
 	COMPILE_CRON("cron", 6), //
 	GET("get", 1), ADD("add", 1), DELETE("delete", 1), UPDATE("update", 1), // CRUD
 	TRANSFER("transfer", 1), //
