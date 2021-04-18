@@ -74,7 +74,8 @@ public class SetBotStatusTask {
 	}
 
 	public Reply getActivityHelp() {
-		return Reply.of().literal("Usable activity: ") //
+		return Reply.of().literal("Usage: ").code("bot set activity value <activity> <description>").newline() //
+				.literal("Usable activity: ") //
 				.code("playing").literal(", ") //
 				.code(ActivityType.STREAMING.name().toLowerCase()).literal(", ") //
 				.code(ActivityType.LISTENING.name().toLowerCase()).literal(", ") //
@@ -83,7 +84,8 @@ public class SetBotStatusTask {
 	}
 
 	public Reply getOnlineStatusHelp() {
-		return Reply.of().literal("Usable status: ") //
+		return Reply.of().literal("Usage: ").code("bot set status value <status>").newline() //
+				.literal("Usable status: ") //
 				.code(OnlineStatus.ONLINE.getKey().toLowerCase()).literal(", ") //
 				.code(OnlineStatus.IDLE.getKey().toLowerCase()).literal(", ") //
 				.code(OnlineStatus.DO_NOT_DISTURB.getKey().toLowerCase()).literal(", ") //
