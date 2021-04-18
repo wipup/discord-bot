@@ -28,8 +28,6 @@ import wp.discord.bot.util.SafeUtil;
 @Slf4j
 public class ScheduledActionManager implements DisposableBean {
 
-
-	
 	@Autowired
 	@Qualifier(AsyncConfig.BEAN_CRON_TASK_DECORATOR)
 	private TaskDecorator taskDecorator;
@@ -57,7 +55,7 @@ public class ScheduledActionManager implements DisposableBean {
 
 	@Autowired
 	private ScheduleRepository scheduleRepository;
-	
+
 	public ScheduledFuture<?> scheduleCronTask(ScheduledAction scheduleAction) {
 		CronTrigger cron = new CronTrigger(scheduleAction.getCron());
 
@@ -76,8 +74,8 @@ public class ScheduledActionManager implements DisposableBean {
 			}
 
 			scheduleAction.setActualRunCount(scheduleAction.getActualRunCount().add(BigInteger.ONE));
-			SafeUtil.suppress(()-> scheduleRepository.save(scheduleAction));
-			
+			SafeUtil.suppress(() -> scheduleRepository.save(scheduleAction));
+
 			for (String cmd : scheduleAction.getCommands()) {
 				try {
 					BotAction action = cmdProcessor.handleCommand(null, cmd);
@@ -101,7 +99,6 @@ public class ScheduledActionManager implements DisposableBean {
 		BigInteger actual = ObjectUtils.defaultIfNull(scheduleAction.getActualRunCount(), BigInteger.ZERO);
 		BigInteger preferred = scheduleAction.getDesiredRunCount();
 		if (preferred != null) {
-//			if (actual >= preferred) {
 			if (actual.compareTo(preferred) >= 0) {
 				cancelTask(scheduleAction);
 				return true;
@@ -121,6 +118,7 @@ public class ScheduledActionManager implements DisposableBean {
 			future.cancel(true);
 			scheduleAction.setScheduledTask(null);
 			scheduleAction.setActive(false);
+			SafeUtil.suppress(() -> scheduleRepository.save(scheduleAction));
 		});
 		SafeUtil.suppress(() -> Thread.sleep(50));
 	}
