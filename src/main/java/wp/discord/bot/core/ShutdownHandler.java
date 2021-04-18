@@ -20,17 +20,33 @@ public class ShutdownHandler implements DisposableBean {
 
 	@Autowired
 	private BotSessionManager sessionManager;
+	
+	@Autowired
+	private ScheduledActionManager scheduler;
 
 	@Override
 	public void destroy() throws Exception {
 		destroyAllSession();
 		destroyAllJDA();
+		shutdownSchedulerTasks();
 	}
 
+	public void shutdownSchedulerTasks() {
+		try {
+			scheduler.destroy();
+		} catch (Exception e) {
+			log.error("error shutdown ScheduledActionManager", e);
+		}
+	}
+	
 	public void destroyAllSession() {
 		log.info("Destroying all sessions");
 		for (BotSession session : sessionManager.getAllSessions()) {
-			session.getExecutorService().shutdownNow();
+			try {
+				session.getExecutorService().shutdownNow();
+			} catch (Exception e) {
+				log.error("error shutdown BotSession: " + session, e);
+			}
 		}
 	}
 

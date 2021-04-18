@@ -3,6 +3,7 @@ package wp.discord.bot.core;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.TaskScheduler;
@@ -19,7 +20,7 @@ import wp.discord.bot.model.BotAction;
 
 @Component
 @Slf4j
-public class ScheduledActionManager {
+public class ScheduledActionManager implements DisposableBean {
 
 	@Autowired
 	@Qualifier(AsyncConfig.BEAN_CRON_TASK_EXECUTOR)
@@ -72,6 +73,11 @@ public class ScheduledActionManager {
 
 	private void notifyOwner(Throwable e) {
 		errorHandler.notifyOwnerNow(null, e);
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		executorService.shutdownNow();
 	}
 
 }
