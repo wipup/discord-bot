@@ -9,12 +9,14 @@ import org.springframework.stereotype.Repository;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.core.persist.AbstractFileBasedRepository;
 import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.db.repository.SequenceRepository.SequenceEntity;
 import wp.discord.bot.util.SafeUtil;
 
 @Repository
+@Slf4j
 public class SequenceRepository extends AbstractFileBasedRepository<SequenceEntity> {
 
 	private Map<String, AtomicInteger> sequenceMap = new HashMap<>();
@@ -49,6 +51,7 @@ public class SequenceRepository extends AbstractFileBasedRepository<SequenceEnti
 
 	@Override
 	public void doReload(SequenceEntity entity) throws Exception {
+		log.info("Reload Sequence: {}", entity);
 		SafeUtil.suppress(() -> getSeq(entity.getName()).set(entity.value.intValue()));
 	}
 
@@ -63,4 +66,5 @@ public class SequenceRepository extends AbstractFileBasedRepository<SequenceEnti
 		private String name;
 		private BigInteger value;
 	}
+
 }

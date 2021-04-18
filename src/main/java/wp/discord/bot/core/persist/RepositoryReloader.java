@@ -57,6 +57,7 @@ public class RepositoryReloader implements InitializingBean {
 					.map((p) -> SafeUtil.get(() -> reloadable.doRead(p))) //
 					.filter((e) -> e != null) //
 					.forEach((e) -> {
+						log.debug("calling doReload: {} with: {}", reloadable, e);
 						SafeUtil.suppress(() -> reloadable.doReload(e));
 					});
 		}
