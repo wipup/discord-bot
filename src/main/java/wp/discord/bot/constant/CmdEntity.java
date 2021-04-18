@@ -22,6 +22,7 @@ public enum CmdEntity {
 	REACTION("reaction", 1), //
 	ID("id", 1), //
 	COUNT("count", 1), //
+	ADMIN("admin", 1), //
 	ALL("all", 2), // //e.g. bot play audio <time-to-xxx> user all 3
 
 	// system

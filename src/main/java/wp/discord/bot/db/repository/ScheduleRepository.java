@@ -26,6 +26,11 @@ public class ScheduleRepository extends AbstractFileBasedRepository<ScheduledAct
 	public static final int MAX_SCHEDULED_PER_USER = 100;
 
 	private Map<String, Map<BigInteger, ScheduledAction>> inMemoryRepository = new ConcurrentHashMap<>();
+	private Map<BigInteger, ScheduledAction> adminRepository = new ConcurrentHashMap<>();
+
+	public ScheduledAction findFromAdmin(BigInteger scheduleId) throws Exception {
+		return SafeUtil.get(() -> adminRepository.get(scheduleId));
+	}
 
 	public BigInteger nextSeqId() throws Exception {
 		return seqRepository.nextValSeqScheduleAction();
@@ -94,6 +99,7 @@ public class ScheduleRepository extends AbstractFileBasedRepository<ScheduledAct
 
 		log.info("save Schedule: {}", ToStringUtils.toJsonString(schedule));
 		asyncPersist(schedule);
+		adminRepository.put(schedule.getId(), schedule);
 		userRepo.put(schedule.getId(), schedule);
 	}
 

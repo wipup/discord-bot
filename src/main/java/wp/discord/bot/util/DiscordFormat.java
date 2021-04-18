@@ -90,6 +90,9 @@ public class DiscordFormat {
 	}
 
 	public static String code(String message) {
+		if (StringUtils.isBlank(message)) {
+			message = " - ";
+		}
 		return MessageFormat.format("`{0}`", message);
 	}
 
