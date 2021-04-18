@@ -5,11 +5,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -34,7 +36,7 @@ public class BotAction {
 
 	private BotSession session;
 	private String authorId;
-	
+
 	private boolean isFromScheduler = false;
 	private boolean isFromTrigger = false;
 
@@ -43,12 +45,16 @@ public class BotAction {
 		entities = new LinkedHashMap<>();
 	}
 
-	public String getFirstEntitiesParam(CmdEntity e) {
+	public String getEntitiesParam(CmdEntity e, int index) {
 		List<String> list = getEntities(e);
-		if (list.isEmpty()) {
+		if (index < 0 || index >= list.size()) {
 			return null;
 		}
-		return list.get(0);
+		return list.get(index);
+	}
+
+	public String getFirstEntitiesParam(CmdEntity e) {
+		return getEntitiesParam(e, 0);
 	}
 
 	public List<String> getEntities(CmdEntity e) {
@@ -70,6 +76,19 @@ public class BotAction {
 
 	public MessageReceivedEvent getMessageReceivedEvent() {
 		return SafeUtil.get(() -> (MessageReceivedEvent) event);
+	}
+
+	@Deprecated
+	public void sendReply(String reply) {
+		sendReply(reply, null);
+	}
+
+	@Deprecated
+	public void sendReply(String reply, Consumer<Message> success) {
+		MessageChannel channel = getEventMessageChannel();
+		if (channel != null) {
+			channel.sendMessage(reply).queue(success);
+		}
 	}
 
 	public void setSession(BotSession session) {

@@ -50,6 +50,9 @@ public class HelpTaskHelper {
 
 	public Reply getAvailableCommandsTemp() {
 		Reply rep = Reply.of() //
+				.code("bot set status value <status>").newline() //
+				.code("bot set activity value <activity> <name>").newline() //
+				.code("bot update audio").newline() //
 				.code("bot shutdown").newline() //
 				
 				.code("bot help cron").newline() //

@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +19,15 @@ import org.springframework.stereotype.Component;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.config.properties.DiscordProperties;
+import wp.discord.bot.core.bot.BotSessionManager;
 import wp.discord.bot.util.SafeUtil;
 
 @Component
@@ -30,13 +35,24 @@ import wp.discord.bot.util.SafeUtil;
 public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandler {
 
 	@Autowired
-	private AudioPlayerManager audioPlayerManager;
-
-	@Autowired
 	private DiscordProperties discordProperties;
 
+	@Autowired
+	private BotSessionManager botSessionManager;
+
+	private AudioPlayerManager audioPlayerManager;
 	private Map<String, AudioTrack> audioTracks; // key = name
-	private transient Map<String, String> trackProperties; // key = path
+
+	// temporary
+	private transient Map<String, String> trackFilePathMap; // key = path
+
+	@PostConstruct
+	public void init() {
+		audioPlayerManager = new DefaultAudioPlayerManager();
+		AudioSourceManagers.registerLocalSource(audioPlayerManager);
+
+		audioTracks = new LinkedHashMap<>();
+	}
 
 	public AudioTrack getAudioTrack(String name) {
 		AudioTrack track = audioTracks.get(name);
@@ -47,7 +63,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 	}
 
 	public List<AudioTrack> getAllAudioTracks() {
-		return audioTracks.values().stream().collect(Collectors.toList());
+		return audioTracks.values().stream().sorted((a, b) -> a.getUserData().toString().compareTo(b.getUserData().toString())).collect(Collectors.toList());
 	}
 
 	public void setAudioTrackName(AudioTrack track, String name) {
@@ -62,6 +78,10 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 		return SafeUtil.get(() -> track.getIdentifier());
 	}
 
+	public AudioPlayerManager getAudioPlayerManager() {
+		return audioPlayerManager;
+	}
+
 	// ------------------------------------------
 
 	@Override
@@ -69,9 +89,17 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 		loadAudioTracks();
 	}
 
+	public void reloadAudio() throws Exception {
+		init();
+		audioTracks.clear();
+		loadAudioTracks();
+		botSessionManager.getAllSessions().stream().forEach((s) -> {
+			botSessionManager.updateBotAudioPlayer(s, audioPlayerManager.createPlayer());
+		});
+	}
+
 	private void loadAudioTracks() throws Exception {
-		audioTracks = new LinkedHashMap<>();
-		trackProperties = new HashMap<>();
+		trackFilePathMap = new HashMap<>();
 
 		String audioDir = discordProperties.getAudioFolder();
 		if (StringUtils.isEmpty(audioDir)) {
@@ -91,7 +119,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 						String absolutePath = absPath.toString();
 						String fileName = absPath.getFileName().toString();
 
-						trackProperties.put(absolutePath, fileName);
+						trackFilePathMap.put(absolutePath, fileName);
 						log.debug("loading: {}", fileName);
 						audioPlayerManager.loadItem(absolutePath, this);
 					});
@@ -103,7 +131,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 		String path = getAudioTrackFilePath(track);
 		log.info("loaded track: {}", path);
 
-		String trackName = trackProperties.get(path);
+		String trackName = trackFilePathMap.get(path);
 		if (audioTracks.containsKey(trackName)) {
 			throw new IllegalStateException("duplicated track name: " + trackName);
 		}

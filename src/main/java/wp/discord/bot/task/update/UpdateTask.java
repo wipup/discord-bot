@@ -19,6 +19,9 @@ public class UpdateTask implements ActionHandler {
 	@Autowired
 	private UpdateScheduleTask updateAlertTask;
 
+	@Autowired
+	private UpdateAudioTrackTask updateAudioTask;
+
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		String targetEntity = SafeUtil.get(() -> action.getActionParams().get(0));
@@ -31,6 +34,11 @@ public class UpdateTask implements ActionHandler {
 		log.debug("updating : {}", entity);
 		if (entity == CmdEntity.SCHEDULE) {
 			updateAlertTask.handleUpdateSchedule(action);
+			return;
+		}
+
+		if (entity == CmdEntity.AUDIO) {
+			updateAudioTask.reloadAllAudioTracks(action);
 			return;
 		}
 

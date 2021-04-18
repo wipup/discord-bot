@@ -18,7 +18,7 @@ public class GetTask implements ActionHandler {
 
 	@Autowired
 	private GetAudioTask getAudioTask;
-	
+
 	@Autowired
 	private GetScheduleTask getScheduleTask;
 
@@ -41,7 +41,7 @@ public class GetTask implements ActionHandler {
 			getScheduleTask.handleGetSchedule(action);
 			return;
 		}
-		
+
 		Reply rep = Reply.of().literal("Unsupported entity: ").code(targetEntity);
 		throw new BotException(rep);
 	}

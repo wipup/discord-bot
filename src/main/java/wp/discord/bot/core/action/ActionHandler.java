@@ -1,6 +1,5 @@
 package wp.discord.bot.core.action;
 
-import java.util.Arrays;
 import java.util.List;
 
 import wp.discord.bot.constant.CmdAction;
@@ -14,6 +13,6 @@ public interface ActionHandler {
 	public CmdAction getAcceptedAction();
 
 	default public List<DiscordUserRole> allowRoles() {
-		return Arrays.asList(DiscordUserRole.values());
+		return DiscordUserRole.ALL_ROLES;
 	}
 }

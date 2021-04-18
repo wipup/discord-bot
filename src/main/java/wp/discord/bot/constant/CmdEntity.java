@@ -12,7 +12,7 @@ public enum CmdEntity {
 	MESSAGE("message", 1), //
 
 	// feature
-	VALUE("value", 1), //
+	VALUE("value", 100), //
 	SCHEDULE("schedule", 1), //
 	AUTO_REPLY("reply", 1), //
 	ACTIVE("active", 1), //
@@ -22,6 +22,10 @@ public enum CmdEntity {
 	REACTION("reaction", 1), //
 	ID("id", 1), //
 	ALL("all", 2), // //e.g. bot play audio <time-to-xxx> user all 3
+
+	// system
+	STATUS("status", 1), //
+	ACTIVITY("activity", 2), //
 	;
 
 	private String cmd;

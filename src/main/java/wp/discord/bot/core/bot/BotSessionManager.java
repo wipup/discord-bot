@@ -9,7 +9,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
 import wp.discord.bot.constant.BotStatus;
+import wp.discord.bot.core.AudioTrackHolder;
 import wp.discord.bot.util.EventUtil;
 
 @Slf4j
@@ -27,7 +28,7 @@ public class BotSessionManager implements InitializingBean {
 	private JDA jda;
 
 	@Autowired
-	private AudioPlayerManager playerManager;
+	private AudioTrackHolder playerManager;
 
 	private Map<String, BotSession> guildSessions;
 
@@ -79,14 +80,20 @@ public class BotSessionManager implements InitializingBean {
 		BotSession bs = new BotSession(jda);
 		bs.setGuild(guild);
 		bs.setGuildId(guild.getId());
-		bs.setAudioPlayer(playerManager.createPlayer());
-		bs.getAudioPlayer().addListener(bs);
 		bs.setAudioManager(guild.getAudioManager());
 		bs.getAudioManager().setSendingHandler(bs);
+		updateBotAudioPlayer(bs, playerManager.getAudioPlayerManager().createPlayer());
 
 		boolean connected = bs.getAudioManager().isConnected();
 		bs.setStatus(connected ? BotStatus.VOICE_CHANNEL_IDLE : BotStatus.NOT_IN_VOICE_CHANNEL);
 
 		return bs;
+	}
+
+	public void updateBotAudioPlayer(BotSession bs, AudioPlayer player) {
+		bs.setAudioPlayer(player);
+		bs.getAudioPlayer().addListener(bs);
+		bs.setAudioManager(bs.getGuild().getAudioManager());
+		bs.getAudioManager().setSendingHandler(bs);
 	}
 }

@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.util.SafeUtil;
+import wp.discord.bot.util.ToStringUtils;
 
 @Repository
 @Slf4j
@@ -52,8 +53,12 @@ public class ScheduleRepository {
 		Map<BigInteger, ScheduledAction> userRepo = inMemoryRepository.get(userId);
 		if (userRepo == null) {
 			return;
-		}		
-		userRepo.remove(scheduleId);
+		}
+		
+		ScheduledAction removed = userRepo.remove(scheduleId);
+		if (removed != null) {
+			log.info("[DEL] Schedule: {}", ToStringUtils.toJsonString(removed));
+		}
 	}
 
 	public List<ScheduledAction> findAll(User user) throws Exception {
@@ -83,7 +88,7 @@ public class ScheduleRepository {
 			inMemoryRepository.put(schedule.getAuthorId(), userRepo);
 		}
 
-		log.info("save Schedule: {}", schedule);
+		log.info("save Schedule: {}", ToStringUtils.toJsonString(schedule));
 		userRepo.put(schedule.getId(), schedule);
 	}
 
