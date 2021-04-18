@@ -97,7 +97,7 @@ public class AddScheduleTask {
 			throw new BotException(rep);
 		}
 
-		BigInteger runCount = sch.getDesiredRunCount();
+		BigInteger desiredRunCount = sch.getDesiredRunCount();
 		String cron = sch.getCron();
 		cronTask.parse(authorId, cron);
 
@@ -119,10 +119,16 @@ public class AddScheduleTask {
 			isAllowSchedulingAction(cmdProcessor.handleCommand(null, cmd));
 		}
 
-		if (runCount != null) {
-//			if (runCount <= 0) {
-			if (runCount.compareTo(BigInteger.ZERO) <= 0) {
-				Reply rep = Reply.of().literal("Desired run count must more than zero! " + runCount);
+		if (desiredRunCount != null) {
+//			if (desiredRunCount <= 0) {
+			if (desiredRunCount.compareTo(BigInteger.ZERO) <= 0) {
+				Reply rep = Reply.of().literal("Desired run count must more than zero! " + desiredRunCount);
+				throw new BotException(rep);
+			}
+			
+			BigInteger actualRun = sch.getActualRunCount();
+			if (actualRun.compareTo(desiredRunCount) >= 0) {
+				Reply rep = Reply.of().literal("Actual run count has already exceeded desired run count! ");
 				throw new BotException(rep);
 			}
 		}
@@ -149,7 +155,7 @@ public class AddScheduleTask {
 		return sch;
 	}
 
-	private BigInteger parseDesiredRunCount(BotAction action) throws Exception {
+	public BigInteger parseDesiredRunCount(BotAction action) throws Exception {
 		String desiredRunCount = action.getFirstEntitiesParam(CmdEntity.COUNT);
 		BigInteger runCount = null;
 		if (StringUtils.isNotEmpty(desiredRunCount)) {

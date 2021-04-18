@@ -78,6 +78,11 @@ public class UpdateScheduleTask {
 			schedule.setName(name);
 		}
 		
+		BigInteger desiredRunCount = addTask.parseDesiredRunCount(action);
+		if (desiredRunCount != null) {
+			schedule.setDesiredRunCount(desiredRunCount);
+		}
+		
 		addTask.validateScheduledAction(schedule);
 
 		String status = action.getFirstEntitiesParam(CmdEntity.ACTIVE);
