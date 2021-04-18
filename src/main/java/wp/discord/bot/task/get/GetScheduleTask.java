@@ -34,6 +34,7 @@ public class GetScheduleTask {
 			DiscordUserRole role = userManager.getRoleOf(action.getAuthorId());
 			if (role == DiscordUserRole.ADMIN || role == DiscordUserRole.OWNER) {
 				getSchedule(action, scheduleId, true);
+				return;
 			} else {
 				Reply r = Reply.of().mentionUser(action.getAuthorId()).literal(", Only admin is allowed.");
 				action.getEventMessageChannel().sendMessage(r.build()).queue();
