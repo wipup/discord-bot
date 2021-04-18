@@ -51,6 +51,7 @@ public class AddScheduleTask {
 
 		if (isActivateSchedule(action)) {
 			applyAlert(sch, action);
+			saveAlertToRepository(sch, action);
 		}
 
 		Reply rep = Reply.of().bold("Scheduled Command Added").literal(refHandler.generateEncodedReferenceCode(sch)).newline() //

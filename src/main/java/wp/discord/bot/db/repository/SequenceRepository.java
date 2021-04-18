@@ -52,7 +52,12 @@ public class SequenceRepository extends AbstractFileBasedRepository<SequenceEnti
 	@Override
 	public void doReload(SequenceEntity entity) throws Exception {
 		log.info("Reload Sequence: {}", entity);
-		SafeUtil.suppress(() -> getSeq(entity.getName()).set(entity.value.intValue()));
+		SafeUtil.suppress(() -> {
+			AtomicInteger seq = getSeq(entity.getName());
+			seq.set(entity.value.intValue());
+
+			log.info("Sequence: {}: value: {}", entity.getName(), seq.get());
+		});
 	}
 
 	@Override
