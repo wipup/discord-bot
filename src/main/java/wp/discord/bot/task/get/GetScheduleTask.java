@@ -96,10 +96,6 @@ public class GetScheduleTask {
 		synchronized (found) {
 			action.getEventMessageChannel().sendMessage(found.reply().toString()).queue();
 		}
-
-		synchronized (found) {
-			action.getEventMessageChannel().sendMessage(found.reply().toString()).queue();
-		}
 	}
 
 	public ScheduledAction getScheduleAdmin(BigInteger id, String scheduleId) throws Exception {
