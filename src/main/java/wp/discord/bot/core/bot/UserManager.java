@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -83,7 +84,7 @@ public class UserManager implements InitializingBean {
 	}
 
 	public String getUserEntityId(BotAction action) {
-		String userId = action.getFirstEntitiesParam(CmdEntity.USER);
+		String userId = StringUtils.trim(action.getFirstEntitiesParam(CmdEntity.USER));
 		if ("me".equalsIgnoreCase(userId)) {
 			return action.getAuthorId();
 		}

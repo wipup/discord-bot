@@ -28,30 +28,29 @@ public class GetScheduleTask {
 
 	public void handleGetSchedule(BotAction action) throws Exception {
 		String scheduleId = action.getFirstEntitiesParam(CmdEntity.ID);
-
-		String isAdmin = action.getFirstEntitiesParam(CmdEntity.ADMIN);
-		if ("true".equalsIgnoreCase(isAdmin)) {
+		boolean adminMode = false;
+		boolean requiredAdmin = "true".equalsIgnoreCase(action.getFirstEntitiesParam(CmdEntity.ADMIN));
+		if (requiredAdmin) {
 			DiscordUserRole role = userManager.getRoleOf(action.getAuthorId());
-			if (role == DiscordUserRole.ADMIN || role == DiscordUserRole.OWNER) {
-				getSchedule(action, scheduleId, true);
-				return;
-			} else {
-				Reply r = Reply.of().mentionUser(action.getAuthorId()).literal(", Only admin is allowed.");
-				action.getEventMessageChannel().sendMessage(r.build()).queue();
-				return;
-			}
+			adminMode = (role == DiscordUserRole.ADMIN || role == DiscordUserRole.OWNER);
 		}
 
-		if (StringUtils.isNotEmpty(scheduleId)) {
-			getSchedule(action, scheduleId, false);
+		if (!adminMode && requiredAdmin) {
+			Reply r = Reply.of().mentionUser(action.getAuthorId()).literal(", Only admin is allowed.");
+			action.getEventMessageChannel().sendMessage(r.build()).queue();
 			return;
 		}
 
-		getAllSchedules(action);
+		if (StringUtils.isNotEmpty(scheduleId)) {
+			getSchedule(action, scheduleId, adminMode);
+			return;
+		}
+
+		getAllSchedules(action, adminMode);
 		return;
 	}
 
-	public void getAllSchedules(BotAction action) throws Exception {
+	public void getAllSchedules(BotAction action, boolean adminMode) throws Exception {
 		String author = action.getAuthorId();
 		List<ScheduledAction> allSchedules = repository.findAll(author);
 
