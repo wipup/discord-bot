@@ -51,7 +51,7 @@ public class GetLogTask {
 				return;
 
 			} else if (logFiles.size() == 1) {
-				sendLogFiles(action, logDir);
+				sendLogFiles(action, logFiles.get(0));
 				return;
 			} else {
 				listLogFileNames(action, logFiles);
@@ -66,7 +66,7 @@ public class GetLogTask {
 		for (i = 0; i < logFiles.size() && i < MAX_LOG_FILE_LIST_COUNT; i++) {
 			Path found = logFiles.get(i);
 			String fileName = found.getFileName().toString();
-			reply.literal(String.format("%2d.) ", i)).code(fileName).newline();
+			reply.literal(String.format("%2d.) ", i + 1)).code(fileName).newline();
 		}
 
 		if (i < logFiles.size()) {
@@ -77,6 +77,8 @@ public class GetLogTask {
 	}
 
 	public void sendLogFiles(BotAction action, Path logFile) throws Exception {
+		log.info("sending log file: {}", logFile);
+		
 		String fileName = logFile.getFileName().toString();
 		InputStream is = Files.newInputStream(logFile);
 		action.getEventMessageChannel().sendFile(is, fileName).queue((m) -> {
