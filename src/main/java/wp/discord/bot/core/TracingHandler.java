@@ -35,6 +35,10 @@ public class TracingHandler {
 		clearTraceContext();
 	}
 
+	public String getTraceId() {
+		return MDC.get(X_B3_TRACE_ID);
+	}
+
 	public void clearTraceContext() {
 		MDC.remove(X_B3_TRACE_ID);
 		MDC.remove(X_B3_SPAN_ID);

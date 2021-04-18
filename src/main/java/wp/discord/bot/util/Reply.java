@@ -2,10 +2,12 @@ package wp.discord.bot.util;
 
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.User;
 import wp.discord.bot.constant.Reaction;
 
+@Slf4j
 public class Reply {
 
 	protected StringBuilder stringBuilder = new StringBuilder();
@@ -132,7 +134,9 @@ public class Reply {
 	}
 
 	public String buildUnquoted() {
-		return stringBuilder.toString();
+		String build = stringBuilder.toString();
+		log.debug("Build Reply: \n{}", build);
+		return build;
 	}
 
 	public String build() {

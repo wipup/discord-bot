@@ -21,6 +21,9 @@ public class EventErrorHandler {
 	@Autowired
 	private UserManager userManager;
 
+	@Autowired
+	private TracingHandler tracingHandler;
+
 	public void handleEventError(GenericEvent event, Throwable e) {
 		log.error("event error: ", e);
 		notifyOwnerNow(event, e);
@@ -63,6 +66,7 @@ public class EventErrorHandler {
 		if (rootCause != null && rootCause != e) {
 			rep.newline().literal("\tCaused by: ").code(e.getClass().getName()).literal(" : ").code(e.getMessage()); //
 		}
+		rep.newline().literal("TraceID: ").code(tracingHandler.getTraceId());
 		return rep;
 	}
 
