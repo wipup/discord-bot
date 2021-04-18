@@ -1,6 +1,7 @@
 package wp.discord.bot.util;
 
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -21,6 +22,10 @@ public class EventUtil {
 
 	public static MessageChannel getChannel(GenericEvent event) {
 		return SafeUtil.get(() -> (MessageChannel) event.getClass().getMethod("getChannel").invoke(event));
+	}
+
+	public static Message getMessage(GenericEvent event) {
+		return SafeUtil.get(() -> (Message) event.getClass().getMethod("getMessage").invoke(event));
 	}
 
 	public static String getMessageId(GenericEvent event) {
