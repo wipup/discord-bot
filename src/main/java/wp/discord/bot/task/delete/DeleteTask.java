@@ -14,10 +14,12 @@ import wp.discord.bot.util.SafeUtil;
 @Component
 public class DeleteTask implements ActionHandler {
 
-	
 	@Autowired
 	private DeleteScheduleTask deleteScheduleTask;
 
+	@Autowired
+	private DeleteMessageTask deleteMessageTask;
+	
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		String targetEntity = SafeUtil.get(() -> action.getActionParams().get(0));
@@ -29,6 +31,12 @@ public class DeleteTask implements ActionHandler {
 
 		if (entity == CmdEntity.SCHEDULE) {
 			deleteScheduleTask.deleteSchedule(action);
+			return;
+		}
+		
+		
+		if (entity == CmdEntity.MESSAGE) {
+			deleteMessageTask.deleteBotMessage(action);
 			return;
 		}
 		

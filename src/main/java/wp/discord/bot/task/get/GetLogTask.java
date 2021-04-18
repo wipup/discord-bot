@@ -72,6 +72,7 @@ public class GetLogTask {
 		if (i < logFiles.size()) {
 			reply.literal("To see more, please use more specific pattern").newline();
 		}
+		reply.literal("To download log file, type: ").code("bot get log name <file-name>");
 
 		action.getEventMessageChannel().sendMessage(reply.build()).queue();
 	}

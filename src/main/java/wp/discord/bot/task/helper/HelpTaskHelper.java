@@ -53,6 +53,7 @@ public class HelpTaskHelper {
 				.code("bot set status value <status>").newline() //
 				.code("bot set activity value <activity> <name>").newline() //
 				.code("bot get log [name <pattern>]").newline() //
+				.code("bot delete message id <message-id> [channel <channel-id>] ").newline() //
 				.code("bot update audio").newline() //
 				.code("bot shutdown").newline() //
 				
