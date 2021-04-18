@@ -60,10 +60,29 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 		return rep;
 	}
 
+	public Reply shortReply(boolean adminMode) {
+		if (adminMode) {
+			return shortReplyAdmin();
+		} else {
+			return shortReply();
+		}
+	}
+
 	public Reply shortReply() {
 		Reply rep = Reply.of() //
 				.literal("ID: ").code(String.format("%06d ", getId())) //
 				.literal(" Name: ").code(String.format("%s", getName())); //
+		if (isActive()) {
+			rep.bold(" (Active)");
+		}
+		return rep;
+	}
+
+	public Reply shortReplyAdmin() {
+		Reply rep = Reply.of();
+		rep.literal("ID: ").code(String.format("%06d ", getId())); //
+		rep.literal(" Author: ").mentionUser(getAuthorId());
+		rep.newline().literal("\tName: ").code(String.format("%s", getName())); //
 		if (isActive()) {
 			rep.bold(" (Active)");
 		}

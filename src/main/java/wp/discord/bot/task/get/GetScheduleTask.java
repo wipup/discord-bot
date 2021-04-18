@@ -65,7 +65,7 @@ public class GetScheduleTask {
 		for (ScheduledAction scha : allSchedules) {
 			count++;
 			reply.code(String.format("%2d.) ", count)) //
-					.append(scha.shortReply()).newline();
+					.append(scha.shortReply(adminMode)).newline();
 		}
 		reply.literal("To see details, type: ").code("bot get schedule id [id]");
 		action.getEventMessageChannel().sendMessage(reply.build()).queue();
