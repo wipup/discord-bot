@@ -3,8 +3,10 @@ package wp.discord.bot.core.persist;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -17,7 +19,7 @@ import wp.discord.bot.config.properties.RepositoryProperties;
 import wp.discord.bot.util.SafeUtil;
 
 @Slf4j
-public abstract class AbstractFileBasedRepository<T> implements Reloadable<T> {
+public abstract class AbstractFileBasedRepository<T> implements Reloadable<T>, DisposableBean {
 
 	@Autowired
 	@Qualifier(ObjectMapperConfig.JSON_MAPPER)
@@ -47,6 +49,8 @@ public abstract class AbstractFileBasedRepository<T> implements Reloadable<T> {
 	}
 
 	abstract protected String getFileName(T entity);
+
+	abstract protected Collection<T> getAllCachedEntities() throws Exception;
 
 	protected void asyncUnpersist(T entity) throws Exception {
 		executor.submit(() -> {
@@ -81,6 +85,17 @@ public abstract class AbstractFileBasedRepository<T> implements Reloadable<T> {
 		log.debug("reading: {}", file);
 		byte[] bytes = Files.readAllBytes(file);
 		return mapper.readValue(bytes, getEntityClass());
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		getAllCachedEntities().stream().forEach((e) -> {
+			try {
+				doPersist(e);
+			} catch (Exception ex) {
+				log.error("error shutdown saving: {}", e, ex);
+			}
+		});
 	}
 
 	@Override

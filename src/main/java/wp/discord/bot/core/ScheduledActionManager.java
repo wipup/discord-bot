@@ -19,6 +19,7 @@ import wp.discord.bot.config.AsyncConfig;
 import wp.discord.bot.core.action.ActionHandleManager;
 import wp.discord.bot.core.cmd.CommandLineProcessor;
 import wp.discord.bot.db.entity.ScheduledAction;
+import wp.discord.bot.db.repository.ScheduleRepository;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.SafeUtil;
@@ -27,6 +28,8 @@ import wp.discord.bot.util.SafeUtil;
 @Slf4j
 public class ScheduledActionManager implements DisposableBean {
 
+
+	
 	@Autowired
 	@Qualifier(AsyncConfig.BEAN_CRON_TASK_DECORATOR)
 	private TaskDecorator taskDecorator;
@@ -52,6 +55,9 @@ public class ScheduledActionManager implements DisposableBean {
 	@Autowired
 	private EventErrorHandler errorHandler;
 
+	@Autowired
+	private ScheduleRepository scheduleRepository;
+	
 	public ScheduledFuture<?> scheduleCronTask(ScheduledAction scheduleAction) {
 		CronTrigger cron = new CronTrigger(scheduleAction.getCron());
 
@@ -70,6 +76,8 @@ public class ScheduledActionManager implements DisposableBean {
 			}
 
 			scheduleAction.setActualRunCount(scheduleAction.getActualRunCount().add(BigInteger.ONE));
+			SafeUtil.suppress(()-> scheduleRepository.save(scheduleAction));
+			
 			for (String cmd : scheduleAction.getCommands()) {
 				try {
 					BotAction action = cmdProcessor.handleCommand(null, cmd);

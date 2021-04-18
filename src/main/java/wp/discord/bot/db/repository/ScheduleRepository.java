@@ -1,6 +1,7 @@
 package wp.discord.bot.db.repository;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,6 +117,11 @@ public class ScheduleRepository extends AbstractFileBasedRepository<ScheduledAct
 	@Override
 	public void doReload(ScheduledAction entity) throws Exception {
 		save(entity);
+	}
+
+	@Override
+	protected Collection<ScheduledAction> getAllCachedEntities() throws Exception {
+		return findAll();
 	}
 
 }

@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.JDA;
 import wp.discord.bot.config.AsyncConfig;
 import wp.discord.bot.core.bot.BotSession;
 import wp.discord.bot.core.bot.BotSessionManager;
+import wp.discord.bot.core.persist.AbstractFileBasedRepository;
 import wp.discord.bot.util.SafeUtil;
 
 @Component
@@ -21,6 +22,9 @@ public class ShutdownHandler implements DisposableBean {
 
 	@Autowired
 	private Collection<JDA> jdas;
+
+	@Autowired
+	private Collection<AbstractFileBasedRepository<?>> allRepository;
 
 	@Autowired
 	private BotSessionManager sessionManager;
@@ -38,6 +42,7 @@ public class ShutdownHandler implements DisposableBean {
 
 	@Override
 	public void destroy() throws Exception {
+		
 		destroyAllSession();
 		destroyAllJDA();
 		shutdownSchedulerTasks();
@@ -45,6 +50,10 @@ public class ShutdownHandler implements DisposableBean {
 		log.info("Closing Executor");
 		SafeUtil.suppress(() -> log.info("Runnable Task left: {}", genericSingleThreadExecutor.shutdownNow().size()));
 		SafeUtil.suppress(() -> log.info("Runnable Task left: {}", genericExecutor.shutdownNow().size()));
+
+		allRepository.stream().forEach((r) -> {
+			SafeUtil.suppress(() -> r.destroy());
+		});
 	}
 
 	public void shutdownSchedulerTasks() {

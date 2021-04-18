@@ -1,9 +1,11 @@
 package wp.discord.bot.db.repository;
 
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
@@ -72,5 +74,13 @@ public class SequenceRepository extends AbstractFileBasedRepository<SequenceEnti
 	@Override
 	public Class<SequenceEntity> getEntityClass() {
 		return SequenceEntity.class;
+	}
+
+	@Override
+	protected Collection<SequenceEntity> getAllCachedEntities() throws Exception {
+		return sequenceMap.entrySet().stream().map((e) -> { //
+			return new SequenceEntity(e.getKey(), BigInteger.valueOf(e.getValue().get())); //
+		}).collect(Collectors.toList());
+
 	}
 }
