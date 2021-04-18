@@ -23,7 +23,7 @@ public class PrivateTextChannelTask implements ActionHandler {
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		String userId = userManager.getUserEntityId(action);
-		
+
 		User user = userManager.getUserEntity(userId);
 		if (user == null) {
 			Reply reply = Reply.of().literal("Invalid user ").code(userId).newline()//
@@ -45,7 +45,9 @@ public class PrivateTextChannelTask implements ActionHandler {
 			throw new BotException(reply);
 		}
 
-		channel.sendMessage(message).queue();
+		channel.sendMessage(message).queue((m) -> {
+			m.suppressEmbeds(true).queue();
+		});
 	}
 
 	@Override

@@ -39,7 +39,9 @@ public class PublicTextChannelTask implements ActionHandler {
 			throw new BotException(reply);
 		}
 
-		channel.sendMessage(message).queue();
+		channel.sendMessage(message).queue((m)->{
+			m.suppressEmbeds(true).queue();
+		});
 	}
 
 	@Override
