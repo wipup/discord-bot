@@ -142,6 +142,7 @@ public class AddScheduleTask {
 		sch.setName(StringUtils.defaultString(name));
 		sch.setId(repository.nextSeqId());
 		sch.setActualRunCount(BigInteger.ZERO);
+		sch.setScheduledTask(null);
 		if (runCount != null) {
 			sch.setDesiredRunCount(runCount);
 		}

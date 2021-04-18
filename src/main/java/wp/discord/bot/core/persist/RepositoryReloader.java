@@ -3,6 +3,7 @@ package wp.discord.bot.core.persist;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.concurrent.ScheduledFuture;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -63,10 +64,11 @@ public class RepositoryReloader implements InitializingBean {
 
 	private void rescheduledTask() throws Exception {
 		scheduledRepository.findAll().stream() //
-				.filter((a) -> a.getShouldRescheduleAfterReload()) //
+				.filter((a) -> a.isActive()) //
 				.forEach((a) -> {
 					log.debug("reschedule: {}", a);
-					scheduledActionManager.scheduleCronTask(a);
+					ScheduledFuture<?> future = scheduledActionManager.scheduleCronTask(a);
+					a.setScheduledTask(future);
 				});
 	}
 }

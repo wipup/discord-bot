@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
@@ -34,16 +33,13 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 	private String name;
 	private String cron;
 	private List<String> commands;
-
+	private boolean active;
 	private BigInteger desiredRunCount;
 	private BigInteger actualRunCount;
 
 	@ToString.Exclude
 	@JsonIgnore
 	private transient ScheduledFuture<?> scheduledTask;
-
-	@JsonAlias({ "active" })
-	private transient Boolean shouldRescheduleAfterReload;
 
 	@Override
 	public Reply reply() {
@@ -74,10 +70,15 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 		return rep;
 	}
 
-	public boolean isActive() {
-		return scheduledTask != null;
+	public void setScheduledTask(ScheduledFuture<?> scheduledTask) {
+		this.scheduledTask = scheduledTask;
+		setActive(scheduledTask != null);
 	}
 
+	private void setActive(boolean active) {
+		this.active = active;
+	}
+	
 	@Override
 	public String toString() {
 		return ToStringUtils.toString(this);
