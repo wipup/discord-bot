@@ -90,6 +90,7 @@ public class UpdateScheduleTask {
 			if (requireRescheduled || Boolean.TRUE.toString().equalsIgnoreCase(status)) {
 				schedule.getScheduledTask().cancel(true);
 				schedule.setScheduledTask(null);
+				schedule.setActive(false);
 				addTask.applyAlert(schedule, action);
 				return;
 			}
@@ -97,6 +98,7 @@ public class UpdateScheduleTask {
 			if (Boolean.FALSE.toString().equalsIgnoreCase(status)) {
 				schedule.getScheduledTask().cancel(true);
 				schedule.setScheduledTask(null);
+				schedule.setActive(false);
 				return;
 			}
 		} else { // currently not active

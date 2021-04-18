@@ -72,7 +72,6 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 
 	public void setScheduledTask(ScheduledFuture<?> scheduledTask) {
 		this.scheduledTask = scheduledTask;
-		setActive(scheduledTask != null);
 	}
 
 	@Override

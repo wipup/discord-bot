@@ -65,6 +65,7 @@ public class DeleteScheduleTask {
 			log.debug("deleting active: {}", found);
 			task.cancel(true);
 			found.setScheduledTask(null);
+			found.setActive(false);
 		} else {
 			log.debug("deleting: {}", found);
 		}

@@ -70,9 +70,11 @@ public class AddScheduleTask {
 		try {
 			ScheduledFuture<?> future = scheduledActionManager.scheduleCronTask(sch);
 			sch.setScheduledTask(future);
+			sch.setActive(true);
 
 		} catch (Exception e) {
 			sch.setScheduledTask(null);
+			sch.setActive(false);
 			saveAlertToRepository(sch, action);
 			throw e;
 		}
@@ -149,6 +151,7 @@ public class AddScheduleTask {
 		sch.setId(repository.nextSeqId());
 		sch.setActualRunCount(BigInteger.ZERO);
 		sch.setScheduledTask(null);
+		sch.setActive(false);
 		if (runCount != null) {
 			sch.setDesiredRunCount(runCount);
 		}

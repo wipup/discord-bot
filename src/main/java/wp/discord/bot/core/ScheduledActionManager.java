@@ -52,6 +52,7 @@ public class ScheduledActionManager implements DisposableBean {
 
 		ScheduledFuture<?> future = cronScheduler.schedule(newRunnableScheduledAction(scheduleAction), cron);
 		scheduleAction.setScheduledTask(future);
+		scheduleAction.setActive(true);
 		return future;
 	}
 
@@ -97,12 +98,13 @@ public class ScheduledActionManager implements DisposableBean {
 	private void cancelTask(ScheduledAction scheduleAction) {
 		log.debug("cancelling count-exceed task: {}", scheduleAction.getName());
 		ScheduledFuture<?> future = scheduleAction.getScheduledTask();
-		scheduleAction.setScheduledTask(null);
 
 		SafeUtil.suppress(() -> Thread.sleep(50));
 		unlimitExecutor.execute(() -> {
 			log.debug("do cancel count-exceed task: {}", scheduleAction.getName());
 			future.cancel(true);
+			scheduleAction.setScheduledTask(null);
+			scheduleAction.setActive(false);
 		});
 		SafeUtil.suppress(() -> Thread.sleep(50));
 	}
