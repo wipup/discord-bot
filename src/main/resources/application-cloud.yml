@@ -1,7 +1,5 @@
 
 spring: 
-  profiles:
-    active: cloud
   application:
     name: Discord-Bot
   main:
@@ -11,7 +9,7 @@ discord:
   oauth2-url: ${OAUTH2_URL}
   token: ${TOKEN}
   status: 
-    name: ${STATUS:-Under Development}
+    name: ${STATUS}
     status: online
     type: default
   users:
