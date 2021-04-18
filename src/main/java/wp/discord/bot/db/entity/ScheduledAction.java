@@ -75,10 +75,6 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 		setActive(scheduledTask != null);
 	}
 
-	private void setActive(boolean active) {
-		this.active = active;
-	}
-	
 	@Override
 	public String toString() {
 		return ToStringUtils.toString(this);
