@@ -37,6 +37,7 @@ import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.managers.AudioManager;
 import wp.discord.bot.constant.BotStatus;
+import wp.discord.bot.util.WaitUtil;
 
 @Getter
 @Setter
@@ -144,7 +145,6 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 
 	public void waitUntil(String reason, Predicate<BotSession> condition) {
 		log.trace("queue waiting until: {}", (Object) reason);
-
 		queue(() -> {
 			doWait(reason, condition);
 		});
@@ -152,29 +152,7 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 
 	// ---------- blocking
 	private void doWait(String reason, Predicate<BotSession> condition) {
-		log.debug("do waiting until: {}", reason);
-
-		final long sleepTime = 50; // ms
-		long accumulatedWaitTime = 0;
-
-		boolean sucess = condition.test(this);
-		while (!sucess) {
-			try {
-				Thread.sleep(sleepTime);
-				accumulatedWaitTime += sleepTime;
-
-				if (accumulatedWaitTime >= 15000) {
-					log.error("wait time timeout");
-					break;
-				}
-			} catch (Exception e) {
-				log.warn("wait sleep interupted", e);
-				break;
-			}
-			sucess = condition.test(this);
-		}
-
-		log.trace("end waiting: {}", reason);
+		WaitUtil.doWait(reason, ()-> condition.test(this));
 	}
 
 	// ---------- non-queue

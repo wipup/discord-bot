@@ -3,10 +3,10 @@ package wp.discord.bot.core;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -100,7 +100,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 	}
 
 	private void loadAudioTracks() throws Exception {
-		trackFilePathMap = new HashMap<>();
+		trackFilePathMap = new ConcurrentHashMap<>();
 
 		String audioDir = discordProperties.getAudioFolder();
 		if (StringUtils.isEmpty(audioDir)) {
@@ -139,6 +139,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 
 		setAudioTrackName(track, trackName);
 		audioTracks.put(trackName, track);
+		trackFilePathMap.remove(path);
 	}
 
 	@Override

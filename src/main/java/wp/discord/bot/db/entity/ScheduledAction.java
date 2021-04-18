@@ -49,7 +49,7 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 
 	public Reply shortReply() {
 		Reply rep = Reply.of() //
-				.literal("ID: ").code(String.format("%2d ", getId())) //
+				.literal("ID: ").code(String.format("%06d ", getId())) //
 				.literal(" Name: ").code(String.format("%s", getName())); //
 		if (isActive()) {
 			rep.bold(" (Active)");

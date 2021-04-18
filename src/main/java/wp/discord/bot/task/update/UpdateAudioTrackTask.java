@@ -33,8 +33,7 @@ public class UpdateAudioTrackTask {
 			throw new BotException(r, e);
 		}
 		
-		Reply r = Reply.of().literal("Reload Audio completed").newline() //
-				.literal("Loaded ").code(String.format(" %3d ", trackHolder.getAllAudioTracks().size())).literal(" files.");
+		Reply r = Reply.of().literal("Reload Audio completed").newline(); //
 		action.getEventMessageChannel().sendMessage(r.toString()).queue();
 	}
 
