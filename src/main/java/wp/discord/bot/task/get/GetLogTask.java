@@ -63,7 +63,7 @@ public class GetLogTask {
 	public void listLogFileNames(BotAction action, List<Path> logFiles) throws Exception {
 		Reply reply = Reply.of().literal("Found ").code(String.valueOf(logFiles.size())).literal(" log files").newline();
 		int i = 0;
-		for (i = 0; i < logFiles.size() || i < MAX_LOG_FILE_LIST_COUNT; i++) {
+		for (i = 0; i < logFiles.size() && i < MAX_LOG_FILE_LIST_COUNT; i++) {
 			Path found = logFiles.get(i);
 			String fileName = found.getFileName().toString();
 			reply.literal(String.format("%2d.) ", i)).code(fileName).newline();
