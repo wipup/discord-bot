@@ -54,11 +54,11 @@ public class RepositoryReloader implements InitializingBean {
 			pathStream.filter(Files::isRegularFile) //
 					.filter(Files::isReadable) //
 					.filter((p) -> p.getFileName().toString().endsWith(reloadable.getFileExtension())) //
-					.map((p) -> SafeUtil.get(() -> reloadable.doRead(p))) //
+					.map((p) -> SafeUtil.runtimeException(() -> reloadable.doRead(p))) //
 					.filter((e) -> e != null) //
 					.forEach((e) -> {
 						log.debug("calling doReload: {} with: {}", reloadable, e);
-						SafeUtil.suppress(() -> reloadable.doReload(e));
+						SafeUtil.runtimeException(() -> reloadable.doReload(e));
 					});
 		}
 	}

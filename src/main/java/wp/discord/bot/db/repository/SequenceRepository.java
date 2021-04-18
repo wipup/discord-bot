@@ -45,11 +45,6 @@ public class SequenceRepository extends AbstractFileBasedRepository<SequenceEnti
 	}
 
 	@Override
-	public Class<SequenceEntity> getEntityClass() {
-		return SequenceEntity.class;
-	}
-
-	@Override
 	public void doReload(SequenceEntity entity) throws Exception {
 		log.info("Reload Sequence: {}", entity);
 		SafeUtil.suppress(() -> {
@@ -72,4 +67,8 @@ public class SequenceRepository extends AbstractFileBasedRepository<SequenceEnti
 		private BigInteger value;
 	}
 
+	@Override
+	public Class<SequenceEntity> getEntityClass() {
+		return SequenceEntity.class;
+	}
 }

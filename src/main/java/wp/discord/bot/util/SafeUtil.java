@@ -12,9 +12,25 @@ public class SafeUtil {
 		public void call() throws Exception;
 	}
 
+	public static <T> T runtimeException(SafeSupplier<T> supplier) {
+		try {
+			return supplier.get();
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
+	public static void runtimeException(SafeSuppresser supplier) {
+		try {
+			supplier.call();
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage(), e);
+		}
+	}
+
 	public static void suppress(SafeSuppresser supplier) {
 		try {
-			supplier.call();	
+			supplier.call();
 		} catch (Exception e) {
 		}
 	}
