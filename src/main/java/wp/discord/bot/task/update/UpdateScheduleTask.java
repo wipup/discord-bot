@@ -82,10 +82,10 @@ public class UpdateScheduleTask {
 			}
 			schedule.setPreference(opt);
 			return true;
-		} 
+		}
 		return false;
 	}
-	
+
 	public void updateSchedule(BotAction action, ScheduledAction schedule) throws Exception {
 		boolean requireRescheduled = updateScheduleType(action, schedule);
 
@@ -94,8 +94,9 @@ public class UpdateScheduleTask {
 			schedule.setName(name);
 		}
 
-		BigInteger desiredRunCount = addTask.parseDesiredRunCount(action);
-		if (desiredRunCount != null) {
+		String desiredRunCountStr = action.getFirstEntitiesParam(CmdEntity.COUNT);
+		if (StringUtils.isNotBlank(desiredRunCountStr)) {
+			BigInteger desiredRunCount = addTask.parseDesiredRunCount(action);
 			schedule.setDesiredRunCount(desiredRunCount);
 		}
 
