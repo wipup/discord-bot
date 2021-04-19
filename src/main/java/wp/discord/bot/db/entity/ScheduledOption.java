@@ -64,10 +64,10 @@ public class ScheduledOption implements Describeable {
 
 	private Reply getStartTimeDisplay() {
 		try {
-			return Reply.of().literal("Start: ").code(ToStringUtils.formatDate(getStartTime(), START_DATE_FORMAT_DISPLAY));
+			return Reply.of().literal(" Start: ").code(ToStringUtils.formatDate(getStartTime(), START_DATE_FORMAT_DISPLAY));
 		} catch (Exception e) {
 			log.error("error printing getStartTimeDisplay: {}", this, e);
-			return Reply.of().literal("Start: ").code("Unable to read date");
+			return Reply.of().literal(" Start: ").code("Unable to read date");
 		}
 	}
 
@@ -78,7 +78,7 @@ public class ScheduledOption implements Describeable {
 					.literal("Repeat every: ").code(ToStringUtils.prettyPrintDurationValue(d));
 		} catch (Exception e) {
 			log.error("error printing duration: {}", this, e);
-			return Reply.of().literal("Start: ").code("Unable to read date");
+			return Reply.of().literal(" Start: ").code("Unable to read date");
 		}
 	}
 
@@ -90,14 +90,12 @@ public class ScheduledOption implements Describeable {
 
 	private Reply replyFixedDuration() {
 		return Reply.of() //
-				.literal(getType().getDisplayName()).newline() //
-				.append(prettyPrintDurationValue());
+				.literal(getType().getDisplayName()).append(prettyPrintDurationValue());
 	}
 
 	private Reply replyFixedTime() {
 		return Reply.of() //
-				.literal(getType().getDisplayName()).newline() //
-				.append(getStartTimeDisplay());
+				.literal(getType().getDisplayName()).append(getStartTimeDisplay());
 	}
 
 	@Override
