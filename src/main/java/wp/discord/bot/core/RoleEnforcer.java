@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import wp.discord.bot.core.bot.UserManager;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.model.DiscordUserRole;
 import wp.discord.bot.util.Reply;
@@ -31,7 +31,7 @@ public class RoleEnforcer {
 					.literal("Only users with role [") //
 					.bold(StringUtils.join(enforceRoles.stream().map(DiscordUserRole::name).collect(Collectors.toList()), ", ")) //
 					.literal("] can access this feature.");
-			throw new BotException(r);
+			throw new ActionFailException(r);
 		}
 	}
 

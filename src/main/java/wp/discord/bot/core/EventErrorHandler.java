@@ -55,9 +55,9 @@ public class EventErrorHandler {
 			}
 		}
 
-		userManager.getOwnerUser().getUser().openPrivateChannel().queue((pc) -> {
-			pc.sendMessage(rep.toString()).queue();
-		});
+		userManager.getOwnerUser().getUser().openPrivateChannel().queue(tracingHandler.addTracingContext((pc) -> {
+			pc.sendMessage(rep.toString()).queue(tracingHandler.onSendMessageSuccess(), tracingHandler.onSendMessageFail());
+		}));
 	}
 
 	public Reply createReply(Throwable e) {

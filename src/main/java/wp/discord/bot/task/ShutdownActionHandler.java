@@ -13,7 +13,7 @@ import wp.discord.bot.model.BotAction;
 import wp.discord.bot.model.DiscordUserRole;
 
 @Component
-public class ShutdownTask implements ActionHandler {
+public class ShutdownActionHandler implements ActionHandler {
 
 	@Autowired
 	private ShutdownHandler shutdownHandler;

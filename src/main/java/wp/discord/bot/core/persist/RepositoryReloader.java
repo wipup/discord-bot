@@ -68,7 +68,7 @@ public class RepositoryReloader implements InitializingBean {
 				.filter((a) -> a.isActive()) //
 				.forEach((a) -> {
 					log.debug("reschedule: {}", a);
-					ScheduledFuture<?> future = scheduledActionManager.scheduleCronTask(a);
+					ScheduledFuture<?> future = SafeUtil.runtimeException(() -> scheduledActionManager.scheduleCronTask(a));
 					a.setScheduledTask(future);
 				});
 	}

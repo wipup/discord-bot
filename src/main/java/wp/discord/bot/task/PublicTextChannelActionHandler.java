@@ -8,17 +8,21 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.TextChannel;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.core.action.ActionHandler;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.DiscordFormat;
 import wp.discord.bot.util.Reply;
 
 @Component
-public class PublicTextChannelTask implements ActionHandler {
+public class PublicTextChannelActionHandler implements ActionHandler {
 
 	@Autowired
 	private JDA jda;
+
+	@Autowired
+	private TracingHandler tracing;
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
@@ -29,19 +33,19 @@ public class PublicTextChannelTask implements ActionHandler {
 		if (channel == null) {
 			Reply reply = Reply.of().literal("Invalid text-channel ").code(channelMention).newline()//
 					.mentionUser(action.getAuthorId()).literal(" please try again");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
 		String message = action.getFirstEntitiesParam(CmdEntity.MESSAGE);
 		if (StringUtils.isEmpty(message)) {
 			Reply reply = Reply.of().literal("Empty text-message ").code(channelMention).newline()//
 					.mentionUser(action.getAuthorId()).literal(" please try again");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
-		channel.sendMessage(message).queue((m)->{
+		channel.sendMessage(message).queue(tracing.trace((m) -> {
 			m.suppressEmbeds(true).queue();
-		});
+		}));
 	}
 
 	@Override

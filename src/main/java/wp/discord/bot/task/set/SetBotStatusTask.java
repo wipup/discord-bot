@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Activity.ActivityType;
 import wp.discord.bot.constant.CmdEntity;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
@@ -28,30 +28,27 @@ public class SetBotStatusTask {
 		}
 
 		ActivityType activityType = getActivityType(activityStr);
-		if (activityType == null) {
-			Reply reply = Reply.of().bold("Error!").literal(" Unknown activity: " + activityStr);
-			throw new BotException(reply.newline().append(getActivityHelp()));
-		}
 
 		String value = action.getEntitiesParam(CmdEntity.VALUE, 1);
 		if (StringUtils.isBlank(value)) {
 			Reply reply = Reply.of().bold("Error!").literal(" Activity value must not be empty");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
 		Activity activity = Activity.of(activityType, value);
 		if (activity == null) {
 			Reply reply = Reply.of().bold("Error!").literal(" Can't set activity now");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 		jda.getPresence().setActivity(activity);
 	}
 
+	
 	public void setOnlineStatus(BotAction action) throws Exception {
 		String stat = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.VALUE));
 		if (StringUtils.isEmpty(stat)) {
 			Reply reply = Reply.of().bold("Error!").literal(" Bot status must not be empty!");
-			throw new BotException(reply.newline().append(getOnlineStatusHelp()));
+			throw new ActionFailException(reply.newline().append(getOnlineStatusHelp()));
 		}
 
 		OnlineStatus status = OnlineStatus.fromKey(stat.toLowerCase());
@@ -60,17 +57,23 @@ public class SetBotStatusTask {
 		}
 		if (status == null) {
 			Reply reply = Reply.of().bold("Error!").literal(" Unknown Status: " + stat);
-			throw new BotException(reply.newline().append(getOnlineStatusHelp()));
+			throw new ActionFailException(reply.newline().append(getOnlineStatusHelp()));
 		}
 
 		jda.getPresence().setStatus(status);
 	}
 
-	private ActivityType getActivityType(String value) {
+	private ActivityType getActivityType(String value) throws Exception {
 		if ("playing".equalsIgnoreCase(value) || "plays".equalsIgnoreCase(value) || "play".equalsIgnoreCase(value)) {
 			return ActivityType.DEFAULT;
 		}
-		return SafeUtil.get(() -> ActivityType.valueOf(value.toUpperCase()));
+		ActivityType type = SafeUtil.get(() -> ActivityType.valueOf(value.toUpperCase()));
+		if (type == null) {
+			Reply reply = Reply.of().bold("Error!").literal(" Unknown activity: " + value);
+			throw new ActionFailException(reply.newline().append(getActivityHelp()));
+		}
+		
+		return type;
 	}
 
 	public Reply getActivityHelp() {

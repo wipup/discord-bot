@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.action.ActionHandler;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.model.DiscordUserRole;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 
 @Component
-public class SetTask implements ActionHandler {
+public class SetActionHandler implements ActionHandler {
 
 	@Autowired
 	private SetBotStatusTask setBotTask;
@@ -30,7 +30,7 @@ public class SetTask implements ActionHandler {
 		if (target == null) {
 			Reply reply = Reply.of().literal("Unknown entity: ").code(" " + targetEntity + " ").newline() //
 					.literal("");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
 		if (target == CmdEntity.STATUS) {
@@ -43,7 +43,7 @@ public class SetTask implements ActionHandler {
 		}
 
 		Reply reply = Reply.of().literal("Unsupported entity: ").code(targetEntity);
-		throw new BotException(reply);
+		throw new ActionFailException(reply);
 	}
 
 	@Override

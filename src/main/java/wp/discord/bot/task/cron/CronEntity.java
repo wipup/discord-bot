@@ -3,6 +3,7 @@ package wp.discord.bot.task.cron;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,13 +60,12 @@ public class CronEntity implements Referenceable, Describeable {
 			}
 		}
 
-		return result;
+		return result.stream().distinct().sorted().collect(Collectors.toList());
 	}
 
-	@Override
-	public Reply reply() {
-		List<Date> sampleDates = samplingDate(3);
-		Reply reply = Reply.of().literal("Cron Expression: ");
+	public Reply reply(int samplingCount) {
+		List<Date> sampleDates = samplingDate(samplingCount);
+		Reply reply = Reply.of().literal("Cron  ");
 
 		StringBuilder selectedExpr = new StringBuilder();
 		int index = 0;
@@ -90,6 +90,11 @@ public class CronEntity implements Referenceable, Describeable {
 		}
 
 		return reply.newline();
+	}
+	
+	@Override
+	public Reply reply() {
+		return reply(3);
 	}
 
 	public static CronEntity construct(Reference ref) {

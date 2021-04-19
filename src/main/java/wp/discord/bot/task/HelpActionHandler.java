@@ -16,7 +16,7 @@ import wp.discord.bot.util.SafeUtil;
 
 @Component
 @Slf4j
-public class HelpTask implements ActionHandler {
+public class HelpActionHandler implements ActionHandler {
 
 	@Autowired
 	private HelpTaskHelper helper;

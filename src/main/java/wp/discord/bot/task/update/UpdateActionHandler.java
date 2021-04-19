@@ -1,52 +1,58 @@
-package wp.discord.bot.task.delete;
+package wp.discord.bot.task.update;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.action.ActionHandler;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 
 @Component
-public class DeleteTask implements ActionHandler {
+@Slf4j
+public class UpdateActionHandler implements ActionHandler {
 
 	@Autowired
-	private DeleteScheduleTask deleteScheduleTask;
+	private UpdateScheduleTask updateAlertTask;
 
 	@Autowired
-	private DeleteMessageTask deleteMessageTask;
-	
+	private UpdateAudioTrackTask updateAudioTask;
+
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		String targetEntity = SafeUtil.get(() -> action.getActionParams().get(0));
 		CmdEntity entity = CmdEntity.getMatchingEntity(targetEntity);
 		if (entity == null) {
 			Reply rep = Reply.of().literal("Unknown entity: ").code(targetEntity);
-			throw new BotException(rep);
+			throw new ActionFailException(rep);
 		}
 
+		log.debug("updating : {}", entity);
 		if (entity == CmdEntity.SCHEDULE) {
-			deleteScheduleTask.deleteSchedule(action);
+			updateAlertTask.handleUpdateSchedule(action);
 			return;
 		}
-		
-		
-		if (entity == CmdEntity.MESSAGE) {
-			deleteMessageTask.deleteBotMessage(action);
+
+		if (entity == CmdEntity.AUDIO) {
+			updateAudioTask.reloadAllAudioTracks(action);
 			return;
 		}
-		
-		Reply rep = Reply.of().literal("Unsupported entity: ").code(targetEntity);
-		throw new BotException(rep);
+
+		if (entity == CmdEntity.AUTO_REPLY) {
+			// TODO
+		}
+
+		Reply rep = Reply.of().literal("Unsupported updating entity: ").code(targetEntity);
+		throw new ActionFailException(rep);
 	}
 
 	@Override
 	public CmdAction getAcceptedAction() {
-		return CmdAction.DELETE;
+		return CmdAction.UPDATE;
 	}
 
 }

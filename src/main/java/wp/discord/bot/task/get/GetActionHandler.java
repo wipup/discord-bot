@@ -1,4 +1,4 @@
-package wp.discord.bot.task.update;
+package wp.discord.bot.task.get;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -7,20 +7,23 @@ import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.action.ActionHandler;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 
 @Component
 @Slf4j
-public class UpdateTask implements ActionHandler {
+public class GetActionHandler implements ActionHandler {
 
 	@Autowired
-	private UpdateScheduleTask updateAlertTask;
+	private GetAudioTask getAudioTask;
 
 	@Autowired
-	private UpdateAudioTrackTask updateAudioTask;
+	private GetScheduleTask getScheduleTask;
+
+	@Autowired
+	private GetLogTask getLogTask;
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
@@ -28,31 +31,29 @@ public class UpdateTask implements ActionHandler {
 		CmdEntity entity = CmdEntity.getMatchingEntity(targetEntity);
 		if (entity == null) {
 			Reply rep = Reply.of().literal("Unknown entity: ").code(targetEntity);
-			throw new BotException(rep);
+			throw new ActionFailException(rep);
 		}
 
-		log.debug("updating : {}", entity);
-		if (entity == CmdEntity.SCHEDULE) {
-			updateAlertTask.handleUpdateSchedule(action);
-			return;
-		}
-
+		log.debug("get : {}", entity);
 		if (entity == CmdEntity.AUDIO) {
-			updateAudioTask.reloadAllAudioTracks(action);
-			return;
+			getAudioTask.getAllAudio(action);
+
+		} else if (entity == CmdEntity.SCHEDULE) {
+			getScheduleTask.handleGetSchedule(action);
+
+		} else if (entity == CmdEntity.LOG) {
+			getLogTask.getLogs(action);
+
+		} else {
+			Reply rep = Reply.of().literal("Unsupported entity: ").code(targetEntity);
+			throw new ActionFailException(rep);
 		}
 
-		if (entity == CmdEntity.AUTO_REPLY) {
-			// TODO
-		}
-
-		Reply rep = Reply.of().literal("Unsupported updating entity: ").code(targetEntity);
-		throw new BotException(rep);
 	}
 
 	@Override
 	public CmdAction getAcceptedAction() {
-		return CmdAction.UPDATE;
+		return CmdAction.GET;
 	}
 
 }

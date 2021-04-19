@@ -1,5 +1,7 @@
 package wp.discord.bot.task.cron;
 
+import java.math.BigInteger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -8,16 +10,21 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import wp.discord.bot.constant.CmdAction;
+import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.constant.Reaction;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.core.cmd.EntityReferenceHandler;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
+import wp.discord.bot.util.SafeUtil;
 
 @Component
 @Slf4j
-public class CompileCronTask implements ActionHandler {
+public class CompileCronActionHandler implements ActionHandler {
+
+	public static final BigInteger MAX_SAMPLING_COUNT = new BigInteger("20");
+	public static final int DEFAULT_SAMPLING_COUNT = 3;
 
 	@Autowired
 	private EntityReferenceHandler refHandler;
@@ -25,7 +32,7 @@ public class CompileCronTask implements ActionHandler {
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		String cronExpr = StringUtils.join(action.getActionParams(), " ");
-		CronEntity cron = parse(action.getAuthorId(), cronExpr);
+		CronEntity cron = parse(cronExpr);
 
 		log.debug("cron expression: {}", cronExpr);
 		MessageChannel channel = action.getEventMessageChannel();
@@ -33,16 +40,36 @@ public class CompileCronTask implements ActionHandler {
 			return;
 		}
 
-		replyCompiledCron(channel, cron);
+		int samplingCount = DEFAULT_SAMPLING_COUNT;
+		String count = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.COUNT));
+		if (StringUtils.isNotBlank(count)) {
+			BigInteger bi = SafeUtil.get(() -> new BigInteger(count));
+			if (bi == null) {
+				Reply r = Reply.of().literal("Invalid sampling count number: ").code(count);
+				throw new ActionFailException(r);
+			}
+			if (bi.compareTo(BigInteger.ZERO) <= 0 || bi.compareTo(MAX_SAMPLING_COUNT) > 0) {
+				Reply r = Reply.of().literal("Invalid sampling count number: ").code(count).newline() //
+						.literal("sampling count must be between ").code(" 1 - 20 ");
+				throw new ActionFailException(r);
+			}
+			samplingCount = bi.intValue();
+		}
+
+		replyCompiledCron(channel, cron, samplingCount);
 	}
 
 	public Reply createReplyCron(CronEntity cron) {
-		return Reply.of().bold("Parse Success ").append(refHandler.generateEncodedReferenceCode(cron)).newline() //
-				.append(cron.reply());
+		return createReplyCron(cron, DEFAULT_SAMPLING_COUNT);
 	}
 
-	public void replyCompiledCron(MessageChannel channel, CronEntity cron) {
-		Reply reply = createReplyCron(cron);
+	public Reply createReplyCron(CronEntity cron, int samplingCount) {
+		return Reply.of().bold("Parse Success ").append(refHandler.generateEncodedReferenceCode(cron)).newline() //
+				.append(cron.reply(samplingCount));
+	}
+
+	public void replyCompiledCron(MessageChannel channel, CronEntity cron, int samplingCount) {
+		Reply reply = createReplyCron(cron, samplingCount);
 		channel.sendMessage(reply.build()).queue((m) -> {
 			generateCronEditorReply(m, cron);
 		});
@@ -56,13 +83,12 @@ public class CompileCronTask implements ActionHandler {
 		m.addReaction(Reaction.NO_CHECKED.getCode()).queue();
 	}
 
-	public CronEntity parse(String authorId, String expr) throws Exception {
+	public CronEntity parse(String expr) throws Exception {
 		try {
 			return new CronEntity(expr);
 		} catch (Exception e) {
-			Reply reply = Reply.of().literal("Invalid CronExpression:  ").code(e.getMessage()).newline()//
-					.mentionUser(authorId).literal(" please try again");
-			throw new BotException(reply);
+			Reply reply = Reply.of().literal("Invalid CronExpression:  ").code(e.getMessage()).newline();
+			throw new ActionFailException(reply);
 		}
 	}
 

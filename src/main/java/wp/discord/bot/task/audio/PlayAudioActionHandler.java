@@ -10,18 +10,18 @@ import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.AudioTrackHolder;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.core.bot.BotSession;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
 
 @Component
-public class PlayAudioTask implements ActionHandler {
+public class PlayAudioActionHandler implements ActionHandler {
 
 	@Autowired
 	private AudioTrackHolder audioHolder;
 
 	@Autowired
-	private JoinVoiceChannelTask joinChannelTask;
+	private JoinVoiceChannelActionHandler joinChannelTask;
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
@@ -30,7 +30,7 @@ public class PlayAudioTask implements ActionHandler {
 		if (track == null) {
 			Reply reply = Reply.of().literal("Invalid audio-id ").code(trackName).newline() //
 					.mentionUser(action.getAuthorId()).literal(" please re-check");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
 		BotSession session = action.getSession();
@@ -45,7 +45,7 @@ public class PlayAudioTask implements ActionHandler {
 		} else { // unknown session
 			Reply reply = Reply.of().literal("Unknown voice-channel ").newline() //
 					.mentionUser(action.getAuthorId()).literal(" please re-check");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
 	}

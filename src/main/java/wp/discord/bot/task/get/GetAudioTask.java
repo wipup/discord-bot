@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import wp.discord.bot.core.AudioTrackHolder;
+import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
 
@@ -17,6 +18,9 @@ public class GetAudioTask {
 	@Autowired
 	private AudioTrackHolder audioHolder;
 
+	@Autowired
+	private TracingHandler tracing;
+	
 	public void getAllAudio(BotAction action) throws Exception {
 		List<AudioTrack> allTracks = audioHolder.getAllAudioTracks();
 
@@ -28,7 +32,7 @@ public class GetAudioTask {
 		}
 		reply.literal("To play audio, type: ").code("bot play audio [name]");
 
-		action.getEventMessageChannel().sendMessage(reply.build()).queue();
+		tracing.queue(action.getEventMessageChannel().sendMessage(reply.build()));
 	}
 
 }

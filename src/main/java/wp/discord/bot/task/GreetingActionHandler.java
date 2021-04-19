@@ -9,7 +9,7 @@ import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
 
 @Component
-public class GreetingTask implements ActionHandler {
+public class GreetingActionHandler implements ActionHandler {
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {

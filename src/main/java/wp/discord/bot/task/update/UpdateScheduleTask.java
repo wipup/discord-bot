@@ -1,16 +1,16 @@
 package wp.discord.bot.task.update;
 
 import java.math.BigInteger;
-import java.util.List;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.db.repository.ScheduleRepository;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.add.AddScheduleTask;
 import wp.discord.bot.util.Reply;
@@ -25,14 +25,16 @@ public class UpdateScheduleTask {
 	@Autowired
 	private ScheduleRepository repository;
 
+	@Autowired
+	private TracingHandler tracing;
+
 	public void handleUpdateSchedule(BotAction action) throws Exception {
 		String author = action.getAuthorId();
 		String scheduleId = action.getFirstEntitiesParam(CmdEntity.ID);
 
 		if (StringUtils.isEmpty(scheduleId)) {
 			Reply r = Reply.of().mentionUser(author).literal(" Schedule ID is required!");
-			action.getEventMessageChannel().sendMessage(r.build()).queue();
-			return;
+			throw new ActionFailException(r);
 		}
 
 		updateSchedule(action, scheduleId);
@@ -43,15 +45,13 @@ public class UpdateScheduleTask {
 		BigInteger id = SafeUtil.get(() -> new BigInteger(scheduleId));
 		if (id == null) {
 			Reply r = Reply.of().mentionUser(author).bold(" Error!").literal(" Schedule ID must be a number!");
-			action.getEventMessageChannel().sendMessage(r.build()).queue();
-			return;
+			throw new ActionFailException(r);
 		}
 
 		ScheduledAction found = repository.find(author, id);
 		if (found == null) {
 			Reply r = Reply.of().mentionUser(author).literal(", not found ID: ").bold(scheduleId);
-			action.getEventMessageChannel().sendMessage(r.build()).queue();
-			return;
+			throw new ActionFailException(r);
 		}
 
 		synchronized (found) {
@@ -59,30 +59,35 @@ public class UpdateScheduleTask {
 			repository.save(found);
 
 			Reply rep = Reply.of().bold("Update Schedule Task Completed").newline().append(found.reply());
-			action.getEventMessageChannel().sendMessage(rep.build()).queue();
+			tracing.queue(action.getEventMessageChannel().sendMessage(rep.build()));
 		}
 	}
 
-	public void updateSchedule(BotAction action, ScheduledAction schedule) throws Exception {
-		boolean requireRescheduled = false;
+	private boolean updateScheduleType(BotAction action, ScheduledAction schedule) throws Exception {
+		String cron = StringUtils.join(action.getEntities(CmdEntity.CRON), " ").trim();
+		String time = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.TIME)).trim();
+		String every = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.EVERY)).trim();
 
-		List<String> cronExpr = action.getEntities(CmdEntity.CRON);
-		if (CollectionUtils.isNotEmpty(cronExpr)) {
-			String cron = StringUtils.join(cronExpr, " ");
-			schedule.setCron(cron);
-			requireRescheduled = true;
+		if (StringUtils.firstNonBlank(cron, time, every) != null) {
+			schedule.setPreference(addTask.getScheduleType(action));
+			return true;
 		}
+		return false;
+	}
+	
+	public void updateSchedule(BotAction action, ScheduledAction schedule) throws Exception {
+		boolean requireRescheduled = updateScheduleType(action, schedule);
 
 		String name = action.getFirstEntitiesParam(CmdEntity.NAME);
 		if (StringUtils.isNotBlank(name)) {
 			schedule.setName(name);
 		}
-		
+
 		BigInteger desiredRunCount = addTask.parseDesiredRunCount(action);
 		if (desiredRunCount != null) {
 			schedule.setDesiredRunCount(desiredRunCount);
 		}
-		
+
 		addTask.validateScheduledAction(schedule);
 
 		String status = action.getFirstEntitiesParam(CmdEntity.ACTIVE);
@@ -108,26 +113,4 @@ public class UpdateScheduleTask {
 		}
 	}
 
-	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

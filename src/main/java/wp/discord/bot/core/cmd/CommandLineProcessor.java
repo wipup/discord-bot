@@ -1,7 +1,6 @@
 package wp.discord.bot.core.cmd;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -34,9 +33,10 @@ public class CommandLineProcessor implements InitializingBean {
 	@Autowired
 	private BotSessionManager sessionManager;
 
-	private Collection<CommandLineEntityReader> entityReaders;
-
-	private Collection<CommandLineActionParameterReader> paramReaders;
+	// TODO
+//	private Collection<CommandLineEntityReader> entityReaders;
+//
+//	private Collection<CommandLineActionParameterReader> paramReaders;
 
 	private List<Pattern> botInitCommands;
 

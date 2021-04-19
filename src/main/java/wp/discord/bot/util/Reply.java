@@ -95,6 +95,10 @@ public class Reply {
 		return this;
 	}
 
+	public Reply code(Number s) {
+		return code(String.valueOf(s));
+	}
+
 	public Reply code(String s) {
 		stringBuilder.append(DiscordFormat.code(s));
 		return this;

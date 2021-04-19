@@ -34,4 +34,5 @@ public class ObjectMapperConfig {
 		mapper.enable(SerializationFeature.INDENT_OUTPUT);
 		return mapper;
 	}
+
 }

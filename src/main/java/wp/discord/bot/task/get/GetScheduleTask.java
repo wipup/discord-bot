@@ -9,16 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.core.bot.UserManager;
 import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.db.repository.ScheduleRepository;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.model.DiscordUserRole;
+import wp.discord.bot.util.DiscordFormat;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 
 @Component
 public class GetScheduleTask {
+
+	@Autowired
+	private TracingHandler tracing;
 
 	@Autowired
 	private UserManager userManager;
@@ -28,6 +34,19 @@ public class GetScheduleTask {
 
 	public void handleGetSchedule(BotAction action) throws Exception {
 		String scheduleId = action.getFirstEntitiesParam(CmdEntity.ID);
+		boolean adminMode = validateAdminMode(action);
+
+		Reply reply = null;
+		if (StringUtils.isNotEmpty(scheduleId)) {
+			reply = getSchedule(action, scheduleId, adminMode);
+		} else {
+			reply = getAllSchedules(action, adminMode);
+		}
+
+		tracing.queue(action.getEventMessageChannel().sendMessage(reply.build()));
+	}
+
+	private boolean validateAdminMode(BotAction action) throws Exception {
 		boolean adminMode = false;
 		boolean requiredAdmin = "true".equalsIgnoreCase(action.getFirstEntitiesParam(CmdEntity.ADMIN));
 		if (requiredAdmin) {
@@ -37,29 +56,24 @@ public class GetScheduleTask {
 
 		if (!adminMode && requiredAdmin) {
 			Reply r = Reply.of().mentionUser(action.getAuthorId()).literal(", Only admin is allowed.");
-			action.getEventMessageChannel().sendMessage(r.build()).queue();
-			return;
+			throw new ActionFailException(r);
 		}
-
-		if (StringUtils.isNotEmpty(scheduleId)) {
-			getSchedule(action, scheduleId, adminMode);
-			return;
-		}
-
-		getAllSchedules(action, adminMode);
-		return;
+		return adminMode;
 	}
 
-	public void getAllSchedules(BotAction action, boolean adminMode) throws Exception {
+	private Reply getAllSchedules(BotAction action, boolean adminMode) throws Exception {
 		String author = action.getAuthorId();
 		List<ScheduledAction> allSchedules = adminMode ? repository.findAll() : repository.findAll(author);
 
 		if (CollectionUtils.isEmpty(allSchedules)) {
 			Reply r = Reply.of().mentionUser(author).literal(", you don't have any scheduled action.");
-			action.getEventMessageChannel().sendMessage(r.build()).queue();
-			return;
+			throw new ActionFailException(r);
 		}
 
+		return createReplyForAllSchedules(allSchedules, adminMode);
+	}
+
+	private Reply createReplyForAllSchedules(List<ScheduledAction> allSchedules, boolean adminMode) {
 		Reply reply = Reply.of().bold("All Schedule IDs").newline();
 		int count = 0;
 		for (ScheduledAction scha : allSchedules) {
@@ -68,38 +82,38 @@ public class GetScheduleTask {
 					.append(scha.shortReply(adminMode)).newline();
 		}
 		reply.literal("To see details, type: ").code("bot get schedule id [id]");
-		action.getEventMessageChannel().sendMessage(reply.build()).queue();
+		return reply;
 	}
 
-	public void getSchedule(BotAction action, String scheduleId, boolean admin) throws Exception {
+	private Reply getSchedule(BotAction action, String scheduleId, boolean admin) throws Exception {
 		String authorId = action.getAuthorId();
 		BigInteger id = SafeUtil.get(() -> new BigInteger(scheduleId));
 		if (id == null) {
 			Reply r = Reply.of().mentionUser(authorId).bold(" Error!").literal(" Schedule ID must be a number!");
-			action.getEventMessageChannel().sendMessage(r.build()).queue();
-			return;
+			throw new ActionFailException(r);
 		}
 
 		ScheduledAction found = null;
 		if (admin) {
-			found = getScheduleAdmin(id, scheduleId);
+			found = getScheduleAdmin(action, id, scheduleId);
 		} else {
 			found = getScheduleUser(authorId, id, scheduleId);
 		}
 		if (found == null) {
 			Reply r = Reply.of().mentionUser(authorId).literal(", not found ID: ").bold(scheduleId);
-			action.getEventMessageChannel().sendMessage(r.build()).queue();
-			return;
+			throw new ActionFailException(r);
 		}
 
-		synchronized (found) {
-			action.getEventMessageChannel().sendMessage(found.reply().toString()).queue();
-		}
+		return found.reply();
 	}
 
-	public ScheduledAction getScheduleAdmin(BigInteger id, String scheduleId) throws Exception {
-		return repository.findFromAdmin(id);
-
+	public ScheduledAction getScheduleAdmin(BotAction action, BigInteger id, String scheduleId) throws Exception {
+		String userId = DiscordFormat.extractId(action.getFirstEntitiesParam(CmdEntity.USER));
+		if (StringUtils.isNotBlank(userId)) {
+			return repository.find(userId, id);
+		} else {
+			return repository.findFromAdmin(id);
+		}
 	}
 
 	public ScheduledAction getScheduleUser(String author, BigInteger id, String scheduleId) throws Exception {

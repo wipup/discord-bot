@@ -1,7 +1,10 @@
 package wp.discord.bot.core.bot;
 
+import java.util.concurrent.ExecutorService;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import brave.Span;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +12,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import wp.discord.bot.config.AsyncConfig;
 import wp.discord.bot.core.EventErrorHandler;
 import wp.discord.bot.core.TracingHandler;
 
@@ -27,8 +31,16 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 	@Autowired
 	private JDA jda;
 
-	@SuppressWarnings("unchecked")
+	@Autowired
+	@Qualifier(AsyncConfig.BEAN_UNLIMIT_EXECUTOR)
+	private ExecutorService executor;
+
 	public void onEvent(GenericEvent event) {
+		executor.submit(() -> startHandler(event));
+	}
+
+	@SuppressWarnings("unchecked")
+	private void startHandler(GenericEvent event) {
 		Span sp = tracing.startNewTrace();
 		try {
 			if (accept(event)) {

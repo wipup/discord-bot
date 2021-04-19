@@ -31,11 +31,14 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 	private BigInteger id;
 	private String authorId;
 	private String name;
+	@Deprecated
 	private String cron;
 	private List<String> commands;
 	private boolean active;
 	private BigInteger desiredRunCount;
 	private BigInteger actualRunCount;
+
+	private ScheduledOption preference; // new
 
 	@ToString.Exclude
 	@JsonIgnore
@@ -46,7 +49,7 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 		Reply rep = Reply.of() //
 				.literal("ID:  ").code(String.format("%06d", getId())).literal("\t Owner: ").mentionUser(getAuthorId()).newline() //
 				.literal("Name:  ").code(getName()).newline() //
-				.literal("Cron:  ").code(getCron()).newline() //
+				.append(preference.reply()).newline() //
 				.startCodeBlock("bash");
 		for (String cmd : getCommands()) {
 			rep.literal(cmd).newline();
@@ -58,6 +61,27 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 		;
 
 		return rep;
+	}
+
+	@Deprecated
+	public String getCron() {
+		return cron;
+	}
+	
+	@Deprecated
+	public void setCron(String cron) {
+		if (cron != null) {
+			setPreference(ScheduledOption.cron(cron));
+		}
+		this.cron = cron;
+	}
+
+	public void setPreference(ScheduledOption option) {
+		// new
+		if (option == null) {
+			option = ScheduledOption.cron(getCron());
+		}
+		this.preference = option;
 	}
 
 	public Reply shortReply(boolean adminMode) {

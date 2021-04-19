@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.core.RoleEnforcer;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
@@ -52,7 +52,7 @@ public class ActionHandleManager implements InitializingBean {
 		List<ActionHandler> handlers = actionHandlerMap.get(cmd);
 		if (handlers == null) {
 			log.error("Unsupported Action={}, {}", cmd, action);
-			throw new BotException(Reply.of().literal("Unsupported action: ").code(cmd.getCmd()).newline() //
+			throw new ActionFailException(Reply.of().literal("Unsupported action: ").code(cmd.getCmd()).newline() //
 					.mentionUser(action.getAuthorId()).literal(" To see how to use, type: ").code(" bot help "));
 		}
 

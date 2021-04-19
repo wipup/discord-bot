@@ -7,14 +7,14 @@ import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.action.ActionHandler;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 
 @Component
 @Slf4j
-public class AddTask implements ActionHandler {
+public class AddActionHandler implements ActionHandler {
 
 	@Autowired
 	private AddScheduleTask addAlert;
@@ -25,7 +25,7 @@ public class AddTask implements ActionHandler {
 		CmdEntity entity = CmdEntity.getMatchingEntity(targetEntity);
 		if (entity == null) {
 			Reply rep = Reply.of().literal("Unknown entity: ").code(targetEntity);
-			throw new BotException(rep);
+			throw new ActionFailException(rep);
 		}
 
 		log.debug("adding new : {}", entity);
@@ -39,7 +39,7 @@ public class AddTask implements ActionHandler {
 		}
 
 		Reply rep = Reply.of().literal("Unsupported adding entity: ").code(targetEntity);
-		throw new BotException(rep);
+		throw new ActionFailException(rep);
 	}
 
 	@Override

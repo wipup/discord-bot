@@ -15,7 +15,7 @@ public enum CmdEntity {
 	SCHEDULE("schedule", 1), //
 	AUTO_REPLY("reply", 1), //
 	CRON("cron", 6), // cron
-	
+
 	// feature
 	VALUE("value", 100), //
 	ACTIVE("active", 1), //
@@ -24,13 +24,13 @@ public enum CmdEntity {
 	REACTION("reaction", 1), //
 	ID("id", 1), //
 	COUNT("count", 1), //
+	TIME("time", 1), //
+	EVERY("every", 1), //
 	ADMIN("admin", 1), //
 	ALL("all", 2), // //e.g. bot play audio <time-to-xxx> user all 3
 
 	// system
-	// TODO
-	LOG("log", 1), // get log name <path> -> found many files = show log files, or found 1 files => zip -> download  
-	STATUS("status", 1), //
+	LOG("log", 1), STATUS("status", 1), //
 	ACTIVITY("activity", 2), //
 	;
 

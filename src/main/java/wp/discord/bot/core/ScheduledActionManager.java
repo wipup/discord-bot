@@ -1,6 +1,7 @@
 package wp.discord.bot.core;
 
 import java.math.BigInteger;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -19,6 +20,8 @@ import wp.discord.bot.config.AsyncConfig;
 import wp.discord.bot.core.action.ActionHandleManager;
 import wp.discord.bot.core.cmd.CommandLineProcessor;
 import wp.discord.bot.db.entity.ScheduledAction;
+import wp.discord.bot.db.entity.ScheduledOption;
+import wp.discord.bot.db.entity.ScheduledType;
 import wp.discord.bot.db.repository.ScheduleRepository;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.BotAction;
@@ -56,11 +59,27 @@ public class ScheduledActionManager implements DisposableBean {
 	@Autowired
 	private ScheduleRepository scheduleRepository;
 
-	public ScheduledFuture<?> scheduleCronTask(ScheduledAction scheduleAction) {
-		CronTrigger cron = new CronTrigger(scheduleAction.getCron());
+	public ScheduledFuture<?> scheduleCronTask(ScheduledAction scheduleAction) throws Exception {
+		
+		ScheduledFuture<?> future = null;
+		ScheduledOption opt = scheduleAction.getPreference();
+		
+		if (opt.getType() == ScheduledType.CRON) {
+			CronTrigger cron = new CronTrigger(opt.getValue());
+			Runnable runnable = taskDecorator.decorate(newRunnableScheduledAction(scheduleAction));
+			future = cronScheduler.schedule(runnable, cron);
 
-		Runnable runnable = taskDecorator.decorate(newRunnableScheduledAction(scheduleAction));
-		ScheduledFuture<?> future = cronScheduler.schedule(runnable, cron);
+		} else if (opt.getType() == ScheduledType.FIXED_RATE) {
+			Duration duration = Duration.parse(opt.getValue());
+			Runnable runnable = taskDecorator.decorate(newRunnableScheduledAction(scheduleAction));
+			future = cronScheduler.scheduleAtFixedRate(runnable, duration);
+			cronScheduler.scheduleAtFixedRate(runnable, opt.getStartTime().toInstant(), duration);
+
+		} else if (opt.getType() == ScheduledType.TIME) {
+			Runnable runnable = taskDecorator.decorate(newRunnableScheduledAction(scheduleAction));
+			future = cronScheduler.schedule(runnable, opt.getStartTime().toInstant());
+		}
+
 		scheduleAction.setScheduledTask(future);
 		scheduleAction.setActive(true);
 		return future;

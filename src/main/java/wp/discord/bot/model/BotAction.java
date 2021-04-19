@@ -51,9 +51,27 @@ public class BotAction {
 		return list.get(index);
 	}
 
+//	public String getRequiredEntitiesParam(CmdEntity e, int index) throws Exception {
+//		String value = getEntitiesParam(e, index);
+//		if (StringUtils.isBlank(value)) {
+//			Reply reply = Reply.of().bold("Error!").literal(" " + e.getCmd() + " must not be empty");
+//			throw new ActionFailException(reply);
+//		}
+//		return value;
+//	}
+
 	public String getFirstEntitiesParam(CmdEntity e) {
 		return getEntitiesParam(e, 0);
 	}
+
+//	public String getRequiredFirstEntitiesParam(CmdEntity e) throws Exception {
+//		String value = getFirstEntitiesParam(e);
+//		if (StringUtils.isBlank(value)) {
+//			Reply reply = Reply.of().bold("Error!").literal(" " + e.getCmd() + " value must not be empty");
+//			throw new ActionFailException(reply);
+//		}
+//		return value;
+//	}
 
 	public List<String> getEntities(CmdEntity e) {
 		List<String> list = entities.get(e);

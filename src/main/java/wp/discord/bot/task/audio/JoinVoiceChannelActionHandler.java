@@ -14,7 +14,7 @@ import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.core.bot.BotSession;
 import wp.discord.bot.core.bot.BotSessionManager;
 import wp.discord.bot.core.bot.UserManager;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.helper.VoiceChannelHelper;
 import wp.discord.bot.util.DiscordFormat;
@@ -22,7 +22,7 @@ import wp.discord.bot.util.Reply;
 
 @Component
 @Slf4j
-public class JoinVoiceChannelTask implements ActionHandler {
+public class JoinVoiceChannelActionHandler implements ActionHandler {
 
 	@Autowired
 	private BotSessionManager sessionManager;
@@ -58,7 +58,7 @@ public class JoinVoiceChannelTask implements ActionHandler {
 		} else {
 			Reply reply = Reply.of().literal("Unknown voice-channel ").mentionChannel(channelId).newline() //
 					.mentionUser(action.getAuthorId()).literal(" please try again");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 	}
 
@@ -69,14 +69,14 @@ public class JoinVoiceChannelTask implements ActionHandler {
 		if (user == null) {
 			Reply reply = Reply.of().literal("Not Found ").mentionUser(userId).newline() //
 					.mentionUser(action.getAuthorId()).literal(" please try again");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
 		VoiceChannel vc = helper.findVoiceChannelOfUser(user);
 		if (vc == null) {
 			Reply reply = Reply.of().literal("Not Found VoiceChannel of ").mention(user).newline() //
 					.mentionUser(action.getAuthorId()).literal(" please try again");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
 		joinVoiceChannel(action, vc);
@@ -90,18 +90,18 @@ public class JoinVoiceChannelTask implements ActionHandler {
 		if (vc == null) {
 			Reply reply = Reply.of().literal("Invalid voice-channel ").mentionChannel(channelId).newline() //
 					.mentionUser(action.getAuthorId()).literal(" please try again");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
 		joinVoiceChannel(action, vc);
 	}
 
-	protected void joinVoiceChannel(BotAction action, VoiceChannel vc) throws Exception {
+	public void joinVoiceChannel(BotAction action, VoiceChannel vc) throws Exception {
 		BotSession bs = sessionManager.getBotSession(vc.getGuild());
 		if (bs == null) {
 			Reply reply = Reply.of().literal("Not member of ").code(vc.getGuild().getName()).newline() //
 					.mentionUser(action.getAuthorId()).literal(" please change");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
 		action.setSession(bs);

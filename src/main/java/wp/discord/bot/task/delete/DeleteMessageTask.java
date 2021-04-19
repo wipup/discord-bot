@@ -13,6 +13,8 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.constant.Reaction;
+import wp.discord.bot.core.TracingHandler;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.DiscordFormat;
 import wp.discord.bot.util.EventUtil;
@@ -25,15 +27,41 @@ public class DeleteMessageTask {
 	@Autowired
 	private JDA jda;
 
+	@Autowired
+	private TracingHandler tracing;
+
 	public void deleteBotMessage(BotAction action) throws Exception {
+		String messageId = getMessageId(action);
+		MessageChannel mc = getMessageChannel(action);
+
+		mc.retrieveMessageById(messageId).queue(tracing.trace((m) -> {
+			
+			log.debug("User {} found message id: {}, channel:{}, content: \n{}", action.getAuthorId(), messageId, mc, m.getContentRaw());
+			
+			m.delete().queue(tracing.trace((voidObj) -> {
+				addReactionOnSuccess(action);
+			}), tracing.trace((e) -> {
+				log.error("User {} failed to delete message id: {}", action.getAuthorId(), messageId, e);
+			}));
+
+		}), tracing.trace((e) -> {
+			
+			Reply reply = Reply.of().literal("Not found message ID: ").code(messageId);
+			tracing.queue(action.getEventMessageChannel().sendMessage(reply.toString()));
+		}));
+	}
+
+	private String getMessageId(BotAction action) throws Exception {
 		String messageId = DiscordFormat.extractId(action.getFirstEntitiesParam(CmdEntity.ID));
 		if (StringUtils.isEmpty(messageId)) {
 			Reply reply = Reply.of().bold("Error! ").literal("Message ID is required!").newline()//
 					.code("Usage: ").code("bot delete message [channel <channel-id>] id <message-id>");
-			action.getEventMessageChannel().sendMessage(reply.toString()).queue();
-			return;
+			throw new ActionFailException(reply);
 		}
+		return messageId;
+	}
 
+	public MessageChannel getMessageChannel(BotAction action) throws Exception {
 		MessageChannel mc = null;
 		String channelId = DiscordFormat.extractId(action.getFirstEntitiesParam(CmdEntity.CHANNEL));
 		if (StringUtils.isEmpty(channelId)) {
@@ -44,8 +72,7 @@ public class DeleteMessageTask {
 			mc = getMessageChannel(channelId);
 			if (mc == null) {
 				Reply reply = Reply.of().literal("Not found Channel ID: ").code(channelId);
-				action.getEventMessageChannel().sendMessage(reply.toString()).queue();
-				return;
+				throw new ActionFailException(reply);
 			}
 		}
 
@@ -57,36 +84,13 @@ public class DeleteMessageTask {
 			if (!user.getId().equals(action.getAuthorId())) {
 				log.error("attempt to delete message in other user private channel!");
 				Reply reply = Reply.of().literal("Not found channel-id: ").code(channelId);
-				action.getEventMessageChannel().sendMessage(reply.toString()).queue();
-				return;
+				throw new ActionFailException(reply);
 			}
 		}
 
-		final MessageChannel targetChannel = mc;
-		mc.retrieveMessageById(messageId).queue((m) -> {
-			
-			log.debug("User {} found message id: {}, channel:{}, content: \n{}", action.getAuthorId(), messageId, targetChannel, m.getContentRaw());
-			m.delete().queue((voidObj) -> {
-				addReactionOnSuccess(action);
-			}, (e) -> {
-				log.error("User {} failed to delete message id: {}", action.getAuthorId(), messageId, e);
-			});
-			
-		}, (e) -> {
-			Reply reply = Reply.of().literal("Not found message ID: ").code(messageId);
-			action.getEventMessageChannel().sendMessage(reply.toString()).queue();
-		});
+		return mc;
 	}
 
-	private void addReactionOnSuccess(BotAction action) {
-		Message m = EventUtil.getMessage(action.getEvent());
-		if (m == null) {
-			return;
-		}
-		
-		m.addReaction(Reaction.CHECKED.getCode()).queue();
-	}
-	
 	private MessageChannel getMessageChannel(String channelId) {
 		if (StringUtils.isEmpty(channelId)) {
 			return null;
@@ -102,6 +106,15 @@ public class DeleteMessageTask {
 			return mc;
 		}
 		return null;
+	}
+
+	private void addReactionOnSuccess(BotAction action) {
+		Message m = EventUtil.getMessage(action.getEvent());
+		if (m == null) {
+			return;
+		}
+
+		m.addReaction(Reaction.CHECKED.getCode()).queue();
 	}
 
 }

@@ -12,14 +12,14 @@ import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.core.bot.BotSession;
 import wp.discord.bot.core.bot.BotSessionManager;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.DiscordFormat;
 import wp.discord.bot.util.Reply;
 
 @Component
 @Slf4j
-public class LeaveVoiceChannelTask implements ActionHandler {
+public class LeaveVoiceChannelActionHandler implements ActionHandler {
 
 	@Autowired
 	private BotSessionManager sessionManager;
@@ -48,14 +48,14 @@ public class LeaveVoiceChannelTask implements ActionHandler {
 		if (vc == null) {
 			Reply reply = Reply.of().literal("Invalid voice-channel ").mentionChannel(channelId).newline() //
 					.mentionUser(action.getAuthorId()).literal(" please try again");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
 		BotSession bs = sessionManager.getBotSession(vc.getGuild());
 		if (bs == null) {
 			Reply reply = Reply.of().literal("Not member of ").code(vc.getGuild().getName()).newline() //
 					.mentionUser(action.getAuthorId()).literal(" please change");
-			throw new BotException(reply);
+			throw new ActionFailException(reply);
 		}
 
 		bs.leaveVoiceChannel();
