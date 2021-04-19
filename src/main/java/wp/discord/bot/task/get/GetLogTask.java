@@ -90,7 +90,7 @@ public class GetLogTask {
 
 		return Reply.of().code(fileName).newline() //
 				.literal("\tFile Size: ").code(DataSize.ofBytes(fileSize).toKilobytes()).literal("KB").newline() //
-				.literal("\tLast Modified: ").code(DateTimeFormatter.ofPattern("dd MM yyyy HH:mm:ss.SSS ").format(dt)).newline();
+				.literal("\tLast Modified: ").code(DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm:ss.SSS ").format(dt)).newline();
 	}
 
 	public void sendLogFiles(BotAction action, Path logFile) throws Exception {
