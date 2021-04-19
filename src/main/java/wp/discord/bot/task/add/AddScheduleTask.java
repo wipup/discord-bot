@@ -203,7 +203,7 @@ public class AddScheduleTask {
 				validateDuration(every);
 				ScheduledOption opt = ScheduledOption.fixedRate(every, startTime);
 				return opt;
-
+				
 			} else {
 				return ScheduledOption.AtTime(startTime);
 			}

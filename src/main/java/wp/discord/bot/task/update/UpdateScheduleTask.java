@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.db.entity.ScheduledAction;
@@ -19,6 +20,7 @@ import wp.discord.bot.task.add.AddScheduleTask;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 
+@Slf4j
 @Component
 public class UpdateScheduleTask {
 
@@ -74,7 +76,7 @@ public class UpdateScheduleTask {
 		if (StringUtils.firstNonBlank(time, every) != null || CollectionUtils.isNotEmpty(cron)) {
 			ScheduledOption opt = addTask.getScheduleType(action);
 			if (opt == null) {
-				Reply reply = Reply.of().literal("Error! Unable to process cron/time/duration");
+				Reply reply = Reply.of().literal("Error! Invalid time/duration/cron configuration.");
 				throw new ActionFailException(reply);
 			}
 			schedule.setPreference(opt);
@@ -109,6 +111,7 @@ public class UpdateScheduleTask {
 			}
 
 			if (Boolean.FALSE.toString().equalsIgnoreCase(status)) {
+				log.debug("Cancel scheduled action: {}", action);
 				schedule.getScheduledTask().cancel(true);
 				schedule.setScheduledTask(null);
 				schedule.setActive(false);
