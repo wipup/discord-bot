@@ -58,7 +58,7 @@ public class ScheduledOption implements Describeable {
 		} else if (type == ScheduledType.FIXED_RATE) {
 			return replyFixedDuration();
 		} else {
-			return replyFixedDuration();
+			return replyFixedTime();
 		}
 	}
 
@@ -85,6 +85,12 @@ public class ScheduledOption implements Describeable {
 				.append(prettyPrintDurationValue());
 	}
 
+	private Reply replyFixedTime() {
+		return Reply.of() //
+				.literal(getType().getDisplayName()).newline() //
+				.append(prettyPrintDurationValue());
+	}
+	
 	@Override
 	public String toString() {
 		return ToStringUtils.toJsonString(this);

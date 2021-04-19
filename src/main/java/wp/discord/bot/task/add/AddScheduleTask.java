@@ -199,13 +199,15 @@ public class AddScheduleTask {
 		if (StringUtils.isNotBlank(time)) {
 
 			Date startTime = validateStartTime(time);
+			Duration d = null;
 			if (StringUtils.isNotBlank(every)) {
-				validateDuration(every);
-				ScheduledOption opt = ScheduledOption.fixedRate(every, startTime);
-				return opt;
+				d = validateDuration(every);
+			}
 
-			} else {
+			if (d == null) {
 				return ScheduledOption.AtTime(startTime);
+			} else {
+				return ScheduledOption.fixedRate(every, startTime);
 			}
 		}
 
@@ -236,13 +238,17 @@ public class AddScheduleTask {
 		}
 	}
 
-	private void validateDuration(String duration) throws Exception {
+	private Duration validateDuration(String duration) throws Exception {
+		if ("non".equalsIgnoreCase(duration)) {
+			return null;
+		}
 		Duration d = SafeUtil.get(() -> Duration.parse(duration));
 		if (d == null) {
 			Reply reply = Reply.of().literal("Invalid duration-time: ").code(duration).newline() //
 					.literal("Duration time must match ").bold("ISO-8601").literal(" DURATION format with pattern ").code("PnDTnHnMn.nS");
 			throw new ActionFailException(reply);
 		}
+		return d;
 	}
 
 	public BigInteger parseDesiredRunCount(BotAction action) throws Exception {
