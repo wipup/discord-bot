@@ -46,7 +46,7 @@ public class AsyncConfig {
 	@Bean(BEAN_CRON_TASK_EXECUTOR)
 	public ScheduledExecutorService cronThreadExecutor() {
 		final int TOTAL_THREAD = 1;
-		return new ScheduledThreadPoolExecutor(TOTAL_THREAD, (r) -> new Thread(r, "cron-" + THREAD_COUNT.incrementAndGet()));
+		return new ScheduledThreadPoolExecutor(TOTAL_THREAD, (r) -> new Thread(r, "scheduled-" + THREAD_COUNT.incrementAndGet()));
 	}
 
 	@Bean(BEAN_CRON_TASK_DECORATOR)

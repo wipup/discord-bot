@@ -75,10 +75,16 @@ public class UpdateScheduleTask {
 		String every = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.EVERY)).trim();
 
 		if ("same".equalsIgnoreCase(time)) {
-			time = SafeUtil.get(() -> ToStringUtils.formatDate(schedule.getPreference().getStartTime(), ScheduledOption.START_DATE_FORMAT));
+			String newTime = SafeUtil.get(() -> ToStringUtils.formatDate(schedule.getPreference().getStartTime(), ScheduledOption.START_DATE_FORMAT));
+			log.debug("set time from: {} to old value: {}", time, newTime);
+			action.getEntities(CmdEntity.TIME).clear();
+			action.getEntities(CmdEntity.TIME).add(newTime);
 		}
 		if ("same".equalsIgnoreCase(every)) {
-			every = schedule.getPreference().getValue();
+			String newEvery = schedule.getPreference().getValue();
+			log.debug("set every-duration from: {} to old value: {}", every, newEvery);
+			action.getEntities(CmdEntity.EVERY).clear();
+			action.getEntities(CmdEntity.EVERY).add(newEvery);
 		}
 
 		String timeOrEvery = StringUtils.firstNonBlank(time, every, cronStr);
