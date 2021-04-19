@@ -62,10 +62,19 @@ public class ScheduledOption implements Describeable {
 		}
 	}
 
+	private Reply getStartTimeDisplay() {
+		try {
+			return Reply.of().literal("Start: ").code(ToStringUtils.formatDate(getStartTime(), START_DATE_FORMAT_DISPLAY));
+		} catch (Exception e) {
+			log.error("error printing getStartTimeDisplay: {}", this, e);
+			return Reply.of().literal("Start: ").code("Unable to read date");
+		}
+	}
+
 	private Reply prettyPrintDurationValue() {
 		try {
 			Duration d = Duration.parse(getValue());
-			return Reply.of().literal("Start: ").code(ToStringUtils.formatDate(getStartTime(), START_DATE_FORMAT_DISPLAY)).newline() //
+			return Reply.of().append(getStartTimeDisplay()).newline() //
 					.literal("Repeat every: ").code(ToStringUtils.prettyPrintDurationValue(d));
 		} catch (Exception e) {
 			log.error("error printing duration: {}", this, e);
@@ -88,9 +97,9 @@ public class ScheduledOption implements Describeable {
 	private Reply replyFixedTime() {
 		return Reply.of() //
 				.literal(getType().getDisplayName()).newline() //
-				.append(prettyPrintDurationValue());
+				.append(getStartTimeDisplay());
 	}
-	
+
 	@Override
 	public String toString() {
 		return ToStringUtils.toJsonString(this);
