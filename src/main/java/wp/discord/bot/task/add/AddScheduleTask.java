@@ -146,8 +146,7 @@ public class AddScheduleTask {
 		validateScheduledDesiredRunCount(sch);
 	}
 
-	private void validateScheduledOption(ScheduledAction sch) throws Exception {
-		ScheduledOption opt = sch.getPreference();
+	public void validateScheduledOption(ScheduledOption opt) throws Exception {
 		if (opt == null || opt.getType() == null) {
 			Reply reply = Reply.of().literal("Schedule Type: ").code("Cron") //
 					.literal(" or ").code("duration").literal(" time is required").newline();
@@ -163,6 +162,11 @@ public class AddScheduleTask {
 				throw new ActionFailException(reply);
 			}
 		}
+	}
+
+	public void validateScheduledOption(ScheduledAction sch) throws Exception {
+		ScheduledOption opt = sch.getPreference();
+		validateScheduledOption(opt);
 	}
 
 	public ScheduledAction newScheduledAction(BotAction action) throws Exception {
@@ -216,7 +220,8 @@ public class AddScheduleTask {
 			return ScheduledOption.cron(cron);
 		}
 
-		return null;
+		Reply reply = Reply.of().literal("At least one of ").code("Cron").literal(" or ").code(" Time").literal(" must exist!");
+		throw new ActionFailException(reply);
 	}
 
 	private String validateCron(String cron) throws Exception {

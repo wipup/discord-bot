@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.events.GenericEvent;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.bot.BotSessionManager;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.CommandLineTokenizer;
 import wp.discord.bot.util.DiscordFormat;
@@ -95,7 +95,7 @@ public class CommandLineProcessor implements InitializingBean {
 					if (cmdAction == null) {
 						Reply reply = Reply.of().literal("Unknown action: ").code(frag).newline() //
 								.mentionUser(authorId).literal(" Please try again.");
-						throw new BotException(reply);
+						throw new ActionFailException(reply);
 					}
 					action.setAction(cmdAction);
 
@@ -105,7 +105,7 @@ public class CommandLineProcessor implements InitializingBean {
 					if (entity == null) {
 						Reply reply = Reply.of().literal("Unknown option: ").code(frag).newline() //
 								.mentionUser(authorId).literal(" Please try again.");
-						throw new BotException(reply);
+						throw new ActionFailException(reply);
 					}
 
 					index = collectEntityOption(action, commands, index, entity);
