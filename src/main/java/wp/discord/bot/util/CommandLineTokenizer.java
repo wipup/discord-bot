@@ -24,6 +24,10 @@ public class CommandLineTokenizer {
 			}
 		}
 
+		List<String> previous = SafeUtil.get(() -> allLines.get(allLines.size() - 1));
+		if (hasEscapeNewLine(previous)) {
+			previous.remove(previous.size() - 1);
+		}
 		return allLines;
 	}
 
