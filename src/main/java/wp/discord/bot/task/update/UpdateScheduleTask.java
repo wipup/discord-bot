@@ -18,6 +18,7 @@ import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.add.AddScheduleTask;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
+import wp.discord.bot.util.ToStringUtils;
 
 @Slf4j
 @Component
@@ -72,6 +73,13 @@ public class UpdateScheduleTask {
 		String cronStr = StringUtils.join(cron, " ").trim();
 		String time = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.TIME)).trim();
 		String every = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.EVERY)).trim();
+
+		if ("same".equalsIgnoreCase(time)) {
+			time = SafeUtil.get(() -> ToStringUtils.formatDate(schedule.getPreference().getStartTime(), ScheduledOption.START_DATE_FORMAT));
+		}
+		if ("same".equalsIgnoreCase(every)) {
+			every = schedule.getPreference().getValue();
+		}
 
 		String timeOrEvery = StringUtils.firstNonBlank(time, every, cronStr);
 		if (timeOrEvery != null) {

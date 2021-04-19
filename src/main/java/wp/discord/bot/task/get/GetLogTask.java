@@ -89,7 +89,7 @@ public class GetLogTask {
 		long fileSize = Files.size(path);
 
 		return Reply.of().code(fileName).newline() //
-				.literal("\tFile Size: ").code(DataSize.ofBytes(fileSize).toKilobytes()).newline() //
+				.literal("\tFile Size: ").code(DataSize.ofBytes(fileSize).toKilobytes()).literal("KB").newline() //
 				.literal("\tLast Modified: ").code(DateTimeFormatter.ofPattern("dd MM yyyy HH:mm:ss.SSS ").format(dt)).newline();
 	}
 

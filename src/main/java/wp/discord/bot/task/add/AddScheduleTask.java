@@ -224,7 +224,7 @@ public class AddScheduleTask {
 		throw new ActionFailException(reply);
 	}
 
-	private String validateCron(String cron) throws Exception {
+	public String validateCron(String cron) throws Exception {
 		CronEntity ce = cronTask.parse(cron);
 		if (ce == null) {
 			Reply reply = Reply.of().literal("Invalid cron: ").code(cron).newline(); //
@@ -233,7 +233,7 @@ public class AddScheduleTask {
 		return ce.getExpression();
 	}
 
-	private Date validateStartTime(String dt) throws Exception {
+	public Date validateStartTime(String dt) throws Exception {
 		try {
 			return ToStringUtils.parseDate(dt, ScheduledOption.START_DATE_FORMAT);
 		} catch (Exception e) {
@@ -243,7 +243,7 @@ public class AddScheduleTask {
 		}
 	}
 
-	private Duration validateDuration(String duration) throws Exception {
+	public Duration validateDuration(String duration) throws Exception {
 		if ("non".equalsIgnoreCase(duration)) {
 			return null;
 		}
