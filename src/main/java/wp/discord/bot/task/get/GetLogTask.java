@@ -88,7 +88,7 @@ public class GetLogTask {
 		ZonedDateTime dt = Files.getLastModifiedTime(path).toInstant().atZone(ZoneId.systemDefault());
 		long fileSize = Files.size(path);
 
-		return Reply.of().code(fileName).newline() //
+		return Reply.of().literal("File Name: ").code(fileName).newline() //
 				.literal("\tFile Size: ").code(DataSize.ofBytes(fileSize).toKilobytes()).literal("KB").newline() //
 				.literal("\tLast Modified: ").code(DateTimeFormatter.ofPattern("dd MMMM yyyy HH:mm:ss.SSS ").format(dt)).newline();
 	}
