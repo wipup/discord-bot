@@ -203,7 +203,7 @@ public class AddScheduleTask {
 				validateDuration(every);
 				ScheduledOption opt = ScheduledOption.fixedRate(every, startTime);
 				return opt;
-				
+
 			} else {
 				return ScheduledOption.AtTime(startTime);
 			}
@@ -249,6 +249,10 @@ public class AddScheduleTask {
 		String desiredRunCount = action.getFirstEntitiesParam(CmdEntity.COUNT);
 		BigInteger runCount = null;
 		if (StringUtils.isNotEmpty(desiredRunCount)) {
+			if (desiredRunCount.equalsIgnoreCase("non") || desiredRunCount.equalsIgnoreCase("infinity")) {
+				return null;
+			}
+
 			runCount = SafeUtil.get(() -> new BigInteger(desiredRunCount));
 			if (runCount == null) {
 				Reply reply = Reply.of().literal("Error! ").literal("Invalid run count: ").code(desiredRunCount);

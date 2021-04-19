@@ -3,7 +3,6 @@ package wp.discord.bot.task.update;
 import java.math.BigInteger;
 import java.util.Collection;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -70,13 +69,15 @@ public class UpdateScheduleTask {
 
 	private boolean updateScheduleType(BotAction action, ScheduledAction schedule) throws Exception {
 		Collection<String> cron = action.getEntities(CmdEntity.CRON);
+		String cronStr = StringUtils.join(cron, " ").trim();
 		String time = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.TIME)).trim();
 		String every = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.EVERY)).trim();
 
-		if (StringUtils.firstNonBlank(time, every) != null || CollectionUtils.isNotEmpty(cron)) {
+		String timeOrEvery = StringUtils.firstNonBlank(time, every, cronStr);
+		if (timeOrEvery != null) {
 			ScheduledOption opt = addTask.getScheduleType(action);
 			if (opt == null) {
-				Reply reply = Reply.of().literal("Error! Invalid time/duration/cron configuration.");
+				Reply reply = Reply.of().literal("Error! Invalid time/duration/cron configuration. ").code(timeOrEvery);
 				throw new ActionFailException(reply);
 			}
 			schedule.setPreference(opt);
