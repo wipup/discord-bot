@@ -1,7 +1,9 @@
 package wp.discord.bot.task.update;
 
 import java.math.BigInteger;
+import java.util.Collection;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.db.entity.ScheduledAction;
+import wp.discord.bot.db.entity.ScheduledOption;
 import wp.discord.bot.db.repository.ScheduleRepository;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
@@ -64,14 +67,19 @@ public class UpdateScheduleTask {
 	}
 
 	private boolean updateScheduleType(BotAction action, ScheduledAction schedule) throws Exception {
-		String cron = StringUtils.join(action.getEntities(CmdEntity.CRON), " ").trim();
+		Collection<String> cron = action.getEntities(CmdEntity.CRON);
 		String time = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.TIME)).trim();
 		String every = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.EVERY)).trim();
 
-		if (StringUtils.firstNonBlank(cron, time, every) != null) {
-			schedule.setPreference(addTask.getScheduleType(action));
+		if (StringUtils.firstNonBlank(time, every) != null || CollectionUtils.isNotEmpty(cron)) {
+			ScheduledOption opt = addTask.getScheduleType(action);
+			if (opt == null) {
+				Reply reply = Reply.of().literal("Error! Unable to process cron/time/duration");
+				throw new ActionFailException(reply);
+			}
+			schedule.setPreference(opt);
 			return true;
-		}
+		} 
 		return false;
 	}
 	
