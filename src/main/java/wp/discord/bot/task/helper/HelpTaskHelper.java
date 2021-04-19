@@ -58,11 +58,11 @@ public class HelpTaskHelper {
 				.code("bot shutdown").newline() //
 				
 				.code("bot help cron").newline() //
-				.code("bot cron <cron-expr>").newline() //
+				.code("bot cron <cron-expr> [count <samplig-count>]").newline() //
 
-				.code("bot add schedule [name <any-name>] [active <true/false>] [count <desired-count>] [cron/time <value>] cmd <cmd1 cmd2 cmd3...>").newline() //
-				.code("bot add schedule [name <any-name>] [active <true/false>] [count <desired-count>] cron <cron-expr> cmd <cmd1 cmd2 cmd3...>").newline() //
-				.code("bot add schedule [name <any-name>] [active <true/false>] [count <desired-count>] [time <yyyy-MM-ddTHH:mm:ss>] [every <ISO-8601>] cmd <cmd1 cmd2 cmd3...>").newline() //
+				.code("bot add schedule [name <any-name>] [active <true/false>] [count <desired-count/non>] [cron/time <value>] cmd <cmd1 cmd2 cmd3...>").newline() //
+				.code("bot add schedule [name <any-name>] [active <true/false>] [count <desired-count/non>] cron <cron-expr> cmd <cmd1 cmd2 cmd3...>").newline() //
+				.code("bot add schedule [name <any-name>] [active <true/false>] [count <desired-count/non>] [time <yyyy-MM-ddTHH:mm:ss>] [every <ISO-8601>] cmd <cmd1 cmd2 cmd3...>").newline() //
 				.code("bot add schedule [name <any-name>] [active <true/false>] [time <yyyy-MM-ddTHH:mm:ss>] cmd <cmd1 cmd2 cmd3...>").newline() //
 				.code("bot get schedule [id <schedule-id>]").newline() //
 				.code("bot update schedule [id <schedule-id>] [cron <cron>] [name <any-name>] [active <true/false>]").newline() //
