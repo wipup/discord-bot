@@ -60,10 +60,10 @@ public class ScheduledActionManager implements DisposableBean {
 	private ScheduleRepository scheduleRepository;
 
 	public ScheduledFuture<?> scheduleCronTask(ScheduledAction scheduleAction) throws Exception {
-		
+
 		ScheduledFuture<?> future = null;
 		ScheduledOption opt = scheduleAction.getPreference();
-		
+
 		if (opt.getType() == ScheduledType.CRON) {
 			CronTrigger cron = new CronTrigger(opt.getValue());
 			Runnable runnable = taskDecorator.decorate(newRunnableScheduledAction(scheduleAction));
@@ -72,8 +72,7 @@ public class ScheduledActionManager implements DisposableBean {
 		} else if (opt.getType() == ScheduledType.FIXED_RATE) {
 			Duration duration = Duration.parse(opt.getValue());
 			Runnable runnable = taskDecorator.decorate(newRunnableScheduledAction(scheduleAction));
-			future = cronScheduler.scheduleAtFixedRate(runnable, duration);
-			cronScheduler.scheduleAtFixedRate(runnable, opt.getStartTime().toInstant(), duration);
+			future = cronScheduler.scheduleAtFixedRate(runnable, opt.getStartTime().toInstant(), duration);
 
 		} else if (opt.getType() == ScheduledType.TIME) {
 			Runnable runnable = taskDecorator.decorate(newRunnableScheduledAction(scheduleAction));
