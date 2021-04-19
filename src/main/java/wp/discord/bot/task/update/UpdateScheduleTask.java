@@ -77,7 +77,8 @@ public class UpdateScheduleTask {
 		if (timeOrEvery != null) {
 			ScheduledOption opt = addTask.getScheduleType(action);
 			if (opt == null) {
-				Reply reply = Reply.of().literal("Error! Invalid time/duration/cron configuration. ").code(timeOrEvery);
+				Reply reply = Reply.of().literal("Error! Invalid time/duration/cron configuration. ").newline() //
+						.literal("Value: ").code(timeOrEvery);
 				throw new ActionFailException(reply);
 			}
 			schedule.setPreference(opt);
