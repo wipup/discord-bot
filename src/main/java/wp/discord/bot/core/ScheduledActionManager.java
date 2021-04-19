@@ -87,28 +87,34 @@ public class ScheduledActionManager implements DisposableBean {
 	private Runnable newRunnableScheduledAction(ScheduledAction scheduleAction) {
 		log.debug("scheduling: {}", scheduleAction);
 		return () -> {
-			if (isRunningCountExceed(scheduleAction)) {
-				return;
-			}
-
-			scheduleAction.setActualRunCount(scheduleAction.getActualRunCount().add(BigInteger.ONE));
-			SafeUtil.suppress(() -> scheduleRepository.save(scheduleAction));
-
-			for (String cmd : scheduleAction.getCommands()) {
-				try {
-					BotAction action = cmdProcessor.handleCommand(null, cmd);
-					if (action != null) {
-						action.setAuthorId(scheduleAction.getAuthorId());
-						action.setFromScheduler(true);
-						actionManager.executeAction(action);
-					}
-				} catch (BotException e) {
-					log.debug("Error executing schedule: {}", scheduleAction.getId(), e);
-					notifyAuthor(e, scheduleAction);
-				} catch (Throwable e) {
-					log.debug("Fatal Error executing schedule: {}", scheduleAction.getId(), e);
-					notifyOwner(e);
+			try {
+				if (isRunningCountExceed(scheduleAction)) {
+					return;
 				}
+
+				scheduleAction.setActualRunCount(scheduleAction.getActualRunCount().add(BigInteger.ONE));
+				for (String cmd : scheduleAction.getCommands()) {
+					try {
+						BotAction action = cmdProcessor.handleCommand(null, cmd);
+						if (action != null) {
+							action.setAuthorId(scheduleAction.getAuthorId());
+							action.setFromScheduler(true);
+							actionManager.executeAction(action);
+						}
+					} catch (BotException e) {
+						log.debug("Error executing schedule: {}", scheduleAction.getId(), e);
+						notifyAuthor(e, scheduleAction);
+					} catch (Throwable e) {
+						log.debug("Fatal Error executing schedule: {}", scheduleAction.getId(), e);
+						notifyOwner(e);
+					}
+				}
+
+			} finally {
+				if (scheduleAction.getPreference().getType() == ScheduledType.TIME) {
+					scheduleAction.setActive(false);
+				}
+				SafeUtil.suppress(() -> scheduleRepository.save(scheduleAction));
 			}
 		};
 	}
