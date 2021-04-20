@@ -33,7 +33,7 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 	@Autowired
 	private ConfigurableApplicationContext appContext;
 
-	private Set<Class<GenericEvent>> ignoredClass;
+	private Set<Class<?>> ignoredClass;
 
 	@Override
 	public void handleEvent(GenericEvent event) throws Exception {
@@ -56,11 +56,12 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 		super.afterPropertiesSet();
 
 		Map<String, AbstractDiscordEventListener> listeners = appContext.getBeansOfType(AbstractDiscordEventListener.class);
-		Set<Class<GenericEvent>> classSet = listeners.values().stream() //
+		Set<Class<?>> classSet = listeners.values().stream() //
 				.filter((l) -> l != this) //
 				.map((l) -> l.eventClass()) //
 				.filter((c) -> c != null) //
-				.distinct().collect(Collectors.toSet());
+				.distinct() //
+				.collect(Collectors.toSet());
 		ignoredClass = Collections.unmodifiableSet(classSet);
 	}
 
