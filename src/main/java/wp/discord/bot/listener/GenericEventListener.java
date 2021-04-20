@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.events.GatewayPingEvent;
@@ -14,7 +16,8 @@ import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.http.HttpRequestEvent;
 import wp.discord.bot.core.bot.AbstractDiscordEventListener;
 
-//@Component
+@Profile("!cloud")
+@Component
 @Slf4j
 public class GenericEventListener extends AbstractDiscordEventListener<GenericEvent> {
 
