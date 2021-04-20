@@ -53,7 +53,7 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 		Map<String, AbstractDiscordEventListener> listeners = appContext.getBeansOfType(AbstractDiscordEventListener.class);
 		Set<Class<?>> classSet = listeners.values().stream() //
 				.filter((l) -> l != this) //
-				.map((l) -> l.eventClass()) //
+				.map((l) -> (Class<?>) l.eventClass()) //
 				.filter((c) -> c != null) //
 				.collect(Collectors.toSet());
 		ignoredClass = Collections.unmodifiableSet(classSet);
