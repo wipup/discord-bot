@@ -73,7 +73,7 @@ public class ScheduledOption implements Describeable {
 
 	private Reply prettyPrintDurationValue() {
 		try {
-			Duration d = Duration.parse(getValue());
+			Duration d = ToStringUtils.convertToDuration(getValue());
 			return Reply.of().append(getStartTimeDisplay()).newline() //
 					.literal("Repeat every: ").code(ToStringUtils.prettyPrintDurationValue(d));
 		} catch (Exception e) {

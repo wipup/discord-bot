@@ -7,6 +7,7 @@ import java.util.Date;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.springframework.boot.convert.DurationStyle;
 
 public class ToStringUtils {
 
@@ -43,5 +44,13 @@ public class ToStringUtils {
 		SimpleDateFormat sdf = new SimpleDateFormat(pattern);
 		sdf.setLenient(false);
 		return sdf.format(date);
+	}
+
+	public static Duration convertToDuration(String str) {
+		Duration d = SafeUtil.get(() -> Duration.parse(str));
+		if (d != null) {
+			return d;
+		}
+		return SafeUtil.get(() -> DurationStyle.detectAndParse(str));
 	}
 }

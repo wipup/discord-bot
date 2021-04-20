@@ -260,14 +260,6 @@ public class AddScheduleTask {
 		}
 	}
 
-	private Duration convertToDuration(String str) {
-		Duration d = SafeUtil.get(() -> Duration.parse(str));
-		if (d != null) {
-			return d;
-		}
-		return SafeUtil.get(() -> DurationStyle.detectAndParse(str));
-	}
-
 	private Date durationToDate(Duration duration, Date startDate) {
 		Temporal t = duration.addTo(ZonedDateTime.ofInstant(startDate.toInstant(), ZoneId.systemDefault()));
 		return Date.from(LocalDateTime.from(t).atZone(ZoneId.systemDefault()).toInstant());
@@ -277,7 +269,7 @@ public class AddScheduleTask {
 		if ("non".equalsIgnoreCase(duration)) {
 			return null;
 		}
-		Duration d = convertToDuration(duration);
+		Duration d = ToStringUtils.convertToDuration(duration);
 		if (d == null) {
 			Reply reply = Reply.of().literal("Invalid duration-time: ").code(duration).newline() //
 					.literal("Duration time must match ").bold("ISO-8601").literal(" DURATION format with pattern ").code("PnDTnHnMn.nS");
