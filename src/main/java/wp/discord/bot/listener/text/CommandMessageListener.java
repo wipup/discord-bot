@@ -7,8 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import wp.discord.bot.config.properties.DiscordProperties;
+import wp.discord.bot.config.properties.DiscordStatus;
 import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.core.action.ActionHandleManager;
 import wp.discord.bot.core.bot.AbstractDiscordEventListener;
@@ -22,6 +26,12 @@ import wp.discord.bot.util.SafeUtil;
 @Component
 @Slf4j
 public class CommandMessageListener extends AbstractDiscordEventListener<MessageReceivedEvent> {
+
+	@Autowired
+	private JDA jda;
+
+	@Autowired
+	private DiscordProperties discordProperties;
 
 	@Autowired
 	private CommandLineProcessor cmdProcessor;
@@ -75,6 +85,16 @@ public class CommandMessageListener extends AbstractDiscordEventListener<Message
 
 		List<BotAction> actions = cmdProcessor.handleMultiLineCommand(relatedEvent, cmd);
 		actionManager.executeActions(actions);
+	}
+
+	@Override
+	public void setReady() {
+		super.setReady();
+		DiscordStatus status = discordProperties.getStatus();
+		log.info("Application is ready, setting status: {}", status);
+
+		jda.getPresence().setActivity(Activity.of(status.getType(), status.getName()));
+		jda.getPresence().setStatus(status.getStatus());
 	}
 
 	@Override

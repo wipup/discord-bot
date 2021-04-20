@@ -7,27 +7,16 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.GatewayPingEvent;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.http.HttpRequestEvent;
-import wp.discord.bot.config.properties.DiscordProperties;
-import wp.discord.bot.config.properties.DiscordStatus;
 import wp.discord.bot.core.bot.AbstractDiscordEventListener;
 
-@Component
+//@Component
 @Slf4j
 public class GenericEventListener extends AbstractDiscordEventListener<GenericEvent> {
-
-	@Autowired
-	private JDA jda;
-
-	@Autowired
-	private DiscordProperties discordProperties;
 
 	@Autowired
 	private ConfigurableApplicationContext appContext;
@@ -61,6 +50,7 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 				.filter((c) -> c != null) //
 				.collect(Collectors.toSet());
 		ignoredClass = Collections.unmodifiableSet(classSet);
+		log.debug("ignored class: {}", ignoredClass);
 	}
 
 	@Override
@@ -72,17 +62,13 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 		if (ignoredClass == null) {
 			return true;
 		}
-		return !ignoredClass.contains(event.getClass());
-	}
 
-	@Override
-	public void setReady() {
-		super.setReady();
-		DiscordStatus status = discordProperties.getStatus();
-		log.info("Application is ready, setting status: {}", status);
-
-		jda.getPresence().setActivity(Activity.of(status.getType(), status.getName()));
-		jda.getPresence().setStatus(status.getStatus());
+		for (Class<?> clazz : ignoredClass) {
+			if (clazz.isAssignableFrom(event.getClass())) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override
