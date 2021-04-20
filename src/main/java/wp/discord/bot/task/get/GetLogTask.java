@@ -52,6 +52,7 @@ public class GetLogTask {
 			List<Path> logFiles = paths.filter(Files::isRegularFile) //
 					.filter((p) -> antMatcher.match(name, p.getFileName().toString())) //
 					.map((p) -> p.toAbsolutePath()) //
+					.sorted(this::sortByLastModifiedTimeDescending)
 					.collect(Collectors.toList());
 
 			if (logFiles.isEmpty()) {
@@ -66,6 +67,14 @@ public class GetLogTask {
 				return;
 			}
 		}
+	}
+	
+	private int sortByLastModifiedTimeDescending(Path p1, Path p2) {
+		return SafeUtil.get(() -> -1 * getLastModifiedTime(p1).compareTo(getLastModifiedTime(p2)), 0);
+	}
+
+	private ZonedDateTime getLastModifiedTime(Path p) throws Exception {
+		return SafeUtil.get(() -> Files.getLastModifiedTime(p).toInstant().atZone(ZoneId.systemDefault()));
 	}
 
 	public void listLogFileNames(BotAction action, List<Path> logFiles) throws Exception {
@@ -85,7 +94,7 @@ public class GetLogTask {
 
 	public Reply createFileReply(Path path) throws Exception {
 		String fileName = path.getFileName().toString();
-		ZonedDateTime dt = Files.getLastModifiedTime(path).toInstant().atZone(ZoneId.systemDefault());
+		ZonedDateTime dt = getLastModifiedTime(path);
 		long fileSize = Files.size(path);
 
 		return Reply.of().literal("File Name: ").code(fileName).newline() //

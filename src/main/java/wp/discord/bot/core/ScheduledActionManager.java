@@ -24,6 +24,7 @@ import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.db.entity.ScheduledOption;
 import wp.discord.bot.db.entity.ScheduledType;
 import wp.discord.bot.db.repository.ScheduleRepository;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
@@ -158,8 +159,8 @@ public class ScheduledActionManager implements DisposableBean {
 	}
 
 	private void handleScheduleTaskFail(ScheduledAction scheduleAction, BotAction action, Throwable e) {
-		if (e instanceof BotException) {
-			BotException be = (BotException) e;
+		if (e instanceof ActionFailException) {
+			ActionFailException be = (ActionFailException) e;
 			unlimitExecutor.submit(taskDecorator.decorate(() -> {
 				notifyAuthor(scheduleAction, action, be);
 			}));
@@ -174,7 +175,6 @@ public class ScheduledActionManager implements DisposableBean {
 		jda.retrieveUserById(authorId).queue(tracer.trace((user) -> {
 			Reply reply = createReplyForAuthor(scheduleAction, action, e);
 			errorHandler.notifyUser(user, reply);
-			
 		}), tracer.trace((error) -> {
 			log.error("Failed to notify author ", errorHandler);
 		}));

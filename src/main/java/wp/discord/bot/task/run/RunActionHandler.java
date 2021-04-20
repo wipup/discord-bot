@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.action.ActionHandler;
-import wp.discord.bot.exception.BotException;
+import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.model.DiscordUserRole;
 import wp.discord.bot.util.Reply;
@@ -27,9 +27,8 @@ public class RunActionHandler implements ActionHandler {
 		String targetEntity = StringUtils.defaultString(SafeUtil.get(() -> action.getActionParams().get(0)));
 		CmdEntity target = CmdEntity.getMatchingEntity(targetEntity);
 		if (target == null) {
-			Reply reply = Reply.of().literal("Unknown entity: ").code(" " + targetEntity + " ").newline() //
-					.literal("");
-			throw new BotException(reply);
+			Reply reply = Reply.of().literal("Unknown entity: ").code(targetEntity);
+			throw new ActionFailException(reply);
 		}
 
 		if (target == CmdEntity.SCHEDULE) {
@@ -38,7 +37,7 @@ public class RunActionHandler implements ActionHandler {
 		}
 
 		Reply reply = Reply.of().literal("Unsupported entity: ").code(targetEntity);
-		throw new BotException(reply);
+		throw new ActionFailException(reply);
 	}
 
 	@Override

@@ -63,6 +63,7 @@ public class HelpTaskHelper {
 				.code("bot add schedule [name <any-name>] [active <true/false>] [count <desired-count/non>] [cron/time <value>] cmd <cmd1 cmd2 cmd3...>").newline() //
 				.code("bot add schedule [name <any-name>] [active <true/false>] [count <desired-count/non>] cron <cron-expr> cmd <cmd1 cmd2 cmd3...>").newline() //
 				.code("bot add schedule [name <any-name>] [active <true/false>] [count <desired-count/non>] [time <yyyy-MM-ddTHH:mm:ss>] [every <ISO-8601>] cmd <cmd1 cmd2 cmd3...>").newline() //
+				.code("bot add schedule [name <any-name>] [active <true/false>] [time <now>] cmd <cmd1 cmd2 cmd3...>").newline() //
 				.code("bot add schedule [name <any-name>] [active <true/false>] [time <yyyy-MM-ddTHH:mm:ss>] cmd <cmd1 cmd2 cmd3...>").newline() //
 				.code("bot get schedule [id <schedule-id>]").newline() //
 				.code("bot update schedule [id <schedule-id>] [name <any-name>] [cron <cron>]  [active <true/false>]").newline() //

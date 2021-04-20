@@ -235,6 +235,9 @@ public class AddScheduleTask {
 
 	public Date validateStartTime(String dt) throws Exception {
 		try {
+			if ("now".equalsIgnoreCase(dt)) {
+				return new Date();
+			}
 			return ToStringUtils.parseDate(dt, ScheduledOption.START_DATE_FORMAT);
 		} catch (Exception e) {
 			Reply r = Reply.of().literal("Invalid Date format!").code(dt).newline() //
