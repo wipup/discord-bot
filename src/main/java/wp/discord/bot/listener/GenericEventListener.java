@@ -34,6 +34,10 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 
 	private Set<Class<?>> ignoredClass;
 
+	public GenericEventListener() {
+		setReady(true);
+	}
+
 	@Override
 	public void handleEvent(GenericEvent event) throws Exception {
 		if (event instanceof GatewayPingEvent) {
@@ -79,11 +83,6 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 
 		jda.getPresence().setActivity(Activity.of(status.getType(), status.getName()));
 		jda.getPresence().setStatus(status.getStatus());
-	}
-
-	@Override
-	public boolean isReady() {
-		return true;
 	}
 
 	@Override

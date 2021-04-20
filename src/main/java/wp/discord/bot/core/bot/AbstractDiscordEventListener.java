@@ -39,18 +39,19 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 	private ExecutorService executor;
 
 	public void onEvent(GenericEvent event) {
-		executor.submit(() -> startHandler(event));
+		if (isReady()) {
+			executor.submit(() -> startHandler(event));
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	private void startHandler(GenericEvent event) {
 		Span sp = tracing.startNewTrace();
 		try {
-			if (isReady() && accept(event)) {
+			if (accept(event)) {
 				prepareHandleEvent((T) event);
 				handleEvent((T) event);
 			}
-
 		} catch (Exception e) {
 			handleError(event, e);
 

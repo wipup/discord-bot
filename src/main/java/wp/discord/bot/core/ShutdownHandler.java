@@ -61,7 +61,7 @@ public class ShutdownHandler implements DisposableBean {
 
 		destroyAllSession();
 		destroyAllJDA();
-		
+
 		log.info("Closing Executor");
 		databaseThreadExecutor.shutdown();
 		genericEventExecutor.shutdown();
@@ -70,6 +70,7 @@ public class ShutdownHandler implements DisposableBean {
 
 	private void stopListeners() {
 		jda.getPresence().setPresence(OnlineStatus.DO_NOT_DISTURB, Activity.of(ActivityType.WATCHING, "Shuting Down"));
+		SafeUtil.suppress(() -> Thread.sleep(50));
 		ctx.getBeansOfType(AbstractDiscordEventListener.class).values().forEach((l) -> l.setReady(false));
 	}
 
