@@ -44,6 +44,8 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 	public void setReady() {
 		super.setReady();
 		DiscordStatus status = discordProperties.getStatus();
+		log.info("Application is ready, setting status: {}", status);
+
 		jda.getPresence().setActivity(Activity.of(status.getType(), status.getName()));
 		jda.getPresence().setStatus(status.getStatus());
 	}
