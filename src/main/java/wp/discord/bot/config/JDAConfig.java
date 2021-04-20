@@ -25,7 +25,6 @@ public class JDAConfig {
 	@Bean
 	public JDA discordJDA() throws Exception {
 		try {
-			log.debug("configuration: {}", discordProperties);
 			JDABuilder builder = JDABuilder.createDefault(discordProperties.getToken());
 			builder.setLargeThreshold(SafeUtil.nonNull(() -> discordProperties.getLargeThreshold(), 50));
 			builder.setActivity(Activity.of(ActivityType.WATCHING, "Initializing"));
