@@ -59,13 +59,13 @@ public class ShutdownHandler implements DisposableBean {
 			SafeUtil.suppress(() -> r.destroy());
 		});
 
+		destroyAllSession();
+		destroyAllJDA();
+		
 		log.info("Closing Executor");
 		databaseThreadExecutor.shutdown();
 		genericEventExecutor.shutdown();
 		shutdownScheduledTaskExecutors();
-
-		destroyAllSession();
-		destroyAllJDA();
 	}
 
 	private void stopListeners() {
