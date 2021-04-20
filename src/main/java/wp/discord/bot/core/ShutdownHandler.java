@@ -72,6 +72,7 @@ public class ShutdownHandler implements DisposableBean {
 		genericEventExecutor.awaitTermination(10, TimeUnit.SECONDS);
 		
 		shutdownScheduledTaskExecutors();
+		log.info("Shutdown completed");
 	}
 
 	private void stopListeners() {
