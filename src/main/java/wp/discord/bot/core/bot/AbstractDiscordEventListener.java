@@ -75,6 +75,7 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 	@org.springframework.context.event.EventListener(ApplicationReadyEvent.class)
 	public void setReady() {
 		log.debug("{} is ready to accept: {}", this.getClass().getSimpleName(), eventClass());
+		ready = true;
 	}
 
 	public boolean acceptType(GenericEvent event) {

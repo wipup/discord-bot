@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.GatewayPingEvent;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.http.HttpRequestEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.config.properties.DiscordProperties;
 import wp.discord.bot.config.properties.DiscordStatus;
 import wp.discord.bot.core.bot.AbstractDiscordEventListener;
@@ -29,6 +30,9 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 			return;
 		}
 		if (event instanceof HttpRequestEvent) {
+			return;
+		}
+		if (event instanceof MessageReceivedEvent) {
 			return;
 		}
 
