@@ -1,6 +1,12 @@
 package wp.discord.bot.listener;
 
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +30,11 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 	@Autowired
 	private DiscordProperties discordProperties;
 
+	@Autowired
+	private ConfigurableApplicationContext appContext;
+
+	private Set<Class<GenericEvent>> ignoredClass;
+
 	@Override
 	public void handleEvent(GenericEvent event) throws Exception {
 		if (event instanceof GatewayPingEvent) {
@@ -39,9 +50,30 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 		log.debug("Received Event: {} : {}", event.getClass().getSimpleName(), event);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
-	public Class<GenericEvent> eventClass() {
-		return GenericEvent.class;
+	public void afterPropertiesSet() throws Exception {
+		super.afterPropertiesSet();
+
+		Map<String, AbstractDiscordEventListener> listeners = appContext.getBeansOfType(AbstractDiscordEventListener.class);
+		Set<Class<GenericEvent>> classSet = listeners.values().stream() //
+				.filter((l) -> l != this) //
+				.map((l) -> l.eventClass()) //
+				.filter((c) -> c != null) //
+				.distinct().collect(Collectors.toSet());
+		ignoredClass = Collections.unmodifiableSet(classSet);
+	}
+
+	@Override
+	public boolean acceptCondition(GenericEvent event) {
+		return super.acceptCondition(event) && isNotIgnoredEvent(event);
+	}
+
+	public boolean isNotIgnoredEvent(GenericEvent event) {
+		if (ignoredClass == null) {
+			return true;
+		}
+		return ignoredClass.contains(event.getClass());
 	}
 
 	@Override
@@ -57,6 +89,11 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 	@Override
 	public boolean isReady() {
 		return true;
+	}
+
+	@Override
+	public Class<GenericEvent> eventClass() {
+		return GenericEvent.class;
 	}
 
 }
