@@ -64,13 +64,11 @@ public class ShutdownHandler implements DisposableBean {
 		destroyAllJDA();
 
 		log.info("Closing DB Executor");
-		databaseThreadExecutor.shutdown();
-		databaseThreadExecutor.awaitTermination(10, TimeUnit.SECONDS);
-		
+		waitAndShutdownExecutor(databaseThreadExecutor);
+
 		log.info("Closing Generic Executor");
-		genericEventExecutor.shutdown();
-		genericEventExecutor.awaitTermination(10, TimeUnit.SECONDS);
-		
+		waitAndShutdownExecutor(genericEventExecutor);
+
 		shutdownScheduledTaskExecutors();
 		log.info("Shutdown completed");
 	}
@@ -98,6 +96,11 @@ public class ShutdownHandler implements DisposableBean {
 				log.error("error shutdown BotSession: " + session, e);
 			}
 		}
+	}
+
+	private void waitAndShutdownExecutor(ExecutorService executor) throws Exception {
+		databaseThreadExecutor.shutdown();
+		databaseThreadExecutor.awaitTermination(10, TimeUnit.SECONDS);
 	}
 
 	public void destroyAllJDA() throws Exception {
