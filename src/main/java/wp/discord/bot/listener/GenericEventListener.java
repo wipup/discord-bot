@@ -74,7 +74,7 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 		if (ignoredClass == null) {
 			return true;
 		}
-		return ignoredClass.contains(event.getClass());
+		return !ignoredClass.contains(event.getClass());
 	}
 
 	@Override
