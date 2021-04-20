@@ -35,12 +35,14 @@ public class BotAction {
 	private BotSession session;
 	private String authorId;
 
-	private boolean isFromScheduler = false;
-	private boolean isFromTrigger = false;
+	private boolean isFromScheduler;
+	private boolean isFromTrigger;
 
 	public BotAction() {
 		actionParams = new ArrayList<>();
 		entities = new LinkedHashMap<>();
+		isFromTrigger = false;
+		isFromScheduler = false;
 	}
 
 	public String getEntitiesParam(CmdEntity e, int index) {

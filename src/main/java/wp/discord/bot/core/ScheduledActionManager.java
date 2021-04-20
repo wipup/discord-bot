@@ -16,6 +16,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import net.dv8tion.jda.api.JDA;
 import wp.discord.bot.config.AsyncConfig;
 import wp.discord.bot.core.action.ActionHandleManager;
 import wp.discord.bot.core.cmd.CommandLineProcessor;
@@ -25,6 +26,7 @@ import wp.discord.bot.db.entity.ScheduledType;
 import wp.discord.bot.db.repository.ScheduleRepository;
 import wp.discord.bot.exception.BotException;
 import wp.discord.bot.model.BotAction;
+import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 
 @Component
@@ -36,12 +38,18 @@ public class ScheduledActionManager implements DisposableBean {
 	private TaskDecorator taskDecorator;
 
 	@Autowired
+	private TracingHandler tracer;
+
+	@Autowired
 	@Qualifier(AsyncConfig.BEAN_CRON_TASK_EXECUTOR)
 	private ScheduledExecutorService executorService;
 
 	@Autowired
 	@Qualifier(AsyncConfig.BEAN_CRON_TASK_SCHEDULER)
 	private TaskScheduler cronScheduler;
+
+	@Autowired
+	private JDA jda;
 
 	@Autowired
 	@Qualifier(AsyncConfig.BEAN_UNLIMIT_EXECUTOR)
@@ -94,19 +102,21 @@ public class ScheduledActionManager implements DisposableBean {
 
 				scheduleAction.setActualRunCount(scheduleAction.getActualRunCount().add(BigInteger.ONE));
 				for (String cmd : scheduleAction.getCommands()) {
+					BotAction action = null;
 					try {
-						BotAction action = cmdProcessor.handleCommand(null, cmd);
+						action = cmdProcessor.handleCommand(null, cmd);
 						if (action != null) {
 							action.setAuthorId(scheduleAction.getAuthorId());
 							action.setFromScheduler(true);
 							actionManager.executeAction(action);
 						}
-					} catch (BotException e) {
+
+					} catch (Exception e) {
 						log.debug("Error executing schedule: {}", scheduleAction.getId(), e);
-						notifyAuthor(e, scheduleAction);
+						handleScheduleTaskFail(scheduleAction, action, e);
 					} catch (Throwable e) {
-						log.debug("Fatal Error executing schedule: {}", scheduleAction.getId(), e);
-						notifyOwner(e);
+						handleScheduleTaskFail(scheduleAction, action, e);
+						throw e;
 					}
 				}
 
@@ -137,22 +147,48 @@ public class ScheduledActionManager implements DisposableBean {
 		ScheduledFuture<?> future = scheduleAction.getScheduledTask();
 
 		SafeUtil.suppress(() -> Thread.sleep(50));
-		unlimitExecutor.execute(() -> {
+		unlimitExecutor.execute(taskDecorator.decorate(() -> {
 			log.debug("do cancel count-exceed task: {}", scheduleAction.getName());
 			future.cancel(true);
 			scheduleAction.setScheduledTask(null);
 			scheduleAction.setActive(false);
 			SafeUtil.suppress(() -> scheduleRepository.save(scheduleAction));
-		});
+		}));
 		SafeUtil.suppress(() -> Thread.sleep(50));
 	}
 
-	private void notifyAuthor(BotException e, ScheduledAction scheduleAction) {
-		errorHandler.notifyOwnerNow(null, e);
+	private void handleScheduleTaskFail(ScheduledAction scheduleAction, BotAction action, Throwable e) {
+		if (e instanceof BotException) {
+			BotException be = (BotException) e;
+			unlimitExecutor.submit(taskDecorator.decorate(() -> {
+				notifyAuthor(scheduleAction, action, be);
+			}));
+		}
+		unlimitExecutor.submit(taskDecorator.decorate(() -> {
+			notifyOwner(scheduleAction, action, e);
+		}));
 	}
 
-	private void notifyOwner(Throwable e) {
-		errorHandler.notifyOwnerNow(null, e);
+	private void notifyAuthor(ScheduledAction scheduleAction, BotAction action, BotException e) {
+		String authorId = scheduleAction.getAuthorId();
+		jda.retrieveUserById(authorId).queue(tracer.trace((user) -> {
+			Reply reply = createReplyForAuthor(scheduleAction, action, e);
+			errorHandler.notifyUser(user, reply);
+			
+		}), tracer.trace((error) -> {
+			log.error("Failed to notify author ", errorHandler);
+		}));
+
+	}
+
+	private Reply createReplyForAuthor(ScheduledAction scheduleAction, BotAction action, BotException e) {
+		return Reply.of().literal("Failed to execute Scheduled Action").newline() //
+				.append(scheduleAction.shortReply()).newline() //
+				.literal("With Error: ").append(e.getReplyMessage());//
+	}
+
+	private void notifyOwner(ScheduledAction scheduleAction, BotAction action, Throwable e) {
+		errorHandler.notifyOwner(scheduleAction, e);
 	}
 
 	@Override

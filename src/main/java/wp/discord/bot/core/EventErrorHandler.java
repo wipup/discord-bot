@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
 import wp.discord.bot.core.bot.UserManager;
+import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.util.EventUtil;
 import wp.discord.bot.util.Reply;
 
@@ -26,38 +27,68 @@ public class EventErrorHandler {
 
 	public void handleEventError(GenericEvent event, Throwable e) {
 		log.error("event error: ", e);
-		notifyOwnerNow(event, e);
+		notifyOwner(event, e);
 	}
 
-	public void notifyOwnerNow(GenericEvent event, Throwable e) {
+	public void notifyUser(User user, Reply reply) {
+		if (user == null) {
+			log.error("user cannot be null");
+			return;
+		}
+		user.openPrivateChannel().queue(tracingHandler.addTracingContext((pc) -> {
+			pc.sendMessage(reply.toString()).queue(tracingHandler.onSendMessageSuccess(), tracingHandler.onSendMessageFail());
+		}));
+	}
+
+	public void sendPrivateMessageToOwner(Reply reply) {
+		notifyUser(userManager.getOwnerUser().getUser(), reply);
+	}
+
+	public void notifyOwner(GenericEvent event, Throwable e) {
 		Reply rep = createReply(e);
 		if (event != null) {
-			rep.newline().literal("Event: ").code(String.valueOf(event));
+			rep.newline().append(createReply(event));
+		}
+		sendPrivateMessageToOwner(rep);
+	}
 
-			User author = EventUtil.getAuthor(event);
-			if (author != null) {
-				rep.newline().literal("\tUser: ").code(author.toString());
-			}
+	public void notifyOwner(ScheduledAction scheduleAction, Throwable e) {
+		Reply rep = createReply(e);
+		if (scheduleAction != null) {
+			rep.newline().bold("Scheduled Action") //
+					.newline().append(createReply(scheduleAction));
+		}
+		sendPrivateMessageToOwner(rep);
+	}
 
-			MessageChannel channel = EventUtil.getChannel(event);
-			if (channel != null) {
-				rep.newline().literal("\tChannel [").code(channel.getType().name()).literal("]: ").code(channel.toString());
-			}
+	public Reply createReply(ScheduledAction action) {
+		return action.shortReply(true);
+	}
 
-			Guild guild = EventUtil.getGuild(event);
-			if (guild != null) {
-				rep.newline().literal("\tGuild: ").code(guild.toString());
-			}
+	public Reply createReply(GenericEvent event) {
+		Reply rep = Reply.of().literal("Event: ").code(String.valueOf(event));
 
-			String messageId = EventUtil.getMessageId(event);
-			if (StringUtils.isNotEmpty(messageId)) {
-				rep.newline().literal("\tMessageId: ").code(messageId);
-			}
+		User author = EventUtil.getAuthor(event);
+		if (author != null) {
+			rep.newline().literal("\tUser: ").code(author.toString());
 		}
 
-		userManager.getOwnerUser().getUser().openPrivateChannel().queue(tracingHandler.addTracingContext((pc) -> {
-			pc.sendMessage(rep.toString()).queue(tracingHandler.onSendMessageSuccess(), tracingHandler.onSendMessageFail());
-		}));
+		MessageChannel channel = EventUtil.getChannel(event);
+		if (channel != null) {
+			rep.newline().literal("\tChannel [").code(channel.getType().name()).literal("]: ").code(channel.toString());
+		}
+
+		Guild guild = EventUtil.getGuild(event);
+		if (guild != null) {
+			rep.newline().literal("\tGuild: ").code(guild.toString());
+		}
+
+		String messageId = EventUtil.getMessageId(event);
+		if (StringUtils.isNotEmpty(messageId)) {
+			rep.newline().literal("\tMessageId: ").code(messageId);
+		}
+
+		return rep;
 	}
 
 	public Reply createReply(Throwable e) {

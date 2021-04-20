@@ -67,7 +67,7 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 	public String getCron() {
 		return cron;
 	}
-	
+
 	@Deprecated
 	public void setCron(String cron) {
 		if (cron != null) {

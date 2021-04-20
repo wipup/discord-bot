@@ -16,10 +16,10 @@ discord:
     - alias: Wipu 
       snowflake-id: ""
       role: owner
-    - alias: P'Ake
+    - alias: Admin
       snowflake-id: ""
       role: admin
-    - alias: P'Ake
-      snowflake-id: ""
-      role: admin      
-  audio-folder: "C:/Users/PC/Documents/workspace-spring-tool-suite-4/discord-bot/src/main/resources/audio"
+  audio-folder: ""
+
+repository:
+  directory-path: ""
