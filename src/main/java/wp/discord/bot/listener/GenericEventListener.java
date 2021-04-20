@@ -55,7 +55,6 @@ public class GenericEventListener extends AbstractDiscordEventListener<GenericEv
 				.filter((l) -> l != this) //
 				.map((l) -> l.eventClass()) //
 				.filter((c) -> c != null) //
-				.distinct() //
 				.collect(Collectors.toSet());
 		ignoredClass = Collections.unmodifiableSet(classSet);
 	}
