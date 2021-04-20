@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
+import wp.discord.bot.constant.BotReferenceConstant;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.db.entity.ScheduledAction;
@@ -74,13 +75,13 @@ public class UpdateScheduleTask {
 		String time = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.TIME)).trim();
 		String every = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.EVERY)).trim();
 
-		if ("same".equalsIgnoreCase(time)) {
+		if (BotReferenceConstant.SAME_VALUE.equalsIgnoreCase(time)) {
 			String newTime = SafeUtil.get(() -> ToStringUtils.formatDate(schedule.getPreference().getStartTime(), ScheduledOption.START_DATE_FORMAT));
 			log.debug("set time from: {} to old value: {}", time, newTime);
 			action.getEntities(CmdEntity.TIME).clear();
 			action.getEntities(CmdEntity.TIME).add(newTime);
 		}
-		if ("same".equalsIgnoreCase(every)) {
+		if (BotReferenceConstant.SAME_VALUE.equalsIgnoreCase(every)) {
 			String newEvery = schedule.getPreference().getValue();
 			log.debug("set every-duration from: {} to old value: {}", every, newEvery);
 			action.getEntities(CmdEntity.EVERY).clear();

@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Activity.ActivityType;
+import wp.discord.bot.constant.BotReferenceConstant;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
@@ -22,7 +23,7 @@ public class SetBotStatusTask {
 
 	public void setActivityStatus(BotAction action) throws Exception {
 		String activityStr = action.getFirstEntitiesParam(CmdEntity.VALUE);
-		if ("non".equalsIgnoreCase(activityStr)) {
+		if (BotReferenceConstant.NONE.equalsIgnoreCase(activityStr)) {
 			jda.getPresence().setActivity(null);
 			return;
 		}
@@ -43,7 +44,6 @@ public class SetBotStatusTask {
 		jda.getPresence().setActivity(activity);
 	}
 
-	
 	public void setOnlineStatus(BotAction action) throws Exception {
 		String stat = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.VALUE));
 		if (StringUtils.isEmpty(stat)) {
@@ -64,7 +64,7 @@ public class SetBotStatusTask {
 	}
 
 	private ActivityType getActivityType(String value) throws Exception {
-		if ("playing".equalsIgnoreCase(value) || "plays".equalsIgnoreCase(value) || "play".equalsIgnoreCase(value)) {
+		if (StringUtils.equalsAnyIgnoreCase(value, BotReferenceConstant.ACTIVITY_PLAYING)) {
 			return ActivityType.DEFAULT;
 		}
 		ActivityType type = SafeUtil.get(() -> ActivityType.valueOf(value.toUpperCase()));
@@ -72,7 +72,7 @@ public class SetBotStatusTask {
 			Reply reply = Reply.of().bold("Error!").literal(" Unknown activity: " + value);
 			throw new ActionFailException(reply.newline().append(getActivityHelp()));
 		}
-		
+
 		return type;
 	}
 

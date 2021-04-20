@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import net.dv8tion.jda.api.entities.User;
+import wp.discord.bot.constant.BotReferenceConstant;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.ScheduledActionManager;
@@ -239,12 +240,12 @@ public class AddScheduleTask {
 
 	private Date validateStartTime(String dt) throws Exception {
 		try {
-			if ("now".equalsIgnoreCase(dt)) {
+			if (BotReferenceConstant.TIME_NOW.equalsIgnoreCase(dt)) {
 				return new Date();
 			}
 			String[] frags = dt.split("\\s+");
 			String next = SafeUtil.get(() -> frags[0]);
-			if ("next".equalsIgnoreCase(next)) {
+			if (BotReferenceConstant.TIME_NEXT.equalsIgnoreCase(next)) {
 				String duration = SafeUtil.get(() -> frags[1]);
 				Duration d = validateDuration(duration);
 				return durationToDate(d, new Date());
@@ -265,7 +266,7 @@ public class AddScheduleTask {
 	}
 
 	public Duration validateDuration(String duration) throws Exception {
-		if ("non".equalsIgnoreCase(duration)) {
+		if (BotReferenceConstant.NONE.equalsIgnoreCase(duration)) {
 			return null;
 		}
 		Duration d = ToStringUtils.convertToDuration(duration);
@@ -281,7 +282,7 @@ public class AddScheduleTask {
 		String desiredRunCount = action.getFirstEntitiesParam(CmdEntity.COUNT);
 		BigInteger runCount = null;
 		if (StringUtils.isNotEmpty(desiredRunCount)) {
-			if (desiredRunCount.equalsIgnoreCase("non") || desiredRunCount.equalsIgnoreCase("infinity")) {
+			if (desiredRunCount.equalsIgnoreCase(BotReferenceConstant.NONE) || desiredRunCount.equalsIgnoreCase(BotReferenceConstant.INFINITY)) {
 				return null;
 			}
 

@@ -48,7 +48,7 @@ public class GetScheduleTask {
 
 	private boolean validateAdminMode(BotAction action) throws Exception {
 		boolean adminMode = false;
-		boolean requiredAdmin = "true".equalsIgnoreCase(action.getFirstEntitiesParam(CmdEntity.ADMIN));
+		boolean requiredAdmin = Boolean.TRUE.toString().equalsIgnoreCase(action.getFirstEntitiesParam(CmdEntity.ADMIN));
 		if (requiredAdmin) {
 			DiscordUserRole role = userManager.getRoleOf(action.getAuthorId());
 			adminMode = (role == DiscordUserRole.ADMIN || role == DiscordUserRole.OWNER);

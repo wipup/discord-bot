@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
+import wp.discord.bot.constant.BotReferenceConstant;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.core.bot.BotSessionManager;
@@ -167,7 +168,7 @@ public class CommandLineProcessor implements InitializingBean {
 		String botMentionString = DiscordFormat.mention(jda.getSelfUser());
 
 		String[] botInitString = new String[] { //
-				"bot", "/bot", "!bot", botMentionString //
+				BotReferenceConstant.BOT, "/" + BotReferenceConstant.BOT, "!" + BotReferenceConstant.BOT, botMentionString //
 		};
 
 		botInitCommands = new ArrayList<>();
