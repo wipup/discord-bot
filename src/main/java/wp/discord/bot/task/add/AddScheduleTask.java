@@ -2,6 +2,8 @@ package wp.discord.bot.task.add;
 
 import java.math.BigInteger;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.Date;
@@ -250,7 +252,7 @@ public class AddScheduleTask {
 			}
 			return ToStringUtils.parseDate(dt, ScheduledOption.START_DATE_FORMAT);
 		} catch (Exception e) {
-			Reply r = Reply.of().literal("Invalid Date format!").code(dt).newline() //
+			Reply r = Reply.of().literal("Invalid Date format! ").code(dt).newline() //
 					.literal("Expected format: ").code("yyyy-MM-ddTHH:mm:ss").newline() //
 					.literal("\tOr: ").code("now").literal(" , ").code("\"next PTnDnHnMn.nS\"") //
 					.literal(" , ").code("\"next n<U>\"");
@@ -267,8 +269,8 @@ public class AddScheduleTask {
 	}
 
 	private Date durationToDate(Duration duration, Date startDate) {
-		Temporal t = duration.addTo(startDate.toInstant());
-		return Date.from(ZonedDateTime.from(t).toInstant());
+		Temporal t = duration.addTo(ZonedDateTime.ofInstant(startDate.toInstant(), ZoneId.systemDefault()));
+		return Date.from(LocalDateTime.from(t).atZone(ZoneId.systemDefault()).toInstant());
 	}
 
 	public Duration validateDuration(String duration) throws Exception {
