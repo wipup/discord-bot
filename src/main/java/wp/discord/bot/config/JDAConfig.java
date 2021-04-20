@@ -8,9 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Activity.ActivityType;
 import wp.discord.bot.config.properties.DiscordProperties;
-import wp.discord.bot.config.properties.DiscordStatus;
 import wp.discord.bot.util.SafeUtil;
 
 @Configuration
@@ -25,12 +26,10 @@ public class JDAConfig {
 	public JDA discordJDA() throws Exception {
 		try {
 			log.debug("configuration: {}", discordProperties);
-			DiscordStatus status = discordProperties.getStatus();
-
 			JDABuilder builder = JDABuilder.createDefault(discordProperties.getToken());
-			builder.setActivity(Activity.of(status.getType(), status.getName()));
 			builder.setLargeThreshold(SafeUtil.nonNull(() -> discordProperties.getLargeThreshold(), 50));
-			builder.setStatus(status.getStatus());
+			builder.setActivity(Activity.of(ActivityType.WATCHING, "Initializing"));
+			builder.setStatus(OnlineStatus.DO_NOT_DISTURB);
 
 			return builder.build().awaitReady();
 		} catch (Exception e) {

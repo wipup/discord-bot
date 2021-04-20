@@ -43,7 +43,7 @@ public class CommandMessageListener extends AbstractDiscordEventListener<Message
 			handleRuntimeException(event, e);
 			throw e;
 		} catch (ActionFailException e) {
-			log.error("Action Error: {}", e.getMessage(), e); 
+			log.error("Action Error: {}", e.getMessage(), e);
 			sendReply(event, e);
 
 		} catch (BotException e) {

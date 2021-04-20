@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 
 import brave.Span;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,8 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 	@Autowired
 	private JDA jda;
 
+	private boolean ready = false;
+
 	@Autowired
 	@Qualifier(AsyncConfig.BEAN_UNLIMIT_EXECUTOR)
 	private ExecutorService executor;
@@ -43,7 +46,7 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 	private void startHandler(GenericEvent event) {
 		Span sp = tracing.startNewTrace();
 		try {
-			if (accept(event)) {
+			if (isReady() && accept(event)) {
 				prepareHandleEvent((T) event);
 				handleEvent((T) event);
 			}
@@ -69,9 +72,18 @@ public abstract class AbstractDiscordEventListener<T extends GenericEvent> imple
 		return false;
 	}
 
+	@org.springframework.context.event.EventListener(ApplicationReadyEvent.class)
+	public void setReady() {
+		log.debug("{} is ready to accept: {}", this.getClass().getSimpleName(), eventClass());
+	}
+
 	public boolean acceptType(GenericEvent event) {
 		Class<T> clazz = eventClass();
 		return clazz.isInstance(event);
+	}
+
+	public boolean isReady() {
+		return ready;
 	}
 
 	public boolean acceptCondition(T event) {
