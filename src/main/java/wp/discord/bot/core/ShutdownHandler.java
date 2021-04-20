@@ -6,11 +6,16 @@ import java.util.concurrent.ExecutorService;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Activity.ActivityType;
 import wp.discord.bot.config.AsyncConfig;
+import wp.discord.bot.core.bot.AbstractDiscordEventListener;
 import wp.discord.bot.core.bot.BotSession;
 import wp.discord.bot.core.bot.BotSessionManager;
 import wp.discord.bot.core.persist.AbstractFileBasedRepository;
@@ -21,7 +26,10 @@ import wp.discord.bot.util.SafeUtil;
 public class ShutdownHandler implements DisposableBean {
 
 	@Autowired
-	private Collection<JDA> jdas;
+	private ConfigurableApplicationContext ctx;
+
+	@Autowired
+	private JDA jda;
 
 	@Autowired
 	private Collection<AbstractFileBasedRepository<?>> allRepository;
@@ -29,34 +37,43 @@ public class ShutdownHandler implements DisposableBean {
 	@Autowired
 	private BotSessionManager sessionManager;
 
+	/**
+	 * {@link AsyncConfig#BEAN_CRON_TASK_SCHEDULER}
+	 */
 	@Autowired
 	private ScheduledActionManager scheduler;
 
-	@Qualifier(AsyncConfig.BEAN_GENERIC_EXECUTOR)
+	@Qualifier(AsyncConfig.BEAN_DATABASE_EXECUTOR)
 	@Autowired
-	private ExecutorService genericSingleThreadExecutor;
+	private ExecutorService databaseThreadExecutor;
 
 	@Qualifier(AsyncConfig.BEAN_UNLIMIT_EXECUTOR)
 	@Autowired
-	private ExecutorService genericExecutor;
+	private ExecutorService genericEventExecutor;
 
 	@Override
 	public void destroy() throws Exception {
-		
-		destroyAllSession();
-		destroyAllJDA();
-		shutdownSchedulerTasks();
-
-		log.info("Closing Executor");
-		SafeUtil.suppress(() -> log.info("Runnable Task left: {}", genericSingleThreadExecutor.shutdownNow().size()));
-		SafeUtil.suppress(() -> log.info("Runnable Task left: {}", genericExecutor.shutdownNow().size()));
+		stopListeners();
 
 		allRepository.stream().forEach((r) -> {
 			SafeUtil.suppress(() -> r.destroy());
 		});
+
+		log.info("Closing Executor");
+		databaseThreadExecutor.shutdown();
+		genericEventExecutor.shutdown();
+		shutdownScheduledTaskExecutors();
+
+		destroyAllSession();
+		destroyAllJDA();
 	}
 
-	public void shutdownSchedulerTasks() {
+	private void stopListeners() {
+		jda.getPresence().setPresence(OnlineStatus.DO_NOT_DISTURB, Activity.of(ActivityType.WATCHING, "Shuting Down"));
+		ctx.getBeansOfType(AbstractDiscordEventListener.class).values().forEach((l) -> l.setReady(false));
+	}
+
+	public void shutdownScheduledTaskExecutors() {
 		try {
 			scheduler.destroy();
 		} catch (Exception e) {
@@ -77,7 +94,7 @@ public class ShutdownHandler implements DisposableBean {
 
 	public void destroyAllJDA() throws Exception {
 		log.info("Shuting down JDA");
-		jdas.stream().forEach(this::shutdownJDA);
+		shutdownJDA(jda);
 	}
 
 	public void shutdownJDA(JDA jda) {

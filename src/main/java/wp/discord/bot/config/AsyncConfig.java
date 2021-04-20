@@ -25,7 +25,7 @@ public class AsyncConfig {
 	public static final String BEAN_CRON_TASK_DECORATOR = "taskDecorator";
 	public static final String BEAN_CRON_TASK_EXECUTOR = "cronTaskExecutor";
 	public static final String BEAN_CRON_TASK_SCHEDULER = "cronTaskScheduler";
-	public static final String BEAN_GENERIC_EXECUTOR = "genericSingleThreadExecutor";
+	public static final String BEAN_DATABASE_EXECUTOR = "genericSingleThreadExecutor";
 	public static final String BEAN_UNLIMIT_EXECUTOR = "genericUnlimitThreadExecutor";
 
 	private static final AtomicInteger THREAD_COUNT = new AtomicInteger(0);
@@ -33,7 +33,7 @@ public class AsyncConfig {
 	@Autowired
 	private TracingHandler tracing;
 
-	@Bean(BEAN_GENERIC_EXECUTOR)
+	@Bean(BEAN_DATABASE_EXECUTOR)
 	public ExecutorService genericSingleThreadExecutor() {
 		return Executors.newSingleThreadExecutor();
 	}

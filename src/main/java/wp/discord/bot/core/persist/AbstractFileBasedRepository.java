@@ -28,7 +28,7 @@ public abstract class AbstractFileBasedRepository<T> implements Reloadable<T>, D
 	@Autowired
 	private RepositoryProperties properties;
 
-	@Qualifier(AsyncConfig.BEAN_GENERIC_EXECUTOR)
+	@Qualifier(AsyncConfig.BEAN_DATABASE_EXECUTOR)
 	@Autowired
 	private ExecutorService executor;
 
