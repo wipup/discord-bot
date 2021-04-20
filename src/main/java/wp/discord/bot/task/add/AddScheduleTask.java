@@ -2,6 +2,8 @@ package wp.discord.bot.task.add;
 
 import java.math.BigInteger;
 import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
@@ -9,6 +11,7 @@ import java.util.concurrent.ScheduledFuture;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.convert.DurationStyle;
 import org.springframework.stereotype.Component;
 
 import net.dv8tion.jda.api.entities.User;
@@ -233,24 +236,46 @@ public class AddScheduleTask {
 		return ce.getExpression();
 	}
 
-	public Date validateStartTime(String dt) throws Exception {
+	private Date validateStartTime(String dt) throws Exception {
 		try {
 			if ("now".equalsIgnoreCase(dt)) {
 				return new Date();
 			}
+			String[] frags = dt.split("\\s+");
+			String next = SafeUtil.get(() -> frags[0]);
+			if ("next".equalsIgnoreCase(next)) {
+				String duration = SafeUtil.get(() -> frags[1]);
+				Duration d = validateDuration(duration);
+				return durationToDate(d, new Date());
+			}
 			return ToStringUtils.parseDate(dt, ScheduledOption.START_DATE_FORMAT);
 		} catch (Exception e) {
 			Reply r = Reply.of().literal("Invalid Date format!").code(dt).newline() //
-					.literal("Expected format: ").code("yyyy-MM-ddTHH:mm:ss");
+					.literal("Expected format: ").code("yyyy-MM-ddTHH:mm:ss").newline() //
+					.literal("\tOr: ").code("now").literal(" , ").code("\"next PTnDnHnMn.nS\"") //
+					.literal(" , ").code("\"next n<U>\"");
 			throw new ActionFailException(r);
 		}
+	}
+
+	private Duration convertToDuration(String str) {
+		Duration d = SafeUtil.get(() -> Duration.parse(str));
+		if (d != null) {
+			return d;
+		}
+		return SafeUtil.get(() -> DurationStyle.detectAndParse(str));
+	}
+
+	private Date durationToDate(Duration duration, Date startDate) {
+		Temporal t = duration.addTo(startDate.toInstant());
+		return Date.from(ZonedDateTime.from(t).toInstant());
 	}
 
 	public Duration validateDuration(String duration) throws Exception {
 		if ("non".equalsIgnoreCase(duration)) {
 			return null;
 		}
-		Duration d = SafeUtil.get(() -> Duration.parse(duration));
+		Duration d = convertToDuration(duration);
 		if (d == null) {
 			Reply reply = Reply.of().literal("Invalid duration-time: ").code(duration).newline() //
 					.literal("Duration time must match ").bold("ISO-8601").literal(" DURATION format with pattern ").code("PnDTnHnMn.nS");
