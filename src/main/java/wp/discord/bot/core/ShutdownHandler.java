@@ -2,6 +2,7 @@ package wp.discord.bot.core;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,9 +63,14 @@ public class ShutdownHandler implements DisposableBean {
 		destroyAllSession();
 		destroyAllJDA();
 
-		log.info("Closing Executor");
+		log.info("Closing DB Executor");
 		databaseThreadExecutor.shutdown();
+		databaseThreadExecutor.awaitTermination(10, TimeUnit.SECONDS);
+		
+		log.info("Closing Generic Executor");
 		genericEventExecutor.shutdown();
+		genericEventExecutor.awaitTermination(10, TimeUnit.SECONDS);
+		
 		shutdownScheduledTaskExecutors();
 	}
 
