@@ -3,26 +3,23 @@ package wp.discord.bot.task.cron;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.scheduling.support.SimpleTriggerContext;
 
 import lombok.Getter;
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.constant.CmdEntity;
 import wp.discord.bot.model.Describeable;
 import wp.discord.bot.model.Reference;
 import wp.discord.bot.model.Referenceable;
+import wp.discord.bot.util.DateTimeUtil;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 
 @Getter
-@Slf4j
 @ToString
 public class CronEntity implements Referenceable, Describeable {
 
@@ -42,25 +39,7 @@ public class CronEntity implements Referenceable, Describeable {
 	}
 
 	public List<Date> samplingDate(int count) {
-		if (count <= 0) {
-			return new ArrayList<>();
-		}
-
-		SimpleTriggerContext ctx = new SimpleTriggerContext();
-
-		List<Date> result = new ArrayList<>(count);
-		for (int i = 0; i < count; i++) {
-			Date d = trigger.nextExecutionTime(ctx);
-			if (d != null) {
-				ctx.update(d, d, d);
-				result.add(d);
-				log.trace("Next trigger date: {}", DateFormatUtils.format(d, "dd MMMM yyyy - HH:mm:ss.SSS"));
-			} else {
-				log.trace("No more next trigger date");
-			}
-		}
-
-		return result.stream().distinct().sorted().collect(Collectors.toList());
+		return DateTimeUtil.samplingDate(trigger, count);
 	}
 
 	public Reply reply(int samplingCount) {
@@ -91,7 +70,7 @@ public class CronEntity implements Referenceable, Describeable {
 
 		return reply.newline();
 	}
-	
+
 	@Override
 	public Reply reply() {
 		return reply(3);

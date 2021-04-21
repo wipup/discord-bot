@@ -2,10 +2,6 @@ package wp.discord.bot.task.add;
 
 import java.math.BigInteger;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
@@ -31,6 +27,7 @@ import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.cron.CompileCronActionHandler;
 import wp.discord.bot.task.cron.CronEntity;
+import wp.discord.bot.util.DateTimeUtil;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 import wp.discord.bot.util.ToStringUtils;
@@ -248,7 +245,7 @@ public class AddScheduleTask {
 			if (BotReferenceConstant.TIME_NEXT.equalsIgnoreCase(next)) {
 				String duration = SafeUtil.get(() -> frags[1]);
 				Duration d = validateDuration(duration);
-				return durationToDate(d, new Date());
+				return DateTimeUtil.addDurationToDate(d, new Date());
 			}
 			return ToStringUtils.parseDate(dt, ScheduledOption.START_DATE_FORMAT);
 		} catch (Exception e) {
@@ -258,11 +255,6 @@ public class AddScheduleTask {
 					.literal(" , ").code("\"next n<U>\"");
 			throw new ActionFailException(r);
 		}
-	}
-
-	private Date durationToDate(Duration duration, Date startDate) {
-		Temporal t = duration.addTo(ZonedDateTime.ofInstant(startDate.toInstant(), ZoneId.systemDefault()));
-		return Date.from(LocalDateTime.from(t).atZone(ZoneId.systemDefault()).toInstant());
 	}
 
 	public Duration validateDuration(String duration) throws Exception {
@@ -278,7 +270,6 @@ public class AddScheduleTask {
 		return d;
 	}
 
-	
 	public BigInteger parseDesiredRunCount(BotAction action) throws Exception {
 		String desiredRunCount = action.getFirstEntitiesParam(CmdEntity.COUNT);
 		BigInteger runCount = null;

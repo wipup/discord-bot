@@ -2,6 +2,7 @@ package wp.discord.bot.db.repository;
 
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.User;
 import wp.discord.bot.core.persist.AbstractFileBasedRepository;
 import wp.discord.bot.db.entity.ScheduledAction;
+import wp.discord.bot.db.entity.ScheduledOption;
+import wp.discord.bot.db.entity.ScheduledType;
 import wp.discord.bot.util.SafeUtil;
 import wp.discord.bot.util.ToStringUtils;
 
@@ -116,6 +119,13 @@ public class ScheduleRepository extends AbstractFileBasedRepository<ScheduledAct
 
 	@Override
 	public void doReload(ScheduledAction entity) throws Exception {
+		Date now = new Date();
+		ScheduledOption opt = entity.getPreference();
+		if (opt.getType() == ScheduledType.FIXED_RATE && entity.isActive()) {
+			if (opt.getStartTime().before(now)) { // if startTime is in the past
+				entity.setPreference(ScheduledOption.fixedRate(opt.getValue(), opt.nextTriggerTime()));
+			}
+		}
 		save(entity);
 	}
 

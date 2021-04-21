@@ -3,9 +3,12 @@ package wp.discord.bot.db.entity;
 import java.time.Duration;
 import java.util.Date;
 
+import org.springframework.scheduling.support.CronTrigger;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.model.Describeable;
+import wp.discord.bot.util.DateTimeUtil;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.ToStringUtils;
 
@@ -28,6 +31,8 @@ public class ScheduledOption implements Describeable {
 		this.value = value;
 	}
 
+	// --------------------------------
+
 	public static ScheduledOption cron(String cron) {
 		return new ScheduledOption(ScheduledType.CRON, cron);
 	}
@@ -49,6 +54,18 @@ public class ScheduledOption implements Describeable {
 		ScheduledOption opt = new ScheduledOption(ScheduledType.TIME, "");
 		opt.startTime = d;
 		return opt;
+	}
+
+	// --------------------------------
+
+	public Date nextTriggerTime() {
+		if (getType() == ScheduledType.CRON) {
+			return DateTimeUtil.samplingDate(new CronTrigger(getValue()), 1).get(0);
+		} else if (getType() == ScheduledType.FIXED_RATE) {
+			return DateTimeUtil.addDurationToDate(Duration.parse(getValue()), getStartTime());
+		} else {
+			return null;
+		}
 	}
 
 	@Override
