@@ -70,7 +70,6 @@ public class TracingHandler {
 		return (e) -> {
 			Span span = null;
 			Map<String, String> currentCtx = MDC.getCopyOfContextMap();
-			log.debug("MDC CTX old: {}, current: {}", oldCtx, currentCtx);
 			try {
 				if (MapUtils.isNotEmpty(oldCtx)) {
 					MDC.setContextMap(oldCtx);

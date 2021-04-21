@@ -216,7 +216,7 @@ public class AddScheduleTask {
 			if (d == null) {
 				return ScheduledOption.AtTime(startTime);
 			} else {
-				return ScheduledOption.fixedRate(every, startTime);
+				return ScheduledOption.fixedRate(d.toString(), startTime);
 			}
 		}
 
