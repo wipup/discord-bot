@@ -164,9 +164,23 @@ public class ScheduledActionManager implements DisposableBean {
 			unlimitExecutor.submit(taskDecorator.decorate(() -> {
 				notifyAuthor(scheduleAction, action, be);
 			}));
+		} else {
+			unlimitExecutor.submit(taskDecorator.decorate(() -> {
+				notifyOwner(scheduleAction, action, e);
+			}));
 		}
 		unlimitExecutor.submit(taskDecorator.decorate(() -> {
-			notifyOwner(scheduleAction, action, e);
+			notifyAuthor(scheduleAction, action, e);
+		}));
+	}
+
+	private void notifyAuthor(ScheduledAction scheduleAction, BotAction action, Throwable e) {
+		String authorId = scheduleAction.getAuthorId();
+		jda.retrieveUserById(authorId).queue(tracer.trace((user) -> {
+			Reply reply = createReplyForUnknownErrorToAuthor(scheduleAction, action, e);
+			errorHandler.notifyUser(user, reply);
+		}), tracer.trace((error) -> {
+			log.error("Failed to notify author ", errorHandler);
 		}));
 	}
 
@@ -179,6 +193,11 @@ public class ScheduledActionManager implements DisposableBean {
 			log.error("Failed to notify author ", errorHandler);
 		}));
 
+	}
+
+	private Reply createReplyForUnknownErrorToAuthor(ScheduledAction scheduleAction, BotAction action, Throwable e) {
+		return Reply.of().literal("Failed to execute Scheduled Action").newline() //
+				.append(scheduleAction.shortReply()).newline();
 	}
 
 	private Reply createReplyForAuthor(ScheduledAction scheduleAction, BotAction action, BotException e) {

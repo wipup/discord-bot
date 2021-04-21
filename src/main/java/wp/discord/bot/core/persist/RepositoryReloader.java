@@ -65,11 +65,11 @@ public class RepositoryReloader implements InitializingBean {
 
 	private void rescheduledTask() throws Exception {
 		scheduledRepository.findAll().stream() //
-				.filter((a) -> a.isActive()) //
-				.forEach((a) -> {
-					log.debug("reschedule: {}", a);
-					ScheduledFuture<?> future = SafeUtil.runtimeException(() -> scheduledActionManager.scheduleCronTask(a));
-					a.setScheduledTask(future);
+				.filter((repo) -> repo.isActive()) //
+				.forEach((repo) -> {
+					log.debug("reschedule: {}", repo);
+					ScheduledFuture<?> future = SafeUtil.runtimeException(() -> scheduledActionManager.scheduleCronTask(repo));
+					repo.setScheduledTask(future);
 				});
 	}
 }

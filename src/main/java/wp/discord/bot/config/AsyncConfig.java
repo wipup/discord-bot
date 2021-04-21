@@ -6,6 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -53,11 +54,17 @@ public class AsyncConfig {
 	public TaskDecorator decorator() {
 		return (runnable) -> {
 			return () -> {
-				Span span = tracing.startNewTrace();
+				Span span = null;
 				try {
+					String traceId = tracing.getTraceId();
+					if (StringUtils.isEmpty(traceId)) {
+						span = tracing.startNewTrace();
+					}
 					runnable.run();
 				} finally {
-					tracing.clearTraceContext(span);
+					if (span != null) {
+						tracing.clearTraceContext(span);
+					}
 				}
 			};
 		};

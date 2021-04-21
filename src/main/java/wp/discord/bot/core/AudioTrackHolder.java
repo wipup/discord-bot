@@ -4,9 +4,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,22 +92,24 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 		loadAudioTracks();
 	}
 
-	public void reloadAudio() throws Exception {
+	public List<Future<Void>> reloadAudio() throws Exception {
 		init();
 		audioTracks.clear();
-		loadAudioTracks();
+		List<Future<Void>> futures = loadAudioTracks();
 		botSessionManager.getAllSessions().stream().forEach((s) -> {
 			botSessionManager.updateBotAudioPlayer(s, audioPlayerManager.createPlayer());
 		});
+		return futures;
 	}
 
-	private void loadAudioTracks() throws Exception {
+	private List<Future<Void>> loadAudioTracks() throws Exception {
 		trackFilePathMap = new ConcurrentHashMap<>();
+		List<Future<Void>> futureList = new LinkedList<>();
 
 		String audioDir = discordProperties.getAudioFolder();
 		if (StringUtils.isEmpty(audioDir)) {
 			log.warn("Audio path is empty");
-			return;
+			return futureList;
 		}
 		Path audioPath = Paths.get(audioDir);
 		if (!Files.isDirectory(audioPath)) {
@@ -122,9 +126,12 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 
 						trackFilePathMap.put(absolutePath, fileName);
 						log.debug("loading: {}", fileName);
-						audioPlayerManager.loadItem(absolutePath, this);
+
+						Future<Void> future = audioPlayerManager.loadItem(absolutePath, this); // this is asynchronous loading
+						futureList.add(future);
 					});
 		}
+		return futureList;
 	}
 
 	@Override

@@ -46,6 +46,10 @@ public class TracingHandler {
 	public String getTraceId() {
 		return MDC.get(X_B3_TRACE_ID);
 	}
+	
+	public String getSpanId() {
+		return MDC.get(X_B3_SPAN_ID);
+	}
 
 	public void clearTraceContext() {
 		MDC.remove(X_B3_TRACE_ID);
@@ -60,19 +64,27 @@ public class TracingHandler {
 		return addTracingContext(consumer);
 	}
 
+	// TODO fix bug : trace ID not match
 	public <T> Consumer<T> addTracingContext(Consumer<T> consumer) {
-		Map<String, String> ctx = MDC.getCopyOfContextMap();
+		Map<String, String> oldCtx = MDC.getCopyOfContextMap();
 		return (e) -> {
-			Map<String, String> oldCtx = MDC.getCopyOfContextMap();
+			Span span = null;
+			Map<String, String> currentCtx = MDC.getCopyOfContextMap();
+			log.debug("MDC CTX old: {}, current: {}", oldCtx, currentCtx);
 			try {
-				if (MapUtils.isNotEmpty(ctx)) {
-					MDC.setContextMap(ctx);
+				if (MapUtils.isNotEmpty(oldCtx)) {
+					MDC.setContextMap(oldCtx);
+				} else {
+					span = startNewTrace();
 				}
 				consumer.accept(e);
 			} finally {
 				MDC.clear();
-				if (MapUtils.isNotEmpty(oldCtx)) {
-					MDC.setContextMap(oldCtx);
+				if (MapUtils.isNotEmpty(currentCtx)) {
+					MDC.setContextMap(currentCtx);
+				}
+				if (span != null) {
+					clearTraceContext(span);
 				}
 			}
 		};
