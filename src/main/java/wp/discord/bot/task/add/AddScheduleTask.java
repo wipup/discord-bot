@@ -213,6 +213,9 @@ public class AddScheduleTask {
 			if (d == null) {
 				return ScheduledOption.AtTime(startTime);
 			} else {
+				if (BotReferenceConstant.TIME_NOW.equalsIgnoreCase(time)) {
+					startTime = DateTimeUtil.addDurationToDate(d, startTime);
+				}
 				return ScheduledOption.fixedRate(d.toString(), startTime);
 			}
 		}
