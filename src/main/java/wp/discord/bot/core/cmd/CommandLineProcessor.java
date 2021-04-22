@@ -102,7 +102,7 @@ public class CommandLineProcessor implements InitializingBean {
 
 					index = collectActionParams(action, commands, index, cmdAction);
 				} else {
-					CmdToken entity = CmdToken.getMatchingEntity(frag);
+					CmdToken entity = CmdToken.getMatchingCmdToken(frag);
 					if (entity == null) {
 						Reply reply = Reply.of().literal("Unknown option: ").code(frag).newline() //
 								.mentionUser(authorId).literal(" Please try again.");

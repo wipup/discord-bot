@@ -40,7 +40,7 @@ public class ReactionHandleTask {
 		ReactionEmote emote = event.getReactionEmote();
 		log.debug("reaction code: {}, emoji: {}", emote.getAsCodepoints(), emote.getAsReactionCode());
 
-		CmdToken entity = CmdToken.getMatchingEntity(ref.getEntity());
+		CmdToken entity = CmdToken.getMatchingCmdToken(ref.getEntity());
 		if (entity == CmdToken.SCHEDULE) {
 			return;
 		}

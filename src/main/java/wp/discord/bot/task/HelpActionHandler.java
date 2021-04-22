@@ -40,7 +40,7 @@ public class HelpActionHandler implements ActionHandler {
 			return;
 		}
 
-		CmdToken entity = CmdToken.getMatchingEntity(param);
+		CmdToken entity = CmdToken.getMatchingCmdToken(param);
 		if (entity != null) {
 			replyCmdEntityHelp(cmd, action, channel);
 			return;

@@ -22,7 +22,7 @@ public class AddActionHandler implements ActionHandler {
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		String targetEntity = SafeUtil.get(() -> action.getActionParams().get(0));
-		CmdToken entity = CmdToken.getMatchingEntity(targetEntity);
+		CmdToken entity = CmdToken.getMatchingCmdToken(targetEntity);
 		if (entity == null) {
 			Reply rep = Reply.of().literal("Unknown entity: ").code(targetEntity);
 			throw new ActionFailException(rep);

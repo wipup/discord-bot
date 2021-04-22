@@ -1,5 +1,7 @@
 package wp.discord.bot.constant;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.Getter;
 
 @Getter
@@ -23,19 +25,29 @@ public enum CmdAction {
 	;
 
 	private String cmd;
+	private String shortCmd;
 	private int parameterCount = 0;
 
 	private CmdAction(String cmd) {
 		this(cmd, 0);
 	}
 
-	private CmdAction(String cmd, int paramCount) {
+	private CmdAction(String cmd, int paramCount, String shortCmd) {
 		this.cmd = cmd;
 		this.parameterCount = paramCount;
+		this.shortCmd = StringUtils.trimToNull(shortCmd);
+	}
+
+	private CmdAction(String cmd, int paramCount) {
+		this(cmd, paramCount, null);
 	}
 
 	public boolean accept(String command) {
-		return cmd.equalsIgnoreCase(command);
+		boolean match = cmd.equalsIgnoreCase(command);
+		if (!match && shortCmd != null) {
+			return shortCmd.equalsIgnoreCase(command);
+		}
+		return match;
 	}
 
 	public static CmdAction getMatchingAction(String cmd) {

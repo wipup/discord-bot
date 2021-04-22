@@ -25,7 +25,7 @@ public class RunActionHandler implements ActionHandler {
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		String targetEntity = StringUtils.defaultString(SafeUtil.get(() -> action.getActionParams().get(0)));
-		CmdToken target = CmdToken.getMatchingEntity(targetEntity);
+		CmdToken target = CmdToken.getMatchingCmdToken(targetEntity);
 		if (target == null) {
 			Reply reply = Reply.of().literal("Unknown entity: ").code(targetEntity);
 			throw new ActionFailException(reply);
