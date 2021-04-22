@@ -37,7 +37,7 @@ public class PrivateTextChannelActionHandler implements ActionHandler {
 	}
 
 	private String getMessage(BotAction action) throws Exception {
-		String message = action.getFirstEntitiesParam(CmdToken.MESSAGE);
+		String message = action.getFirstTokenParam(CmdToken.MESSAGE);
 		if (StringUtils.isEmpty(message)) {
 			Reply reply = Reply.of().literal("Empty text-message ").newline() //
 					.mentionUser(action.getAuthorId()).literal(" please try again");

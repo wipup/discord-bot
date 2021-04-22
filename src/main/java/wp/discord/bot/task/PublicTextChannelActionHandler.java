@@ -26,7 +26,7 @@ public class PublicTextChannelActionHandler implements ActionHandler {
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
-		String channelMention = action.getFirstEntitiesParam(CmdToken.CHANNEL);
+		String channelMention = action.getFirstTokenParam(CmdToken.CHANNEL);
 		String channelId = DiscordFormat.extractId(channelMention);
 
 		TextChannel channel = jda.getTextChannelById(channelId);
@@ -36,7 +36,7 @@ public class PublicTextChannelActionHandler implements ActionHandler {
 			throw new ActionFailException(reply);
 		}
 
-		String message = action.getFirstEntitiesParam(CmdToken.MESSAGE);
+		String message = action.getFirstTokenParam(CmdToken.MESSAGE);
 		if (StringUtils.isEmpty(message)) {
 			Reply reply = Reply.of().literal("Empty text-message ").code(channelMention).newline()//
 					.mentionUser(action.getAuthorId()).literal(" please try again");

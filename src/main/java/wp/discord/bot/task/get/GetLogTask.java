@@ -42,7 +42,7 @@ public class GetLogTask {
 	public void getLogs(BotAction action) throws Exception {
 		roleEnforcer.allowOnlyAdminOrHigher(action);
 
-		String name = StringUtils.defaultIfBlank(action.getFirstEntitiesParam(CmdToken.NAME), "*");
+		String name = StringUtils.defaultIfBlank(action.getFirstTokenParam(CmdToken.NAME), "*");
 		Path logDir = getLogBaseDir();
 		log.debug("reading log directory: {}", logDir);
 

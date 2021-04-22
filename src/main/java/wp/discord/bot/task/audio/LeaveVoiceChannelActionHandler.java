@@ -35,7 +35,7 @@ public class LeaveVoiceChannelActionHandler implements ActionHandler {
 			return;
 		}
 
-		String channelId = action.getFirstEntitiesParam(CmdToken.CHANNEL);
+		String channelId = action.getFirstTokenParam(CmdToken.CHANNEL);
 		channelId = DiscordFormat.extractId(channelId);
 
 		if (StringUtils.isEmpty(channelId)) {

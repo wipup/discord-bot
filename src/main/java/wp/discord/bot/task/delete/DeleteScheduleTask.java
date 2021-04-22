@@ -29,7 +29,7 @@ public class DeleteScheduleTask {
 	
 	public void deleteSchedule(BotAction action) throws Exception {
 		String author = action.getAuthorId();
-		String scheduleId = action.getFirstEntitiesParam(CmdToken.ID);
+		String scheduleId = action.getFirstTokenParam(CmdToken.ID);
 
 		if (StringUtils.isEmpty(scheduleId)) {
 			Reply r = Reply.of().mentionUser(author).bold(" Error!").literal(" Schedule ID is required!").newline() //

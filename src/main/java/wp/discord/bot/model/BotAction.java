@@ -45,8 +45,8 @@ public class BotAction {
 		isFromScheduler = false;
 	}
 
-	public String getEntitiesParam(CmdToken e, int index) {
-		List<String> list = getEntities(e);
+	public String getTokenParams(CmdToken e, int index) {
+		List<String> list = getAllTokenParams(e);
 		if (index < 0 || index >= list.size()) {
 			return null;
 		}
@@ -62,8 +62,8 @@ public class BotAction {
 //		return value;
 //	}
 
-	public String getFirstEntitiesParam(CmdToken e) {
-		return getEntitiesParam(e, 0);
+	public String getFirstTokenParam(CmdToken e) {
+		return getTokenParams(e, 0);
 	}
 
 //	public String getRequiredFirstEntitiesParam(CmdEntity e) throws Exception {
@@ -75,7 +75,7 @@ public class BotAction {
 //		return value;
 //	}
 
-	public List<String> getEntities(CmdToken e) {
+	public List<String> getAllTokenParams(CmdToken e) {
 		List<String> list = entities.get(e);
 		if (list == null) {
 			list = new ArrayList<>(e.getParameterCount());

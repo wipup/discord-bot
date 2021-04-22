@@ -52,7 +52,7 @@ public class DeleteMessageTask {
 	}
 
 	private String getMessageId(BotAction action) throws Exception {
-		String messageId = DiscordFormat.extractId(action.getFirstEntitiesParam(CmdToken.ID));
+		String messageId = DiscordFormat.extractId(action.getFirstTokenParam(CmdToken.ID));
 		if (StringUtils.isEmpty(messageId)) {
 			Reply reply = Reply.of().bold("Error! ").literal("Message ID is required!").newline()//
 					.code("Usage: ").code("bot delete message [channel <channel-id>] id <message-id>");
@@ -63,7 +63,7 @@ public class DeleteMessageTask {
 
 	public MessageChannel getMessageChannel(BotAction action) throws Exception {
 		MessageChannel mc = null;
-		String channelId = DiscordFormat.extractId(action.getFirstEntitiesParam(CmdToken.CHANNEL));
+		String channelId = DiscordFormat.extractId(action.getFirstTokenParam(CmdToken.CHANNEL));
 		if (StringUtils.isEmpty(channelId)) {
 			mc = action.getEventMessageChannel();
 			log.debug("Use default message channel: {}", mc);

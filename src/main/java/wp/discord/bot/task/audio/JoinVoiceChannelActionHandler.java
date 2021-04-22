@@ -38,14 +38,14 @@ public class JoinVoiceChannelActionHandler implements ActionHandler {
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
-		String channelId = action.getFirstEntitiesParam(CmdToken.CHANNEL);
+		String channelId = action.getFirstTokenParam(CmdToken.CHANNEL);
 		String userId = userManager.getUserEntityId(action);
 
 		channelId = DiscordFormat.extractId(channelId);
 		if (StringUtils.isEmpty(userId)) {
 			userId = action.getAuthorId();
-			action.getEntities(CmdToken.USER).clear();
-			action.getEntities(CmdToken.USER).add(userId);
+			action.getAllTokenParams(CmdToken.USER).clear();
+			action.getAllTokenParams(CmdToken.USER).add(userId);
 			log.debug("set default user-id to author: {}", userId);
 		}
 
@@ -83,7 +83,7 @@ public class JoinVoiceChannelActionHandler implements ActionHandler {
 	}
 
 	public void joinChannelByChannelId(BotAction action) throws Exception {
-		String channelId = action.getFirstEntitiesParam(CmdToken.CHANNEL);
+		String channelId = action.getFirstTokenParam(CmdToken.CHANNEL);
 		channelId = DiscordFormat.extractId(channelId);
 
 		VoiceChannel vc = jda.getVoiceChannelById(channelId);

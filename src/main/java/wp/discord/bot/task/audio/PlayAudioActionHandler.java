@@ -25,7 +25,7 @@ public class PlayAudioActionHandler implements ActionHandler {
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
-		String trackName = action.getFirstEntitiesParam(CmdToken.AUDIO);
+		String trackName = action.getFirstTokenParam(CmdToken.AUDIO);
 		AudioTrack track = audioHolder.getAudioTrack(trackName);
 		if (track == null) {
 			Reply reply = Reply.of().literal("Invalid audio-id ").code(trackName).newline() //

@@ -24,8 +24,8 @@ public class ReactionAddListener extends AbstractDiscordEventListener<MessageRea
 
 		BotAction action = cmdProcessor.newBotAction(event);
 		action.setAuthorId(event.getUserId());
-		action.getEntities(CmdToken.MESSAGE).add(event.getMessageId());
-		action.getEntities(CmdToken.REACTION).add(event.getReaction().getReactionEmote().getAsReactionCode());
+		action.getAllTokenParams(CmdToken.MESSAGE).add(event.getMessageId());
+		action.getAllTokenParams(CmdToken.REACTION).add(event.getReaction().getReactionEmote().getAsReactionCode());
 
 		task.handleAction(event, action);
 	}

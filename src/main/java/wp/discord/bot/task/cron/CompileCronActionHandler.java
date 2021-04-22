@@ -41,7 +41,7 @@ public class CompileCronActionHandler implements ActionHandler {
 		}
 
 		int samplingCount = DEFAULT_SAMPLING_COUNT;
-		String count = StringUtils.defaultString(action.getFirstEntitiesParam(CmdToken.COUNT));
+		String count = StringUtils.defaultString(action.getFirstTokenParam(CmdToken.COUNT));
 		if (StringUtils.isNotBlank(count)) {
 			BigInteger bi = SafeUtil.get(() -> new BigInteger(count));
 			if (bi == null) {

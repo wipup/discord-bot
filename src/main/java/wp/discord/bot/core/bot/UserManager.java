@@ -85,7 +85,7 @@ public class UserManager implements InitializingBean {
 	}
 
 	public String getUserEntityId(BotAction action) {
-		String userId = StringUtils.trim(action.getFirstEntitiesParam(CmdToken.USER));
+		String userId = StringUtils.trim(action.getFirstTokenParam(CmdToken.USER));
 		if (BotReferenceConstant.USER_AUTHOR.equalsIgnoreCase(userId)) {
 			return action.getAuthorId();
 		}

@@ -33,7 +33,7 @@ public class GetScheduleTask {
 	private ScheduleRepository repository;
 
 	public void handleGetSchedule(BotAction action) throws Exception {
-		String scheduleId = action.getFirstEntitiesParam(CmdToken.ID);
+		String scheduleId = action.getFirstTokenParam(CmdToken.ID);
 		boolean adminMode = validateAdminMode(action);
 
 		Reply reply = null;
@@ -48,7 +48,7 @@ public class GetScheduleTask {
 
 	private boolean validateAdminMode(BotAction action) throws Exception {
 		boolean adminMode = false;
-		boolean requiredAdmin = Boolean.TRUE.toString().equalsIgnoreCase(action.getFirstEntitiesParam(CmdToken.ADMIN));
+		boolean requiredAdmin = Boolean.TRUE.toString().equalsIgnoreCase(action.getFirstTokenParam(CmdToken.ADMIN));
 		if (requiredAdmin) {
 			DiscordUserRole role = userManager.getRoleOf(action.getAuthorId());
 			adminMode = (role == DiscordUserRole.ADMIN || role == DiscordUserRole.OWNER);
@@ -108,7 +108,7 @@ public class GetScheduleTask {
 	}
 
 	public ScheduledAction getScheduleAdmin(BotAction action, BigInteger id, String scheduleId) throws Exception {
-		String userId = DiscordFormat.extractId(action.getFirstEntitiesParam(CmdToken.USER));
+		String userId = DiscordFormat.extractId(action.getFirstTokenParam(CmdToken.USER));
 		if (StringUtils.isNotBlank(userId)) {
 			return repository.find(userId, id);
 		} else {

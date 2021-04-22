@@ -133,7 +133,7 @@ public class CommandLineProcessor implements InitializingBean {
 		int count = 0;
 		for (int i = currentIndex + 1; i < currentIndex + 1 + entity.getParameterCount() && i < tokens.length; i++) {
 			count++;
-			action.getEntities(entity).add(tokens[i]);
+			action.getAllTokenParams(entity).add(tokens[i]);
 		}
 		return currentIndex + count;
 	}
