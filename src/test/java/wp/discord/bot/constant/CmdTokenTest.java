@@ -1,13 +1,14 @@
 package wp.discord.bot.constant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Test;
 
 public class CmdTokenTest {
@@ -18,16 +19,12 @@ public class CmdTokenTest {
 		for (CmdToken t : CmdToken.values()) {
 			Collection<String> cmds = t.getCmds();
 			assertNotNull(cmds);
-
-			if (CollectionUtils.isEmpty(cmds)) {
-				throw new IllegalStateException("Empty Token: " + t);
-			}
+			assertFalse(cmds.isEmpty(), "Empty Token: " + t);
 
 			cmds.forEach((cmd) -> {
 				cmd = cmd.toLowerCase();
-				if (tokens.contains(cmd)) {
-					throw new IllegalStateException("Duplicated Token: " + t + ", cmd: " + cmd);
-				}
+
+				assertFalse(tokens.contains(cmd), "Duplicated Token: " + t + ", cmd: " + cmd);
 				tokens.add(cmd);
 			});
 		}
@@ -38,9 +35,7 @@ public class CmdTokenTest {
 		for (CmdToken t : CmdToken.values()) {
 			Collection<String> cmds = t.getCmds();
 			for (String cmd : cmds) {
-				if (!t.accept(cmd)) {
-					throw new IllegalStateException("Not Accepting Own token key: " + t + ", cmd: " + cmd);
-				}
+				assertTrue(t.accept(cmd), "Not Accepting Own token key: " + t + ", cmd: " + cmd);
 			}
 		}
 	}
