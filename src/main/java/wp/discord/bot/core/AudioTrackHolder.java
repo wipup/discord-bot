@@ -34,6 +34,10 @@ import wp.discord.bot.util.SafeUtil;
 @Slf4j
 public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandler {
 
+	private static String[] SUPPORTED_FORMAT = new String[] { //
+			".mp3", ".flac", ".wav", ".aac", "mp4", "m4a", "ogg", "flac" //
+	};
+
 	@Autowired
 	private DiscordProperties discordProperties;
 
@@ -119,7 +123,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 		try (Stream<Path> pathStream = Files.list(audioPath)) {
 			pathStream.filter(Files::isRegularFile) //
 					.filter(Files::isReadable) //
-					.filter((p) -> StringUtils.endsWithIgnoreCase(p.getFileName().toString(), ".mp3")) //
+					.filter((p) -> StringUtils.endsWithAny(p.getFileName().toString().toLowerCase(), SUPPORTED_FORMAT)) //
 					.map((p) -> p.toAbsolutePath()).forEach((absPath) -> {
 						String absolutePath = absPath.toString();
 						String fileName = absPath.getFileName().toString();
