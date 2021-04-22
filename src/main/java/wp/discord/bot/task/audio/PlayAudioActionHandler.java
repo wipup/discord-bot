@@ -13,6 +13,7 @@ import wp.discord.bot.core.bot.BotSession;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
+import wp.discord.bot.util.SafeUtil;
 
 @Component
 public class PlayAudioActionHandler implements ActionHandler {
@@ -25,6 +26,28 @@ public class PlayAudioActionHandler implements ActionHandler {
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
+		AudioTrack track = getAudioTrack(action);
+
+		BotSession session = action.getSession();
+		joinChannelTask.handleAction(action);
+
+		int playCount = getCount(action);
+		if (session != null) {
+			for (int i = 0; i < playCount; i++) {
+				session.playTrack(track);
+				session.playTrack(track);
+			}
+			session.leaveVoiceChannel();
+
+		} else { // unknown session
+			Reply reply = Reply.of().literal("Unknown voice-channel ").newline() //
+					.mentionUser(action.getAuthorId()).literal(" please re-check");
+			throw new ActionFailException(reply);
+		}
+
+	}
+
+	public AudioTrack getAudioTrack(BotAction action) throws Exception {
 		String trackName = action.getFirstTokenParam(CmdToken.AUDIO);
 		AudioTrack track = audioHolder.getAudioTrack(trackName);
 		if (track == null) {
@@ -33,21 +56,16 @@ public class PlayAudioActionHandler implements ActionHandler {
 			throw new ActionFailException(reply);
 		}
 
-		BotSession session = action.getSession();
-		joinChannelTask.handleAction(action);
+		return track;
+	}
 
-		if (session != null) {
-			session.playTrack(track);
-			session.playTrack(track);
-			session.leaveVoiceChannel();
-			
-
-		} else { // unknown session
-			Reply reply = Reply.of().literal("Unknown voice-channel ").newline() //
-					.mentionUser(action.getAuthorId()).literal(" please re-check");
-			throw new ActionFailException(reply);
+	private int getCount(BotAction action) {
+		String count = action.getFirstTokenParam(CmdToken.COUNT);
+		Integer c = SafeUtil.get(() -> Integer.parseInt(count));
+		if (c == null) {
+			return 2;
 		}
-
+		return Math.abs(c);
 	}
 
 	@Override
