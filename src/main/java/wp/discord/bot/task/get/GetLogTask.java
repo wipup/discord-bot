@@ -18,7 +18,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.unit.DataSize;
 
 import lombok.extern.slf4j.Slf4j;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.RoleEnforcer;
 import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.exception.ActionFailException;
@@ -42,7 +42,7 @@ public class GetLogTask {
 	public void getLogs(BotAction action) throws Exception {
 		roleEnforcer.allowOnlyAdminOrHigher(action);
 
-		String name = StringUtils.defaultIfBlank(action.getFirstEntitiesParam(CmdEntity.NAME), "*");
+		String name = StringUtils.defaultIfBlank(action.getFirstEntitiesParam(CmdToken.NAME), "*");
 		Path logDir = getLogBaseDir();
 		log.debug("reading log directory: {}", logDir);
 

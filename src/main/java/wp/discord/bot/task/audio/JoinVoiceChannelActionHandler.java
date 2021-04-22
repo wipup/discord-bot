@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.core.bot.BotSession;
 import wp.discord.bot.core.bot.BotSessionManager;
@@ -38,14 +38,14 @@ public class JoinVoiceChannelActionHandler implements ActionHandler {
 
 	@Override
 	public void handleAction(BotAction action) throws Exception {
-		String channelId = action.getFirstEntitiesParam(CmdEntity.CHANNEL);
+		String channelId = action.getFirstEntitiesParam(CmdToken.CHANNEL);
 		String userId = userManager.getUserEntityId(action);
 
 		channelId = DiscordFormat.extractId(channelId);
 		if (StringUtils.isEmpty(userId)) {
 			userId = action.getAuthorId();
-			action.getEntities(CmdEntity.USER).clear();
-			action.getEntities(CmdEntity.USER).add(userId);
+			action.getEntities(CmdToken.USER).clear();
+			action.getEntities(CmdToken.USER).add(userId);
 			log.debug("set default user-id to author: {}", userId);
 		}
 
@@ -83,7 +83,7 @@ public class JoinVoiceChannelActionHandler implements ActionHandler {
 	}
 
 	public void joinChannelByChannelId(BotAction action) throws Exception {
-		String channelId = action.getFirstEntitiesParam(CmdEntity.CHANNEL);
+		String channelId = action.getFirstEntitiesParam(CmdToken.CHANNEL);
 		channelId = DiscordFormat.extractId(channelId);
 
 		VoiceChannel vc = jda.getVoiceChannelById(channelId);

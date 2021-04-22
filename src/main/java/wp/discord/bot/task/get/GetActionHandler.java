@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
@@ -28,20 +28,20 @@ public class GetActionHandler implements ActionHandler {
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		String targetEntity = SafeUtil.get(() -> action.getActionParams().get(0));
-		CmdEntity entity = CmdEntity.getMatchingEntity(targetEntity);
+		CmdToken entity = CmdToken.getMatchingEntity(targetEntity);
 		if (entity == null) {
 			Reply rep = Reply.of().literal("Unknown entity: ").code(targetEntity);
 			throw new ActionFailException(rep);
 		}
 
 		log.debug("get : {}", entity);
-		if (entity == CmdEntity.AUDIO) {
+		if (entity == CmdToken.AUDIO) {
 			getAudioTask.getAllAudio(action);
 
-		} else if (entity == CmdEntity.SCHEDULE) {
+		} else if (entity == CmdToken.SCHEDULE) {
 			getScheduleTask.handleGetSchedule(action);
 
-		} else if (entity == CmdEntity.LOG) {
+		} else if (entity == CmdToken.LOG) {
 			getLogTask.getLogs(action);
 
 		} else {

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.User;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.core.bot.UserManager;
@@ -37,7 +37,7 @@ public class PrivateTextChannelActionHandler implements ActionHandler {
 	}
 
 	private String getMessage(BotAction action) throws Exception {
-		String message = action.getFirstEntitiesParam(CmdEntity.MESSAGE);
+		String message = action.getFirstEntitiesParam(CmdToken.MESSAGE);
 		if (StringUtils.isEmpty(message)) {
 			Reply reply = Reply.of().literal("Empty text-message ").newline() //
 					.mentionUser(action.getAuthorId()).literal(" please try again");

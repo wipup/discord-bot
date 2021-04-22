@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.constant.Reaction;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.core.cmd.EntityReferenceHandler;
@@ -41,7 +41,7 @@ public class CompileCronActionHandler implements ActionHandler {
 		}
 
 		int samplingCount = DEFAULT_SAMPLING_COUNT;
-		String count = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.COUNT));
+		String count = StringUtils.defaultString(action.getFirstEntitiesParam(CmdToken.COUNT));
 		if (StringUtils.isNotBlank(count)) {
 			BigInteger bi = SafeUtil.get(() -> new BigInteger(count));
 			if (bi == null) {

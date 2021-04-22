@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
@@ -26,18 +26,18 @@ public class SetActionHandler implements ActionHandler {
 	public void handleAction(BotAction action) throws Exception {
 
 		String targetEntity = StringUtils.defaultString(SafeUtil.get(() -> action.getActionParams().get(0)));
-		CmdEntity target = CmdEntity.getMatchingEntity(targetEntity);
+		CmdToken target = CmdToken.getMatchingEntity(targetEntity);
 		if (target == null) {
 			Reply reply = Reply.of().literal("Unknown entity: ").code(" " + targetEntity + " ").newline() //
 					.literal("");
 			throw new ActionFailException(reply);
 		}
 
-		if (target == CmdEntity.STATUS) {
+		if (target == CmdToken.STATUS) {
 			setBotTask.setOnlineStatus(action);
 			return;
 		}
-		if (target == CmdEntity.ACTIVITY) {
+		if (target == CmdToken.ACTIVITY) {
 			setBotTask.setActivityStatus(action);
 			return;
 		}

@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.core.bot.BotSession;
 import wp.discord.bot.core.bot.BotSessionManager;
@@ -35,7 +35,7 @@ public class LeaveVoiceChannelActionHandler implements ActionHandler {
 			return;
 		}
 
-		String channelId = action.getFirstEntitiesParam(CmdEntity.CHANNEL);
+		String channelId = action.getFirstEntitiesParam(CmdToken.CHANNEL);
 		channelId = DiscordFormat.extractId(channelId);
 
 		if (StringUtils.isEmpty(channelId)) {

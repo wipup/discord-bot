@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.constant.Reaction;
 import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.exception.ActionFailException;
@@ -52,7 +52,7 @@ public class DeleteMessageTask {
 	}
 
 	private String getMessageId(BotAction action) throws Exception {
-		String messageId = DiscordFormat.extractId(action.getFirstEntitiesParam(CmdEntity.ID));
+		String messageId = DiscordFormat.extractId(action.getFirstEntitiesParam(CmdToken.ID));
 		if (StringUtils.isEmpty(messageId)) {
 			Reply reply = Reply.of().bold("Error! ").literal("Message ID is required!").newline()//
 					.code("Usage: ").code("bot delete message [channel <channel-id>] id <message-id>");
@@ -63,7 +63,7 @@ public class DeleteMessageTask {
 
 	public MessageChannel getMessageChannel(BotAction action) throws Exception {
 		MessageChannel mc = null;
-		String channelId = DiscordFormat.extractId(action.getFirstEntitiesParam(CmdEntity.CHANNEL));
+		String channelId = DiscordFormat.extractId(action.getFirstEntitiesParam(CmdToken.CHANNEL));
 		if (StringUtils.isEmpty(channelId)) {
 			mc = action.getEventMessageChannel();
 			log.debug("Use default message channel: {}", mc);

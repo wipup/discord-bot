@@ -11,7 +11,7 @@ import org.springframework.scheduling.support.CronTrigger;
 
 import lombok.Getter;
 import lombok.ToString;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.model.Describeable;
 import wp.discord.bot.model.Reference;
 import wp.discord.bot.model.Referenceable;
@@ -166,7 +166,7 @@ public class CronEntity implements Referenceable, Describeable {
 
 	@Override
 	public String entityName() {
-		return CmdEntity.CRON.getCmd();
+		return CmdToken.CRON.getCmd();
 	}
 
 	public String getExpression() {

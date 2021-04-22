@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.helper.HelpTaskHelper;
@@ -40,7 +40,7 @@ public class HelpActionHandler implements ActionHandler {
 			return;
 		}
 
-		CmdEntity entity = CmdEntity.getMatchingEntity(param);
+		CmdToken entity = CmdToken.getMatchingEntity(param);
 		if (entity != null) {
 			replyCmdEntityHelp(cmd, action, channel);
 			return;

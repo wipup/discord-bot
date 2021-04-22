@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
@@ -22,19 +22,19 @@ public class AddActionHandler implements ActionHandler {
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		String targetEntity = SafeUtil.get(() -> action.getActionParams().get(0));
-		CmdEntity entity = CmdEntity.getMatchingEntity(targetEntity);
+		CmdToken entity = CmdToken.getMatchingEntity(targetEntity);
 		if (entity == null) {
 			Reply rep = Reply.of().literal("Unknown entity: ").code(targetEntity);
 			throw new ActionFailException(rep);
 		}
 
 		log.debug("adding new : {}", entity);
-		if (entity == CmdEntity.SCHEDULE) {
+		if (entity == CmdToken.SCHEDULE) {
 			addAlert.addAlert(action);
 			return;
 		}
 
-		if (entity == CmdEntity.AUTO_REPLY) {
+		if (entity == CmdToken.AUTO_REPLY) {
 			// TODO
 		}
 

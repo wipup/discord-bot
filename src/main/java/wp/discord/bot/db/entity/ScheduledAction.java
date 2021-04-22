@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.ToString;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.model.Describeable;
 import wp.discord.bot.model.Referenceable;
 import wp.discord.bot.util.Reply;
@@ -129,7 +129,7 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 
 	@Override
 	public String entityName() {
-		return CmdEntity.SCHEDULE.getCmd();
+		return CmdToken.SCHEDULE.getCmd();
 	}
 
 	@Override

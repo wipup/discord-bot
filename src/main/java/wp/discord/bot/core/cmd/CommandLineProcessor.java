@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
 import wp.discord.bot.constant.BotReferenceConstant;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.bot.BotSessionManager;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
@@ -102,7 +102,7 @@ public class CommandLineProcessor implements InitializingBean {
 
 					index = collectActionParams(action, commands, index, cmdAction);
 				} else {
-					CmdEntity entity = CmdEntity.getMatchingEntity(frag);
+					CmdToken entity = CmdToken.getMatchingEntity(frag);
 					if (entity == null) {
 						Reply reply = Reply.of().literal("Unknown option: ").code(frag).newline() //
 								.mentionUser(authorId).literal(" Please try again.");
@@ -129,7 +129,7 @@ public class CommandLineProcessor implements InitializingBean {
 		return currentIndex + count;
 	}
 
-	private int collectEntityOption(BotAction action, String[] tokens, int currentIndex, CmdEntity entity) {
+	private int collectEntityOption(BotAction action, String[] tokens, int currentIndex, CmdToken entity) {
 		int count = 0;
 		for (int i = currentIndex + 1; i < currentIndex + 1 + entity.getParameterCount() && i < tokens.length; i++) {
 			count++;

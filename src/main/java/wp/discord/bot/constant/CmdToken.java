@@ -3,7 +3,7 @@ package wp.discord.bot.constant;
 import lombok.Getter;
 
 @Getter
-public enum CmdEntity {
+public enum CmdToken {
 
 	// discord entity
 	CHANNEL("channel", 1), //
@@ -37,11 +37,11 @@ public enum CmdEntity {
 	private String cmd;
 	private int parameterCount = 0;
 
-	private CmdEntity(String cmd) {
+	private CmdToken(String cmd) {
 		this(cmd, 0);
 	}
 
-	private CmdEntity(String cmd, int paramCount) {
+	private CmdToken(String cmd, int paramCount) {
 		this.cmd = cmd;
 		this.parameterCount = paramCount;
 	}
@@ -50,8 +50,8 @@ public enum CmdEntity {
 		return cmd.equalsIgnoreCase(command);
 	}
 
-	public static CmdEntity getMatchingEntity(String cmd) {
-		for (CmdEntity a : CmdEntity.values()) {
+	public static CmdToken getMatchingEntity(String cmd) {
+		for (CmdToken a : CmdToken.values()) {
 			if (a.accept(cmd)) {
 				return a;
 			}

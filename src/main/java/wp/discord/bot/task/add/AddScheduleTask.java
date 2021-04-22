@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import net.dv8tion.jda.api.entities.User;
 import wp.discord.bot.constant.BotReferenceConstant;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.ScheduledActionManager;
 import wp.discord.bot.core.bot.UserManager;
 import wp.discord.bot.core.cmd.CommandLineProcessor;
@@ -68,7 +68,7 @@ public class AddScheduleTask {
 	}
 
 	public boolean isActivateSchedule(BotAction action) {
-		String status = action.getFirstEntitiesParam(CmdEntity.ACTIVE);
+		String status = action.getFirstEntitiesParam(CmdToken.ACTIVE);
 		if (StringUtils.isEmpty(status)) {
 			status = Boolean.TRUE.toString();
 		}
@@ -173,8 +173,8 @@ public class AddScheduleTask {
 
 	public ScheduledAction newScheduledAction(BotAction action) throws Exception {
 		BigInteger runCount = parseDesiredRunCount(action);
-		String name = action.getFirstEntitiesParam(CmdEntity.NAME);
-		List<String> cmds = action.getEntities(CmdEntity.CMD);
+		String name = action.getFirstEntitiesParam(CmdToken.NAME);
+		List<String> cmds = action.getEntities(CmdToken.CMD);
 		String authorId = action.getAuthorId();
 
 		ScheduledAction sch = new ScheduledAction();
@@ -193,9 +193,9 @@ public class AddScheduleTask {
 	}
 
 	public ScheduledOption getScheduleType(BotAction action) throws Exception {
-		String cron = StringUtils.join(action.getEntities(CmdEntity.CRON), " ");
-		String time = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.TIME)).trim();
-		String repeat = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.REPEAT)).trim();
+		String cron = StringUtils.join(action.getEntities(CmdToken.CRON), " ");
+		String time = StringUtils.defaultString(action.getFirstEntitiesParam(CmdToken.TIME)).trim();
+		String repeat = StringUtils.defaultString(action.getFirstEntitiesParam(CmdToken.REPEAT)).trim();
 
 		if (StringUtils.isNotBlank(time) && StringUtils.isNotBlank(cron)) {
 			Reply reply = Reply.of().literal("Cron and Time must be mutually exclusive!");
@@ -274,7 +274,7 @@ public class AddScheduleTask {
 	}
 
 	public BigInteger parseDesiredRunCount(BotAction action) throws Exception {
-		String desiredRunCount = action.getFirstEntitiesParam(CmdEntity.COUNT);
+		String desiredRunCount = action.getFirstEntitiesParam(CmdToken.COUNT);
 		BigInteger runCount = null;
 		if (StringUtils.isNotEmpty(desiredRunCount)) {
 			if (desiredRunCount.equalsIgnoreCase(BotReferenceConstant.NONE) || desiredRunCount.equalsIgnoreCase(BotReferenceConstant.INFINITY)) {

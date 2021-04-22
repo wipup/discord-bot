@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Activity.ActivityType;
 import wp.discord.bot.constant.BotReferenceConstant;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.util.Reply;
@@ -22,7 +22,7 @@ public class SetBotStatusTask {
 	private JDA jda;
 
 	public void setActivityStatus(BotAction action) throws Exception {
-		String activityStr = action.getFirstEntitiesParam(CmdEntity.VALUE);
+		String activityStr = action.getFirstEntitiesParam(CmdToken.VALUE);
 		if (BotReferenceConstant.NONE.equalsIgnoreCase(activityStr)) {
 			jda.getPresence().setActivity(null);
 			return;
@@ -30,7 +30,7 @@ public class SetBotStatusTask {
 
 		ActivityType activityType = getActivityType(activityStr);
 
-		String value = action.getEntitiesParam(CmdEntity.VALUE, 1);
+		String value = action.getEntitiesParam(CmdToken.VALUE, 1);
 		if (StringUtils.isBlank(value)) {
 			Reply reply = Reply.of().bold("Error!").literal(" Activity value must not be empty");
 			throw new ActionFailException(reply);
@@ -45,7 +45,7 @@ public class SetBotStatusTask {
 	}
 
 	public void setOnlineStatus(BotAction action) throws Exception {
-		String stat = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.VALUE));
+		String stat = StringUtils.defaultString(action.getFirstEntitiesParam(CmdToken.VALUE));
 		if (StringUtils.isEmpty(stat)) {
 			Reply reply = Reply.of().bold("Error!").literal(" Bot status must not be empty!");
 			throw new ActionFailException(reply.newline().append(getOnlineStatusHelp()));

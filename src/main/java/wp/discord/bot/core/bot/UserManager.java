@@ -19,7 +19,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
 import wp.discord.bot.config.properties.DiscordProperties;
 import wp.discord.bot.config.properties.DiscordUserProperties;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.constant.BotReferenceConstant;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.model.DiscordUser;
@@ -85,7 +85,7 @@ public class UserManager implements InitializingBean {
 	}
 
 	public String getUserEntityId(BotAction action) {
-		String userId = StringUtils.trim(action.getFirstEntitiesParam(CmdEntity.USER));
+		String userId = StringUtils.trim(action.getFirstEntitiesParam(CmdToken.USER));
 		if (BotReferenceConstant.USER_AUTHOR.equalsIgnoreCase(userId)) {
 			return action.getAuthorId();
 		}

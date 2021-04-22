@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.action.ActionHandler;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
@@ -23,19 +23,19 @@ public class DeleteActionHandler implements ActionHandler {
 	@Override
 	public void handleAction(BotAction action) throws Exception {
 		String targetEntity = SafeUtil.get(() -> action.getActionParams().get(0));
-		CmdEntity entity = CmdEntity.getMatchingEntity(targetEntity);
+		CmdToken entity = CmdToken.getMatchingEntity(targetEntity);
 		if (entity == null) {
 			Reply rep = Reply.of().literal("Unknown entity: ").code(targetEntity);
 			throw new ActionFailException(rep);
 		}
 
-		if (entity == CmdEntity.SCHEDULE) {
+		if (entity == CmdToken.SCHEDULE) {
 			deleteScheduleTask.deleteSchedule(action);
 			return;
 		}
 		
 		
-		if (entity == CmdEntity.MESSAGE) {
+		if (entity == CmdToken.MESSAGE) {
 			deleteMessageTask.deleteBotMessage(action);
 			return;
 		}

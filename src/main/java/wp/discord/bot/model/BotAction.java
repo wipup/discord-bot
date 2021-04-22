@@ -15,7 +15,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import wp.discord.bot.constant.CmdAction;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.bot.BotSession;
 import wp.discord.bot.util.EventUtil;
 import wp.discord.bot.util.SafeUtil;
@@ -30,7 +30,7 @@ public class BotAction {
 	private List<String> actionParams;
 
 	private GenericEvent event;
-	private Map<CmdEntity, List<String>> entities;
+	private Map<CmdToken, List<String>> entities;
 
 	private BotSession session;
 	private String authorId;
@@ -45,7 +45,7 @@ public class BotAction {
 		isFromScheduler = false;
 	}
 
-	public String getEntitiesParam(CmdEntity e, int index) {
+	public String getEntitiesParam(CmdToken e, int index) {
 		List<String> list = getEntities(e);
 		if (index < 0 || index >= list.size()) {
 			return null;
@@ -62,7 +62,7 @@ public class BotAction {
 //		return value;
 //	}
 
-	public String getFirstEntitiesParam(CmdEntity e) {
+	public String getFirstEntitiesParam(CmdToken e) {
 		return getEntitiesParam(e, 0);
 	}
 
@@ -75,7 +75,7 @@ public class BotAction {
 //		return value;
 //	}
 
-	public List<String> getEntities(CmdEntity e) {
+	public List<String> getEntities(CmdToken e) {
 		List<String> list = entities.get(e);
 		if (list == null) {
 			list = new ArrayList<>(e.getParameterCount());

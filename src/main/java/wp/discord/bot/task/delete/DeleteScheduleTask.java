@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.db.repository.ScheduleRepository;
@@ -29,7 +29,7 @@ public class DeleteScheduleTask {
 	
 	public void deleteSchedule(BotAction action) throws Exception {
 		String author = action.getAuthorId();
-		String scheduleId = action.getFirstEntitiesParam(CmdEntity.ID);
+		String scheduleId = action.getFirstEntitiesParam(CmdToken.ID);
 
 		if (StringUtils.isEmpty(scheduleId)) {
 			Reply r = Reply.of().mentionUser(author).bold(" Error!").literal(" Schedule ID is required!").newline() //

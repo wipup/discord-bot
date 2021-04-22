@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
-import wp.discord.bot.constant.CmdEntity;
+import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.bot.UserManager;
 import wp.discord.bot.core.cmd.EntityReferenceHandler;
 import wp.discord.bot.model.BotAction;
@@ -40,12 +40,12 @@ public class ReactionHandleTask {
 		ReactionEmote emote = event.getReactionEmote();
 		log.debug("reaction code: {}, emoji: {}", emote.getAsCodepoints(), emote.getAsReactionCode());
 
-		CmdEntity entity = CmdEntity.getMatchingEntity(ref.getEntity());
-		if (entity == CmdEntity.SCHEDULE) {
+		CmdToken entity = CmdToken.getMatchingEntity(ref.getEntity());
+		if (entity == CmdToken.SCHEDULE) {
 			return;
 		}
 
-		if (entity == CmdEntity.CRON) { // compile cron
+		if (entity == CmdToken.CRON) { // compile cron
 			cronReactionTask.handleAction(event, action, message, ref);
 			return;
 		}
