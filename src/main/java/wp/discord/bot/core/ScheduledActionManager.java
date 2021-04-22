@@ -98,6 +98,7 @@ public class ScheduledActionManager implements DisposableBean {
 		return () -> {
 			try {
 				if (isRunningCountExceed(scheduleAction)) {
+					cancelTask(scheduleAction);
 					return;
 				}
 
@@ -124,6 +125,9 @@ public class ScheduledActionManager implements DisposableBean {
 			} finally {
 				if (scheduleAction.getPreference().getType() == ScheduledType.TIME) {
 					scheduleAction.setActive(false);
+					
+				} else if (isRunningCountExceed(scheduleAction)) {
+					scheduleAction.setActive(false);
 				}
 				SafeUtil.suppress(() -> scheduleRepository.save(scheduleAction));
 			}
@@ -134,12 +138,8 @@ public class ScheduledActionManager implements DisposableBean {
 		BigInteger actual = ObjectUtils.defaultIfNull(scheduleAction.getActualRunCount(), BigInteger.ZERO);
 		BigInteger preferred = scheduleAction.getDesiredRunCount();
 		if (preferred != null) {
-			if (actual.compareTo(preferred) >= 0) {
-				cancelTask(scheduleAction);
-				return true;
-			}
+			return actual.compareTo(preferred) >= 0;
 		}
-
 		return false;
 	}
 
@@ -164,14 +164,15 @@ public class ScheduledActionManager implements DisposableBean {
 			unlimitExecutor.submit(taskDecorator.decorate(() -> {
 				notifyAuthor(scheduleAction, action, be);
 			}));
+			
 		} else {
+			unlimitExecutor.submit(taskDecorator.decorate(() -> {
+				notifyAuthor(scheduleAction, action, e);
+			}));
 			unlimitExecutor.submit(taskDecorator.decorate(() -> {
 				notifyOwner(scheduleAction, action, e);
 			}));
 		}
-		unlimitExecutor.submit(taskDecorator.decorate(() -> {
-			notifyAuthor(scheduleAction, action, e);
-		}));
 	}
 
 	private void notifyAuthor(ScheduledAction scheduleAction, BotAction action, Throwable e) {
