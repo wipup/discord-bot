@@ -25,7 +25,7 @@ public enum CmdEntity {
 	ID("id", 1), //
 	COUNT("count", 1), //
 	TIME("time", 1), //
-	EVERY("every", 1), //
+	REPEAT("repeat", 1), //
 	ADMIN("admin", 1), //
 	ALL("all", 2), // //e.g. bot play audio <time-to-xxx> user all 3
 

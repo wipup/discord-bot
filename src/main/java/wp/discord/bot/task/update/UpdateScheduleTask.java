@@ -73,7 +73,7 @@ public class UpdateScheduleTask {
 		Collection<String> cron = action.getEntities(CmdEntity.CRON);
 		String cronStr = StringUtils.join(cron, " ").trim();
 		String time = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.TIME)).trim();
-		String every = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.EVERY)).trim();
+		String every = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.REPEAT)).trim();
 
 		if (BotReferenceConstant.SAME_VALUE.equalsIgnoreCase(time)) {
 			String newTime = SafeUtil.get(() -> ToStringUtils.formatDate(schedule.getPreference().getStartTime(), ScheduledOption.START_DATE_FORMAT));
@@ -82,10 +82,10 @@ public class UpdateScheduleTask {
 			action.getEntities(CmdEntity.TIME).add(newTime);
 		}
 		if (BotReferenceConstant.SAME_VALUE.equalsIgnoreCase(every)) {
-			String newEvery = schedule.getPreference().getValue();
-			log.debug("set every-duration from: {} to old value: {}", every, newEvery);
-			action.getEntities(CmdEntity.EVERY).clear();
-			action.getEntities(CmdEntity.EVERY).add(newEvery);
+			String newRepeat = schedule.getPreference().getValue();
+			log.debug("set every-duration from: {} to old value: {}", every, newRepeat);
+			action.getEntities(CmdEntity.REPEAT).clear();
+			action.getEntities(CmdEntity.REPEAT).add(newRepeat);
 		}
 
 		String timeOrEvery = StringUtils.firstNonBlank(time, every, cronStr);

@@ -195,7 +195,7 @@ public class AddScheduleTask {
 	public ScheduledOption getScheduleType(BotAction action) throws Exception {
 		String cron = StringUtils.join(action.getEntities(CmdEntity.CRON), " ");
 		String time = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.TIME)).trim();
-		String every = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.EVERY)).trim();
+		String repeat = StringUtils.defaultString(action.getFirstEntitiesParam(CmdEntity.REPEAT)).trim();
 
 		if (StringUtils.isNotBlank(time) && StringUtils.isNotBlank(cron)) {
 			Reply reply = Reply.of().literal("Cron and Time must be mutually exclusive!");
@@ -206,8 +206,8 @@ public class AddScheduleTask {
 
 			Date startTime = validateStartTime(time);
 			Duration d = null;
-			if (StringUtils.isNotBlank(every)) {
-				d = validateDuration(every);
+			if (StringUtils.isNotBlank(repeat)) {
+				d = validateDuration(repeat);
 			}
 
 			if (d == null) {
