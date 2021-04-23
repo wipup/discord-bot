@@ -45,13 +45,19 @@ public class CommandLineTokenizer {
 		StringBuilder sb = new StringBuilder();
 
 		boolean literal = false;
+		char encloseLiteral = '"';
+		
 		char[] array = command.trim().toCharArray();
 		for (int i = 0; i < array.length; i++) {
 
 			char c = array[i];
-			if (c == '"') {
-				literal = !literal;
-				continue;
+			
+			if (!literal) {
+				if (c == '"' || c == '\'') {
+					literal = true;
+					encloseLiteral = c;
+					continue;
+				}
 			}
 
 			if (literal) {
@@ -69,6 +75,10 @@ public class CommandLineTokenizer {
 						}
 					}
 				} else {
+					if (c == encloseLiteral) {
+						literal = false;
+						continue;
+					}
 					sb.append(c);
 				}
 			} else if (Character.isWhitespace(c)) { // is white

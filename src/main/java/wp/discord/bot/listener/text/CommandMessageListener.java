@@ -83,7 +83,7 @@ public class CommandMessageListener extends AbstractDiscordEventListener<Message
 		}
 		log.info("[CMD] {}", cmd);
 
-		List<BotAction> actions = cmdProcessor.handleMultiLineCommand(relatedEvent, cmd);
+		List<BotAction> actions = cmdProcessor.parseMultiLineCommand(relatedEvent, cmd);
 		actionManager.executeActions(actions);
 	}
 

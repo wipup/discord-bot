@@ -41,11 +41,11 @@ public class CommandLineProcessor implements InitializingBean {
 
 	private List<Pattern> botInitCommands;
 
-	public List<BotAction> handleMultiLineCommand(GenericEvent event, String multiLines) throws Exception {
+	public List<BotAction> parseMultiLineCommand(GenericEvent event, String multiLines) throws Exception {
 		List<BotAction> result = new ArrayList<>();
 		List<List<String>> multiCommands = CommandLineTokenizer.tokenizeMultiLines(multiLines);
 		for (List<String> command : multiCommands) {
-			BotAction action = handleTokenizedCommand(event, command.toArray(new String[command.size()]));
+			BotAction action = parseTokenizedCommand(event, command.toArray(new String[command.size()]));
 			if (result.isEmpty() && !command.isEmpty()) { // first non-empty line
 				if (!isBotCommand(command)) {
 					return result;
@@ -58,9 +58,9 @@ public class CommandLineProcessor implements InitializingBean {
 		return result;
 	}
 
-	public BotAction handleCommand(GenericEvent event, String command) throws Exception {
+	public BotAction parseCommand(GenericEvent event, String command) throws Exception {
 		List<String> tokenizedCommand = CommandLineTokenizer.tokenize(command);
-		return handleTokenizedCommand(event, tokenizedCommand.toArray(new String[tokenizedCommand.size()]));
+		return parseTokenizedCommand(event, tokenizedCommand.toArray(new String[tokenizedCommand.size()]));
 	}
 
 	public BotAction newBotAction(GenericEvent event) {
@@ -71,11 +71,11 @@ public class CommandLineProcessor implements InitializingBean {
 		return action;
 	}
 
-	public BotAction handleTokenizedCommand(GenericEvent event, String[] commands) throws Exception {
-		return handleTokenizedCommand(newBotAction(event), commands);
+	public BotAction parseTokenizedCommand(GenericEvent event, String[] commands) throws Exception {
+		return parseTokenizedCommand(newBotAction(event), commands);
 	}
 
-	public BotAction handleTokenizedCommand(BotAction botAction, String[] commands) throws Exception {
+	public BotAction parseTokenizedCommand(BotAction botAction, String[] commands) throws Exception {
 		if (!isBotCommand(commands)) {
 			return null;
 		}
@@ -86,15 +86,15 @@ public class CommandLineProcessor implements InitializingBean {
 			String authorId = action.getAuthorId();
 
 			for (int index = 1; index < commands.length; index++) {
-				String frag = commands[index];
-				if (StringUtils.isEmpty(frag)) {
+				String token = commands[index];
+				if (StringUtils.isEmpty(token)) {
 					continue;
 				}
 
 				if (action.getAction() == null) {
-					CmdAction cmdAction = CmdAction.getMatchingAction(frag);
+					CmdAction cmdAction = CmdAction.getMatchingAction(token);
 					if (cmdAction == null) {
-						Reply reply = Reply.of().literal("Unknown action: ").code(frag).newline() //
+						Reply reply = Reply.of().literal("Unknown action: ").code(token).newline() //
 								.mentionUser(authorId).literal(" Please try again.");
 						throw new ActionFailException(reply);
 					}
@@ -102,9 +102,9 @@ public class CommandLineProcessor implements InitializingBean {
 
 					index = collectActionParams(action, commands, index, cmdAction);
 				} else {
-					CmdToken entity = CmdToken.getMatchingCmdToken(frag);
+					CmdToken entity = CmdToken.getMatchingCmdToken(token);
 					if (entity == null) {
-						Reply reply = Reply.of().literal("Unknown option: ").code(frag).newline() //
+						Reply reply = Reply.of().literal("Unknown option: ").code(token).newline() //
 								.mentionUser(authorId).literal(" Please try again.");
 						throw new ActionFailException(reply);
 					}

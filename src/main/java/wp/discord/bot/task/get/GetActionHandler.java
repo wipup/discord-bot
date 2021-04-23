@@ -36,7 +36,7 @@ public class GetActionHandler implements ActionHandler {
 
 		log.debug("get : {}", entity);
 		if (entity == CmdToken.AUDIO) {
-			getAudioTask.getAllAudio(action);
+			getAudioTask.handleGetAudio(action);
 
 		} else if (entity == CmdToken.SCHEDULE) {
 			getScheduleTask.handleGetSchedule(action);

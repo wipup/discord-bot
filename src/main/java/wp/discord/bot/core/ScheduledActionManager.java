@@ -106,7 +106,7 @@ public class ScheduledActionManager implements DisposableBean {
 				for (String cmd : scheduleAction.getCommands()) {
 					BotAction action = null;
 					try {
-						action = cmdProcessor.handleCommand(null, cmd);
+						action = cmdProcessor.parseCommand(null, cmd);
 						if (action != null) {
 							action.setAuthorId(scheduleAction.getAuthorId());
 							action.setFromScheduler(true);

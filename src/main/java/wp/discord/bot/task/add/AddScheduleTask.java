@@ -110,7 +110,7 @@ public class AddScheduleTask {
 			throw new ActionFailException(rep);
 		}
 		for (String cmd : sch.getCommands()) {
-			isAllowSchedulingAction(cmdProcessor.handleCommand(null, cmd));
+			isAllowSchedulingAction(cmdProcessor.parseCommand(null, cmd));
 		}
 	}
 
