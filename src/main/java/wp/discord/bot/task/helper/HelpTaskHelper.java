@@ -72,7 +72,7 @@ public class HelpTaskHelper {
 				.code("bot update schedule [id <schedule-id>] [name <any-name>] [time same] [repeat none] [active <true/false>]").newline() //
 				.code("bot delete schedule id <schedule-id>").newline() //
 
-				.code("bot get audio").newline() //
+				.code("bot get audio [name <name>]").newline() //
 				.code("bot play audio <audio-name> [channel <channel-id>] [user <user-id>]").newline() //
 				.code("bot pm [user <user-id>] message <any-message>").newline() //
 				.code("bot send [channel <channel-id>] message <any-message>").newline() //
