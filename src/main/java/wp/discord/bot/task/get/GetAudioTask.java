@@ -21,6 +21,8 @@ import wp.discord.bot.util.Reply;
 @Component
 public class GetAudioTask {
 
+	public static final int MAX_DISPLAY_SIZE = 25;
+
 	@Autowired
 	private AudioTrackHolder audioHolder;
 
@@ -58,7 +60,6 @@ public class GetAudioTask {
 	public void getAllAudio(BotAction action) throws Exception {
 		List<AudioTrack> allTracks = audioHolder.getAllAudioTracks();
 
-		final int MAX_DISPLAY_SIZE = 25;
 		int foundSize = allTracks.size();
 		if (allTracks.size() > MAX_DISPLAY_SIZE) {
 			allTracks = allTracks.subList(0, MAX_DISPLAY_SIZE);
