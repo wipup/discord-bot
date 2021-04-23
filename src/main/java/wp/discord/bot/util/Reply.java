@@ -66,6 +66,10 @@ public class Reply {
 		return this;
 	}
 
+	public Reply literal(Number n) {
+		return literal(String.valueOf(n));
+	}
+
 	public Reply literal(String s) {
 		stringBuilder.append(DiscordFormat.literal(s));
 		return this;
@@ -90,6 +94,11 @@ public class Reply {
 		return this;
 	}
 
+	public Reply codeBlock(String s, String lang) {
+		stringBuilder.append(DiscordFormat.codeBlock(s, lang));
+		return this;
+	}
+	
 	public Reply codeBlock(String s) {
 		stringBuilder.append(DiscordFormat.codeBlock(s));
 		return this;

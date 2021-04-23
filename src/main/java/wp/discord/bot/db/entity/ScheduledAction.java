@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
@@ -31,14 +33,11 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 	private BigInteger id;
 	private String authorId;
 	private String name;
-	@Deprecated
-	private String cron;
 	private List<String> commands;
 	private boolean active;
 	private BigInteger desiredRunCount;
 	private BigInteger actualRunCount;
-
-	private ScheduledOption preference; // new
+	private ScheduledOption preference;
 
 	@ToString.Exclude
 	@JsonIgnore
@@ -46,42 +45,20 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 
 	@Override
 	public Reply reply() {
+
+		List<String> cmdList = getCommands();
+		String cmds = StringUtils.join(cmdList, "\n");
+		String desiredRun = getDesiredRunCount() == null ? INFINITY_SIGN : String.valueOf(getDesiredRunCount());
+
 		Reply rep = Reply.of() //
 				.literal("ID:  ").code(String.format("%06d", getId())).literal("\t Owner: ").mentionUser(getAuthorId()).newline() //
 				.literal("Name:  ").code(getName()).newline() //
 				.append(preference.reply()).newline() //
-				.startCodeBlock("bash");
-		for (String cmd : getCommands()) {
-			rep.literal(cmd).newline();
-		}
-		String desiredRun = getDesiredRunCount() == null ? INFINITY_SIGN : String.valueOf(getDesiredRunCount());
-		rep.endCodeBlock() //
+				.literal("Commands (").code(cmdList.size()).literal(")").newline() //
+				.codeBlock(cmds, "bash") //
 				.literal("Active:  ").code(String.valueOf(isActive())).literal("   ") //
-				.literal("Run:  ").code(String.format("%d/%s", getActualRunCount(), desiredRun)).newline() //
-		;
-
+				.literal("Run:  ").code(String.format("%d/%s", getActualRunCount(), desiredRun)).newline(); //
 		return rep;
-	}
-
-	@Deprecated
-	public String getCron() {
-		return cron;
-	}
-
-	@Deprecated
-	public void setCron(String cron) {
-		if (cron != null) {
-			setPreference(ScheduledOption.cron(cron));
-		}
-		this.cron = cron;
-	}
-
-	public void setPreference(ScheduledOption option) {
-		// new
-		if (option == null) {
-			option = ScheduledOption.cron(getCron());
-		}
-		this.preference = option;
 	}
 
 	public Reply shortReply(boolean adminMode) {
