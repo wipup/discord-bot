@@ -165,8 +165,8 @@ public class CronEntity implements Referenceable, Describeable {
 	}
 
 	@Override
-	public String entityName() {
-		return CmdToken.CRON.getCmd();
+	public CmdToken entityName() {
+		return CmdToken.CRON;
 	}
 
 	public String getExpression() {

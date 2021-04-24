@@ -46,6 +46,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 
 	private AudioPlayerManager audioPlayerManager;
 	private Map<String, AudioTrack> audioTracks; // key = name
+	private List<AudioTrack> allAudioTracks;
 
 	// temporary
 	private transient Map<String, String> trackFilePathMap; // key = path
@@ -70,15 +71,11 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 	}
 
 	public List<AudioTrack> getAllAudioTracks() {
-		return audioTracks.values().stream().sorted((a, b) -> a.getUserData().toString().compareTo(b.getUserData().toString())).collect(Collectors.toList());
+		return allAudioTracks;
 	}
 
 	public void setAudioTrackName(AudioTrack track, String name) {
 		track.setUserData(name);
-	}
-
-	public String getAudioTrackName(AudioTrack track) {
-		return SafeUtil.get(() -> track.getUserData().toString());
 	}
 
 	public String getAudioTrackFilePath(AudioTrack track) {
@@ -99,6 +96,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 	public List<Future<Void>> reloadAudio() throws Exception {
 		init();
 		audioTracks.clear();
+		allAudioTracks.clear();
 		List<Future<Void>> futures = loadAudioTracks();
 		botSessionManager.getAllSessions().stream().forEach((s) -> {
 			botSessionManager.updateBotAudioPlayer(s, audioPlayerManager.createPlayer());
@@ -135,6 +133,10 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 						futureList.add(future);
 					});
 		}
+
+		allAudioTracks = audioTracks.values().stream() //
+				.sorted((a, b) -> a.getUserData().toString().compareTo(b.getUserData().toString())) //
+				.collect(Collectors.toList());
 		return futureList;
 	}
 

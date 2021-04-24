@@ -11,17 +11,19 @@ import org.springframework.util.AntPathMatcher;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import net.dv8tion.jda.api.entities.Message;
 import wp.discord.bot.constant.CmdToken;
+import wp.discord.bot.constant.Reaction;
 import wp.discord.bot.core.AudioTrackHolder;
 import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
+import wp.discord.bot.task.audio.AudioListReference;
+import wp.discord.bot.task.cron.CronEntity;
 import wp.discord.bot.util.Reply;
 
 @Component
 public class GetAudioTask {
-
-	public static final int MAX_DISPLAY_SIZE = 25;
 
 	@Autowired
 	private AudioTrackHolder audioHolder;
@@ -31,19 +33,51 @@ public class GetAudioTask {
 
 	public void handleGetAudio(BotAction action) throws Exception {
 		String name = action.getFirstTokenParam(CmdToken.NAME);
+
+		Reply reply = Reply.of();
 		if (StringUtils.isNotEmpty(name)) {
-			getAudiosByPattern(action, name);
-			return;
+			Reply r = getAudiosByPatternReply(name, 0, AudioListReference.MAX_DISPLAY_SIZE);
+			reply.append(r);
+		} else {
+			Reply r = getAllAudiosReply(0, AudioListReference.MAX_DISPLAY_SIZE);
+			reply.append(r);
 		}
 
-		getAllAudio(action);
+		tracing.queue(action.getEventMessageChannel().sendMessage(reply.build()));
+		action.getEventMessageChannel().sendMessage(reply.build()).queue(tracing.addTracingContext((m) -> {
+			generateAudioListReaction(m, null);
+		}));
 	}
 
-	public void getAudiosByPattern(BotAction action, String pattern) throws Exception {
+	public AudioListReference getAudios(BotAction action, AudioListReference ref) throws Exception {
+		String name = ref.getNamePattern();
+		int offset = ref.getOffset();
+		int size = ref.getMaxDisplaySize();
+
+		if (StringUtils.isNotEmpty(name)) {
+			ref = getAudiosByPattern(name, offset, size);
+		} else {
+			ref = getAllAudio(offset, size);
+		}
+
+		return ref;
+	}
+
+	public void generateAudioListReaction(Message m, CronEntity cron) {
+		m.addReaction(Reaction.OK.getCode()).queue();
+		m.addReaction(Reaction.LEFT.getCode()).queue();
+		m.addReaction(Reaction.RIGHT.getCode()).queue();
+	}
+
+	public Reply getAudiosByPatternReply(String pattern, int offset, int size) throws Exception {
+		return getAudiosByPattern(pattern, offset, size).reply();
+	}
+
+	public AudioListReference getAudiosByPattern(String pattern, int offset, int size) throws Exception {
 		AntPathMatcher matcher = new AntPathMatcher();
 
 		List<AudioTrack> matchedTracks = audioHolder.getAllAudioTracks().stream() //
-				.filter((track) -> matcher.match(pattern, audioHolder.getAudioTrackName(track))) //
+				.filter((track) -> matcher.match(pattern, track.getUserData().toString())) //
 				.sorted((t1, t2) -> t1.getIdentifier().compareTo(t2.getIdentifier())) //
 				.collect(Collectors.toList()); //
 
@@ -52,39 +86,34 @@ public class GetAudioTask {
 			throw new ActionFailException(reply);
 		}
 
-		Reply reply = Reply.of().literal("Found ").code(matchedTracks.size()).literal(" Tracks").newline();
-		reply.append(createReply(matchedTracks));
-		tracing.queue(action.getEventMessageChannel().sendMessage(reply.build()));
+		int total = matchedTracks.size();
+
+		AudioListReference ref = new AudioListReference();
+		ref.setAudioTracks(matchedTracks.stream().skip(offset).limit(size).collect(Collectors.toList()));
+		ref.setOffset(offset);
+		ref.setNamePattern(pattern);
+		ref.setTotal(total);
+		return ref;
 	}
 
-	public void getAllAudio(BotAction action) throws Exception {
-		List<AudioTrack> allTracks = audioHolder.getAllAudioTracks();
+	public Reply getAllAudiosReply(int offset, int size) throws Exception {
+		return getAllAudio(offset, size).reply();
+	}
 
-		int foundSize = allTracks.size();
-		if (allTracks.size() > MAX_DISPLAY_SIZE) {
-			allTracks = allTracks.subList(0, MAX_DISPLAY_SIZE);
+	public AudioListReference getAllAudio(int offset, int size) throws Exception {
+		List<AudioTrack> allTracks = audioHolder.getAllAudioTracks().stream() //
+				.skip(offset).limit(size).collect(Collectors.toList());
+
+		if (CollectionUtils.isEmpty(allTracks)) {
+			Reply reply = Reply.of().literal("No audio available");
+			throw new ActionFailException(reply);
 		}
 
-		Reply reply = Reply.of().bold("All Available Audio ").code(foundSize).literal(" files").newline();
-		reply.append(createReply(allTracks)).newline().append("To filter audio, type: ").code("bot get audio name <pattern>");
-		tracing.queue(action.getEventMessageChannel().sendMessage(reply.build()));
+		AudioListReference ref = new AudioListReference();
+		ref.setAudioTracks(allTracks);
+		ref.setOffset(offset);
+		ref.setTotal(audioHolder.getAllAudioTracks().size());
+		return ref;
 	}
 
-	public Reply createReply(List<AudioTrack> tracks) {
-		Reply reply = Reply.of();
-		int count = 0;
-		for (AudioTrack track : tracks) {
-			count++;
-			reply.code(String.format("%2d", count)).literal(") ").append(createReply(track)).newline();
-		}
-		return reply.append(createReplyHelper());
-	}
-
-	public Reply createReply(AudioTrack track) {
-		return Reply.of().code(audioHolder.getAudioTrackName(track));
-	}
-
-	public Reply createReplyHelper() {
-		return Reply.of().literal("To play audio, type: ").code("bot play audio [name]");
-	}
 }

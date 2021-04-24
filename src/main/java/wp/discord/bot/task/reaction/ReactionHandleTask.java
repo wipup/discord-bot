@@ -26,6 +26,9 @@ public class ReactionHandleTask {
 	@Autowired
 	private CompileCronReactionTask cronReactionTask;
 
+	@Autowired
+	private GetAudioReactionTask audioTask;
+
 	public void handleAction(GenericMessageReactionEvent event, BotAction action) throws Exception {
 		Message message = getMessage(event);
 		if (!isThisBotMessage(message) || reactByBot(event)) {
@@ -41,7 +44,8 @@ public class ReactionHandleTask {
 		log.debug("reaction code: {}, emoji: {}", emote.getAsCodepoints(), emote.getAsReactionCode());
 
 		CmdToken entity = CmdToken.getMatchingCmdToken(ref.getEntity());
-		if (entity == CmdToken.SCHEDULE) {
+		if (entity == CmdToken.AUDIO) {
+			audioTask.handleAction(event, action, message, ref);
 			return;
 		}
 

@@ -2,15 +2,17 @@ package wp.discord.bot.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public interface Referenceable {
+import wp.discord.bot.constant.CmdToken;
+
+public interface Referenceable extends Describeable {
 
 	public String entityID();
 
-	public String entityName();
+	public CmdToken entityName();
 
 	@JsonIgnore
 	default public Reference getReference() {
-		return new Reference(entityName(), entityID());
+		return new Reference(entityName().getCmd(), entityID());
 	}
 
 }

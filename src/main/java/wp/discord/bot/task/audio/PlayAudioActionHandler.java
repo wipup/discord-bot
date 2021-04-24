@@ -49,7 +49,7 @@ public class PlayAudioActionHandler implements ActionHandler {
 
 	}
 
-	private void playAudios(BotSession session, List<AudioTrack> tracks, int playCount) {
+	public void playAudios(BotSession session, List<AudioTrack> tracks, int playCount) {
 		for (int i = 0; i < playCount; i++) {
 			for (AudioTrack track : tracks) {
 				session.playTrack(track);
