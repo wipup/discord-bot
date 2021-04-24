@@ -6,18 +6,21 @@ import java.util.Base64;
 
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
 import net.dv8tion.jda.api.entities.Message;
 import wp.discord.bot.model.Reference;
 import wp.discord.bot.model.Referenceable;
 import wp.discord.bot.util.SafeUtil;
 
 @Component
+@Slf4j
 public class EntityReferenceHandler {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 	public String generateEncodedReferenceCode(Referenceable entity) {
 		String raw = entity.getReference().getCode();
+		log.info("raw entity code: {}", raw);
 
 		String encoded = Base64.getEncoder().encodeToString(raw.getBytes(DEFAULT_CHARSET));
 		if (encoded.endsWith("==")) {

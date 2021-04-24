@@ -59,7 +59,7 @@ public class GetAudioReactionTask {
 			offset = 0;
 		}
 		if (offset >= list.getTotal()) {
-			offset = list.getTotal();
+			offset -= list.getMaxDisplaySize();
 		}
 		list.setOffset(offset);
 		return list;
