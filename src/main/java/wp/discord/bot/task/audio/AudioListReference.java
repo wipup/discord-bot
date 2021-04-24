@@ -17,7 +17,7 @@ import wp.discord.bot.util.Reply;
 @Data
 public class AudioListReference implements Referenceable {
 
-	public static final int MAX_DISPLAY_SIZE = 20;
+	public static final int MAX_DISPLAY_SIZE = 10;
 
 	@JsonIgnore
 	private transient List<AudioTrack> audioTracks;
