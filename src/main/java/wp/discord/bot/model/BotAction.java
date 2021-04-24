@@ -75,6 +75,10 @@ public class BotAction {
 //		return value;
 //	}
 
+	public boolean hasTokenParams(CmdToken e) {
+		return entities.containsKey(e);
+	}
+
 	public List<String> getAllTokenParams(CmdToken e) {
 		List<String> list = entities.get(e);
 		if (list == null) {

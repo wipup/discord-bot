@@ -2,7 +2,9 @@ package wp.discord.bot.task.update;
 
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -116,6 +118,12 @@ public class UpdateScheduleTask {
 			schedule.setDesiredRunCount(desiredRunCount);
 		}
 
+		List<String> cmds = action.getAllTokenParams(CmdToken.CMD);
+		if (CollectionUtils.isNotEmpty(cmds)) {
+			schedule.setCommands(cmds);
+			requireRescheduled = true;
+		}
+		
 		addTask.validateScheduledAction(schedule);
 
 		String status = action.getFirstTokenParam(CmdToken.ACTIVE);
