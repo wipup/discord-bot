@@ -43,7 +43,7 @@ public class GetAudioTask {
 		AntPathMatcher matcher = new AntPathMatcher();
 
 		List<AudioTrack> matchedTracks = audioHolder.getAllAudioTracks().stream() //
-				.filter((track) -> matcher.match(pattern, track.getIdentifier())) //
+				.filter((track) -> matcher.match(pattern, audioHolder.getAudioTrackName(track))) //
 				.sorted((t1, t2) -> t1.getIdentifier().compareTo(t2.getIdentifier())) //
 				.collect(Collectors.toList()); //
 
@@ -85,6 +85,6 @@ public class GetAudioTask {
 	}
 
 	public Reply createReplyHelper() {
-		return Reply.of().literal("To play audio, type: ").code("bot play audio [name]").newline();
+		return Reply.of().literal("To play audio, type: ").code("bot play audio [name]");
 	}
 }
