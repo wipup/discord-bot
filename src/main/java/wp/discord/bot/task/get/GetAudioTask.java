@@ -19,7 +19,6 @@ import wp.discord.bot.core.TracingHandler;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.audio.AudioListReference;
-import wp.discord.bot.task.cron.CronEntity;
 import wp.discord.bot.util.Reply;
 
 @Component
@@ -43,9 +42,8 @@ public class GetAudioTask {
 			reply.append(r);
 		}
 
-		tracing.queue(action.getEventMessageChannel().sendMessage(reply.build()));
 		action.getEventMessageChannel().sendMessage(reply.build()).queue(tracing.addTracingContext((m) -> {
-			generateAudioListReaction(m, null);
+			generateAudioListReaction(m);
 		}));
 	}
 
@@ -63,10 +61,13 @@ public class GetAudioTask {
 		return ref;
 	}
 
-	public void generateAudioListReaction(Message m, CronEntity cron) {
-		m.addReaction(Reaction.OK.getCode()).queue();
-		m.addReaction(Reaction.LEFT.getCode()).queue();
-		m.addReaction(Reaction.RIGHT.getCode()).queue();
+	public void generateAudioListReaction(Message m) {
+		try {
+			m.addReaction(Reaction.OK.getCode()).queue();
+			m.addReaction(Reaction.LEFT.getCode()).queue();
+			m.addReaction(Reaction.RIGHT.getCode()).queue();
+		} catch (Exception e) {
+		}
 	}
 
 	public Reply getAudiosByPatternReply(String pattern, int offset, int size) throws Exception {
