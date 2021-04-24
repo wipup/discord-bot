@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
-import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.AudioTrackHolder;
@@ -23,7 +22,6 @@ import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 
 @Component
-@Slf4j
 public class PlayAudioActionHandler implements ActionHandler {
 
 	@Autowired
@@ -52,12 +50,8 @@ public class PlayAudioActionHandler implements ActionHandler {
 	}
 
 	public void playAudios(BotSession session, List<AudioTrack> tracks, int playCount) {
-		log.debug("playing audio count: {}", playCount);
 		for (int i = 0; i < playCount; i++) {
-			log.debug("playing index: {}", i);
 			for (AudioTrack track : tracks) {
-				log.debug("playing track: {}", track.getUserData().toString());
-				session.playTrack(track);
 				session.playTrack(track);
 			}
 		}
@@ -85,7 +79,6 @@ public class PlayAudioActionHandler implements ActionHandler {
 			throw new ActionFailException(reply);
 		}
 
-		log.debug("playing tracks: {}", tracks);
 		return tracks;
 	}
 
