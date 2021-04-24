@@ -9,13 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import wp.discord.bot.constant.CmdToken;
+import wp.discord.bot.core.RoleEnforcer;
 import wp.discord.bot.core.TracingHandler;
-import wp.discord.bot.core.bot.UserManager;
 import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.db.repository.ScheduleRepository;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
-import wp.discord.bot.model.DiscordUserRole;
 import wp.discord.bot.util.DiscordFormat;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
@@ -24,10 +23,10 @@ import wp.discord.bot.util.SafeUtil;
 public class GetScheduleTask {
 
 	@Autowired
-	private TracingHandler tracing;
+	private RoleEnforcer roleEnforcer;
 
 	@Autowired
-	private UserManager userManager;
+	private TracingHandler tracing;
 
 	@Autowired
 	private ScheduleRepository repository;
@@ -45,6 +44,15 @@ public class GetScheduleTask {
 		tracing.queue(action.getEventMessageChannel().sendMessage(reply.build()));
 	}
 
+	private boolean isAdminMode(BotAction action) throws Exception {
+		boolean requiredAdmin = Boolean.TRUE.toString().equalsIgnoreCase(action.getFirstTokenParam(CmdToken.ADMIN));
+		if (requiredAdmin) {
+			roleEnforcer.allowOnlyAdminOrHigher(action);
+			return true;
+		}
+		return false;
+	}
+
 	private Reply getScheduleReply(BotAction action, String scheduleId) throws Exception {
 		ScheduledAction found = getSchedule(action, scheduleId);
 		if (found == null) {
@@ -55,7 +63,7 @@ public class GetScheduleTask {
 	}
 
 	public ScheduledAction getSchedule(BotAction action, String scheduleId) throws Exception {
-		boolean admin = validateAdminMode(action);
+		boolean admin = isAdminMode(action);
 
 		String authorId = action.getAuthorId();
 		BigInteger id = SafeUtil.get(() -> new BigInteger(scheduleId));
@@ -73,25 +81,21 @@ public class GetScheduleTask {
 		return found;
 	}
 
-	private boolean validateAdminMode(BotAction action) throws Exception {
-		boolean adminMode = false;
-		boolean requiredAdmin = Boolean.TRUE.toString().equalsIgnoreCase(action.getFirstTokenParam(CmdToken.ADMIN));
-		if (requiredAdmin) {
-			DiscordUserRole role = userManager.getRoleOf(action.getAuthorId());
-			adminMode = (role == DiscordUserRole.ADMIN || role == DiscordUserRole.OWNER);
-		}
-
-		if (!adminMode && requiredAdmin) {
-			Reply r = Reply.of().mentionUser(action.getAuthorId()).literal(", Only admin is allowed.");
-			throw new ActionFailException(r);
-		}
-		return adminMode;
+	public Reply getAllSchedulesReply(BotAction action) throws Exception {
+		List<ScheduledAction> allSchedules = getAllSchedules(action);
+		return createReplyForAllSchedules(action, allSchedules);
 	}
 
 	public List<ScheduledAction> getAllSchedules(BotAction action) throws Exception {
-		boolean adminMode = validateAdminMode(action);
+		boolean adminMode = isAdminMode(action);
 
 		String author = action.getAuthorId();
+		String userId = action.getFirstTokenParam(CmdToken.USER);
+		if (StringUtils.isNotEmpty(userId)) {
+			roleEnforcer.allowOnlyAdminOrHigher(action);
+			author = DiscordFormat.extractId(userId);
+		}
+
 		List<ScheduledAction> allSchedules = adminMode ? repository.findAll() : repository.findAll(author);
 
 		if (CollectionUtils.isEmpty(allSchedules)) {
@@ -102,13 +106,8 @@ public class GetScheduleTask {
 		return allSchedules;
 	}
 
-	public Reply getAllSchedulesReply(BotAction action) throws Exception {
-		List<ScheduledAction> allSchedules = getAllSchedules(action);
-		return createReplyForAllSchedules(action, allSchedules);
-	}
-
 	public Reply createReplyForAllSchedules(BotAction action, List<ScheduledAction> allSchedules) throws Exception {
-		boolean adminMode = validateAdminMode(action);
+		boolean adminMode = isAdminMode(action);
 
 		Reply reply = Reply.of().bold("All Schedule IDs").newline();
 		int count = 0;
