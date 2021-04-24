@@ -19,7 +19,7 @@
 	</appender>
 
 	<appender name="RollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${log.dir}/${applicationName}.log</file>
+		<file>${log.dir}/${applicationName}.log.gz</file>
 		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
 			<pattern>${logFilePatter}</pattern>
 		</encoder>
