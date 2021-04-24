@@ -105,8 +105,8 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 	}
 
 	@Override
-	public String entityName() {
-		return CmdToken.SCHEDULE.getCmd();
+	public CmdToken entityName() {
+		return CmdToken.SCHEDULE;
 	}
 
 	@Override
