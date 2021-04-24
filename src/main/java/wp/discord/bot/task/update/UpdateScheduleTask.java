@@ -19,6 +19,7 @@ import wp.discord.bot.db.repository.ScheduleRepository;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.add.AddScheduleTask;
+import wp.discord.bot.task.get.GetScheduleTask;
 import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 import wp.discord.bot.util.ToStringUtils;
@@ -29,6 +30,9 @@ public class UpdateScheduleTask {
 
 	@Autowired
 	private AddScheduleTask addTask;
+
+	@Autowired
+	private GetScheduleTask getTask;
 
 	@Autowired
 	private ScheduleRepository repository;
@@ -49,16 +53,9 @@ public class UpdateScheduleTask {
 	}
 
 	public void updateSchedule(BotAction action, String scheduleId) throws Exception {
-		String author = action.getAuthorId();
-		BigInteger id = SafeUtil.get(() -> new BigInteger(scheduleId));
-		if (id == null) {
-			Reply r = Reply.of().mentionUser(author).bold(" Error!").literal(" Schedule ID must be a number!");
-			throw new ActionFailException(r);
-		}
-
-		ScheduledAction found = repository.find(author, id);
+		ScheduledAction found = getTask.getSchedule(action, scheduleId);
 		if (found == null) {
-			Reply r = Reply.of().mentionUser(author).literal(", not found ID: ").bold(scheduleId);
+			Reply r = Reply.of().mentionUser(action.getAuthorId()).literal(", not found ID: ").bold(scheduleId);
 			throw new ActionFailException(r);
 		}
 
@@ -123,7 +120,7 @@ public class UpdateScheduleTask {
 			schedule.setCommands(cmds);
 			requireRescheduled = true;
 		}
-		
+
 		addTask.validateScheduledAction(schedule);
 
 		String status = action.getFirstTokenParam(CmdToken.ACTIVE);

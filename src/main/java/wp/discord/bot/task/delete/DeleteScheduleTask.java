@@ -1,6 +1,5 @@
 package wp.discord.bot.task.delete;
 
-import java.math.BigInteger;
 import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,25 +13,27 @@ import wp.discord.bot.db.entity.ScheduledAction;
 import wp.discord.bot.db.repository.ScheduleRepository;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
+import wp.discord.bot.task.get.GetScheduleTask;
 import wp.discord.bot.util.Reply;
-import wp.discord.bot.util.SafeUtil;
 
 @Component
 @Slf4j
 public class DeleteScheduleTask {
 
 	@Autowired
+	private GetScheduleTask getTask;
+
+	@Autowired
 	private ScheduleRepository repository;
 
 	@Autowired
 	private TracingHandler tracing;
-	
+
 	public void deleteSchedule(BotAction action) throws Exception {
-		String author = action.getAuthorId();
 		String scheduleId = action.getFirstTokenParam(CmdToken.ID);
 
 		if (StringUtils.isEmpty(scheduleId)) {
-			Reply r = Reply.of().mentionUser(author).bold(" Error!").literal(" Schedule ID is required!").newline() //
+			Reply r = Reply.of().mentionUser(action.getAuthorId()).bold(" Error!").literal(" Schedule ID is required!").newline() //
 					.literal("To delete, type: ").code("bot delete schedule id [id]");
 			throw new ActionFailException(r);
 		}
@@ -41,18 +42,9 @@ public class DeleteScheduleTask {
 	}
 
 	public void deleteSchedule(BotAction action, String scheduleId) throws Exception {
-		String author = action.getAuthorId();
-		BigInteger id = SafeUtil.get(() -> new BigInteger(scheduleId));
-		if (id == null) {
-			Reply r = Reply.of().mentionUser(author).bold(" Error!").literal(" Schedule ID must be a number!");
-			action.getEventMessageChannel().sendMessage(r.build()).queue();
-			throw new ActionFailException(r);
-		}
-
-		ScheduledAction found = repository.find(author, id);
+		ScheduledAction found = getTask.getSchedule(action, scheduleId);
 		if (found == null) {
-			Reply r = Reply.of().mentionUser(author).literal(", not found ID: ").bold(scheduleId);
-			action.getEventMessageChannel().sendMessage(r.build()).queue();
+			Reply r = Reply.of().mentionUser(action.getAuthorId()).literal(", not found ID: ").bold(scheduleId);
 			throw new ActionFailException(r);
 		}
 

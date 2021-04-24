@@ -34,16 +34,43 @@ public class GetScheduleTask {
 
 	public void handleGetSchedule(BotAction action) throws Exception {
 		String scheduleId = action.getFirstTokenParam(CmdToken.ID);
-		boolean adminMode = validateAdminMode(action);
 
 		Reply reply = null;
 		if (StringUtils.isNotEmpty(scheduleId)) {
-			reply = getSchedule(action, scheduleId, adminMode);
+			reply = getScheduleReply(action, scheduleId);
 		} else {
-			reply = getAllSchedules(action, adminMode);
+			reply = getAllSchedulesReply(action);
 		}
 
 		tracing.queue(action.getEventMessageChannel().sendMessage(reply.build()));
+	}
+
+	private Reply getScheduleReply(BotAction action, String scheduleId) throws Exception {
+		ScheduledAction found = getSchedule(action, scheduleId);
+		if (found == null) {
+			Reply r = Reply.of().mentionUser(action.getAuthorId()).literal(", not found ID: ").bold(scheduleId);
+			throw new ActionFailException(r);
+		}
+		return found.reply();
+	}
+
+	public ScheduledAction getSchedule(BotAction action, String scheduleId) throws Exception {
+		boolean admin = validateAdminMode(action);
+
+		String authorId = action.getAuthorId();
+		BigInteger id = SafeUtil.get(() -> new BigInteger(scheduleId));
+		if (id == null) {
+			Reply r = Reply.of().mentionUser(authorId).bold(" Error!").literal(" Schedule ID must be a number!");
+			throw new ActionFailException(r);
+		}
+
+		ScheduledAction found = null;
+		if (admin) {
+			found = getScheduleAdmin(action, id, scheduleId);
+		} else {
+			found = getScheduleUser(authorId, id, scheduleId);
+		}
+		return found;
 	}
 
 	private boolean validateAdminMode(BotAction action) throws Exception {
@@ -61,7 +88,9 @@ public class GetScheduleTask {
 		return adminMode;
 	}
 
-	private Reply getAllSchedules(BotAction action, boolean adminMode) throws Exception {
+	public List<ScheduledAction> getAllSchedules(BotAction action) throws Exception {
+		boolean adminMode = validateAdminMode(action);
+
 		String author = action.getAuthorId();
 		List<ScheduledAction> allSchedules = adminMode ? repository.findAll() : repository.findAll(author);
 
@@ -70,10 +99,17 @@ public class GetScheduleTask {
 			throw new ActionFailException(r);
 		}
 
-		return createReplyForAllSchedules(allSchedules, adminMode);
+		return allSchedules;
 	}
 
-	private Reply createReplyForAllSchedules(List<ScheduledAction> allSchedules, boolean adminMode) {
+	public Reply getAllSchedulesReply(BotAction action) throws Exception {
+		List<ScheduledAction> allSchedules = getAllSchedules(action);
+		return createReplyForAllSchedules(action, allSchedules);
+	}
+
+	public Reply createReplyForAllSchedules(BotAction action, List<ScheduledAction> allSchedules) throws Exception {
+		boolean adminMode = validateAdminMode(action);
+
 		Reply reply = Reply.of().bold("All Schedule IDs").newline();
 		int count = 0;
 		for (ScheduledAction scha : allSchedules) {
@@ -85,29 +121,7 @@ public class GetScheduleTask {
 		return reply;
 	}
 
-	private Reply getSchedule(BotAction action, String scheduleId, boolean admin) throws Exception {
-		String authorId = action.getAuthorId();
-		BigInteger id = SafeUtil.get(() -> new BigInteger(scheduleId));
-		if (id == null) {
-			Reply r = Reply.of().mentionUser(authorId).bold(" Error!").literal(" Schedule ID must be a number!");
-			throw new ActionFailException(r);
-		}
-
-		ScheduledAction found = null;
-		if (admin) {
-			found = getScheduleAdmin(action, id, scheduleId);
-		} else {
-			found = getScheduleUser(authorId, id, scheduleId);
-		}
-		if (found == null) {
-			Reply r = Reply.of().mentionUser(authorId).literal(", not found ID: ").bold(scheduleId);
-			throw new ActionFailException(r);
-		}
-
-		return found.reply();
-	}
-
-	public ScheduledAction getScheduleAdmin(BotAction action, BigInteger id, String scheduleId) throws Exception {
+	private ScheduledAction getScheduleAdmin(BotAction action, BigInteger id, String scheduleId) throws Exception {
 		String userId = DiscordFormat.extractId(action.getFirstTokenParam(CmdToken.USER));
 		if (StringUtils.isNotBlank(userId)) {
 			return repository.find(userId, id);
@@ -116,7 +130,7 @@ public class GetScheduleTask {
 		}
 	}
 
-	public ScheduledAction getScheduleUser(String author, BigInteger id, String scheduleId) throws Exception {
+	private ScheduledAction getScheduleUser(String author, BigInteger id, String scheduleId) throws Exception {
 		return repository.find(author, id);
 	}
 
