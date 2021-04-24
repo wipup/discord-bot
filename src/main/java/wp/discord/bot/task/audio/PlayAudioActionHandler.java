@@ -54,7 +54,9 @@ public class PlayAudioActionHandler implements ActionHandler {
 	public void playAudios(BotSession session, List<AudioTrack> tracks, int playCount) {
 		log.debug("playing audio count: {}", playCount);
 		for (int i = 0; i < playCount; i++) {
+			log.debug("playing index: {}", i);
 			for (AudioTrack track : tracks) {
+				log.debug("playing track: {}", track.getUserData().toString());
 				session.playTrack(track);
 				session.playTrack(track);
 			}
