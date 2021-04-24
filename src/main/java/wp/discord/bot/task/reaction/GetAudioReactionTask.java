@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.events.message.react.GenericMessageReactionEvent;
 import wp.discord.bot.constant.Reaction;
 import wp.discord.bot.core.TracingHandler;
+import wp.discord.bot.core.cmd.EntityReferenceHandler;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.model.Reference;
 import wp.discord.bot.task.audio.AudioListReference;
@@ -17,6 +18,9 @@ import wp.discord.bot.util.SafeUtil;
 
 @Component
 public class GetAudioReactionTask {
+
+	@Autowired
+	private EntityReferenceHandler refHandler;
 
 	@Autowired
 	private TracingHandler tracing;
@@ -36,7 +40,8 @@ public class GetAudioReactionTask {
 		audioList = processReaction(audioList, reaction);
 		audioList = getAudioTask.getAudios(action, audioList);
 
-		Reply reply = audioList.reply();
+		Reply reply = Reply.of().bold("Success ").literal(refHandler.generateEncodedReferenceCode(audioList)).newline() //
+				.append(audioList.reply());
 		tracing.queue(message.editMessage(reply.build()));
 	}
 

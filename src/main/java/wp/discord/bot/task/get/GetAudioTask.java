@@ -16,6 +16,7 @@ import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.constant.Reaction;
 import wp.discord.bot.core.AudioTrackHolder;
 import wp.discord.bot.core.TracingHandler;
+import wp.discord.bot.core.cmd.EntityReferenceHandler;
 import wp.discord.bot.exception.ActionFailException;
 import wp.discord.bot.model.BotAction;
 import wp.discord.bot.task.audio.AudioListReference;
@@ -23,6 +24,9 @@ import wp.discord.bot.util.Reply;
 
 @Component
 public class GetAudioTask {
+
+	@Autowired
+	private EntityReferenceHandler refHandler;
 
 	@Autowired
 	private AudioTrackHolder audioHolder;
@@ -33,14 +37,15 @@ public class GetAudioTask {
 	public void handleGetAudio(BotAction action) throws Exception {
 		String name = action.getFirstTokenParam(CmdToken.NAME);
 
-		Reply reply = Reply.of();
+		AudioListReference list = null;
 		if (StringUtils.isNotEmpty(name)) {
-			Reply r = getAudiosByPatternReply(name, 0, AudioListReference.MAX_DISPLAY_SIZE);
-			reply.append(r);
+			list = getAudiosByPattern(name, 0, AudioListReference.MAX_DISPLAY_SIZE);
 		} else {
-			Reply r = getAllAudiosReply(0, AudioListReference.MAX_DISPLAY_SIZE);
-			reply.append(r);
+			list = getAllAudio(0, AudioListReference.MAX_DISPLAY_SIZE);
 		}
+
+		Reply reply = Reply.of().bold("Success ").literal(refHandler.generateEncodedReferenceCode(list)).newline() //
+				.append(list.reply());
 
 		action.getEventMessageChannel().sendMessage(reply.build()).queue(tracing.addTracingContext((m) -> {
 			generateAudioListReaction(m);
@@ -62,16 +67,8 @@ public class GetAudioTask {
 	}
 
 	public void generateAudioListReaction(Message m) {
-		try {
-			m.addReaction(Reaction.OK.getCode()).queue();
-			m.addReaction(Reaction.LEFT.getCode()).queue();
-			m.addReaction(Reaction.RIGHT.getCode()).queue();
-		} catch (Exception e) {
-		}
-	}
-
-	public Reply getAudiosByPatternReply(String pattern, int offset, int size) throws Exception {
-		return getAudiosByPattern(pattern, offset, size).reply();
+		m.addReaction(Reaction.LEFT.getCode()).queue();
+		m.addReaction(Reaction.RIGHT.getCode()).queue();
 	}
 
 	public AudioListReference getAudiosByPattern(String pattern, int offset, int size) throws Exception {
@@ -95,10 +92,6 @@ public class GetAudioTask {
 		ref.setNamePattern(pattern);
 		ref.setTotal(total);
 		return ref;
-	}
-
-	public Reply getAllAudiosReply(int offset, int size) throws Exception {
-		return getAllAudio(offset, size).reply();
 	}
 
 	public AudioListReference getAllAudio(int offset, int size) throws Exception {
