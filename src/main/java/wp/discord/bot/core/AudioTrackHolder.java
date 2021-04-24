@@ -3,13 +3,13 @@ package wp.discord.bot.core;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -60,6 +60,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 		AudioSourceManagers.registerLocalSource(audioPlayerManager);
 
 		audioTracks = new LinkedHashMap<>();
+		allAudioTracks = new ArrayList<>();
 	}
 
 	public AudioTrack getAudioTrack(String name) {
@@ -133,10 +134,6 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 						futureList.add(future);
 					});
 		}
-
-		allAudioTracks = audioTracks.values().stream() //
-				.sorted((a, b) -> a.getUserData().toString().compareTo(b.getUserData().toString())) //
-				.collect(Collectors.toList());
 		return futureList;
 	}
 
@@ -152,6 +149,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 
 		setAudioTrackName(track, trackName);
 		audioTracks.put(trackName, track);
+		allAudioTracks.add(track);
 		trackFilePathMap.remove(path);
 	}
 
