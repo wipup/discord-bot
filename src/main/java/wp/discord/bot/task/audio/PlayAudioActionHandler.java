@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
+import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.constant.CmdAction;
 import wp.discord.bot.constant.CmdToken;
 import wp.discord.bot.core.AudioTrackHolder;
@@ -22,6 +23,7 @@ import wp.discord.bot.util.Reply;
 import wp.discord.bot.util.SafeUtil;
 
 @Component
+@Slf4j
 public class PlayAudioActionHandler implements ActionHandler {
 
 	@Autowired
@@ -50,6 +52,7 @@ public class PlayAudioActionHandler implements ActionHandler {
 	}
 
 	public void playAudios(BotSession session, List<AudioTrack> tracks, int playCount) {
+		log.debug("playing audio count: {}", playCount);
 		for (int i = 0; i < playCount; i++) {
 			for (AudioTrack track : tracks) {
 				session.playTrack(track);
@@ -79,6 +82,8 @@ public class PlayAudioActionHandler implements ActionHandler {
 					.mentionUser(action.getAuthorId()).literal(" please re-check");
 			throw new ActionFailException(reply);
 		}
+
+		log.debug("playing tracks: {}", tracks);
 		return tracks;
 	}
 
@@ -94,8 +99,13 @@ public class PlayAudioActionHandler implements ActionHandler {
 	}
 
 	private int getCount(BotAction action) {
-		String count = action.getFirstTokenParam(CmdToken.COUNT);
-		Integer c = SafeUtil.get(() -> Integer.parseInt(count));
+		String countStr = action.getFirstTokenParam(CmdToken.COUNT);
+		if (StringUtils.isBlank(countStr)) {
+			countStr = "2";
+		}
+
+		final String count = countStr;
+		Integer c = SafeUtil.get(() -> Integer.parseInt(count), 2);
 		if (c == null) {
 			return 2;
 		}
