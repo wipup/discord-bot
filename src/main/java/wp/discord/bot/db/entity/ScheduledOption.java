@@ -3,6 +3,7 @@ package wp.discord.bot.db.entity;
 import java.time.Duration;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.support.CronTrigger;
 
 import lombok.Getter;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import wp.discord.bot.model.Describeable;
 import wp.discord.bot.util.DateTimeUtil;
 import wp.discord.bot.util.Reply;
+import wp.discord.bot.util.SafeUtil;
 import wp.discord.bot.util.ToStringUtils;
 
 @Getter
@@ -68,6 +70,14 @@ public class ScheduledOption implements Describeable {
 		}
 	}
 
+	public String nextTriggerTimeDisplay() {
+		String nextRun = SafeUtil.get(() -> ToStringUtils.formatDate(nextTriggerTime(), START_DATE_FORMAT_DISPLAY));
+		if (StringUtils.isBlank(nextRun)) {
+			nextRun = " - ";
+		}
+		return nextRun;
+	}
+
 	@Override
 	public Reply reply() {
 		if (type == ScheduledType.CRON) {
@@ -101,13 +111,14 @@ public class ScheduledOption implements Describeable {
 
 	private Reply replyCron() {
 		return Reply.of() //
-				.literal(getType().getDisplayName()) //
-				.literal(":  ").code(getValue()); //
+				.literal(getType().getDisplayName()).literal(":  ").code(getValue()).newline() //
+				.literal("Next Run: ").code(nextTriggerTimeDisplay()); //
 	}
 
 	private Reply replyFixedDuration() {
 		return Reply.of() //
-				.literal(getType().getDisplayName()).append(prettyPrintDurationValue());
+				.literal(getType().getDisplayName()).append(prettyPrintDurationValue()).newline() //
+				.literal("Next Run: ").code(nextTriggerTimeDisplay()); //
 	}
 
 	private Reply replyFixedTime() {
