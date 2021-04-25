@@ -94,7 +94,7 @@ public class ScheduledActionManager implements DisposableBean {
 	}
 
 	private Runnable newRunnableScheduledAction(ScheduledAction scheduleAction) {
-		log.debug("scheduling: {}", scheduleAction);
+		log.trace("scheduling: {}", scheduleAction);
 		return () -> {
 			try {
 				if (isRunningCountExceed(scheduleAction)) {

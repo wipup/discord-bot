@@ -57,7 +57,7 @@ public class RepositoryReloader implements InitializingBean {
 					.map((p) -> SafeUtil.runtimeException(() -> reloadable.doRead(p))) //
 					.filter((e) -> e != null) //
 					.forEach((e) -> {
-						log.debug("calling doReload: {} with: {}", reloadable.getClass().getSimpleName(), e);
+						log.trace("calling doReload: {} with: {}", reloadable.getClass().getSimpleName(), e);
 						SafeUtil.runtimeException(() -> reloadable.doReload(e));
 					});
 		}
@@ -67,7 +67,7 @@ public class RepositoryReloader implements InitializingBean {
 		scheduledRepository.findAll().stream() //
 				.filter((repo) -> repo.isActive()) //
 				.forEach((repo) -> {
-					log.debug("reschedule: {}", repo);
+					log.trace("reschedule: {}", repo);
 					ScheduledFuture<?> future = SafeUtil.runtimeException(() -> scheduledActionManager.scheduleCronTask(repo));
 					repo.setScheduledTask(future);
 				});
