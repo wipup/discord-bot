@@ -128,7 +128,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 						String fileName = absPath.getFileName().toString();
 
 						trackFilePathMap.put(absolutePath, fileName);
-						log.debug("loading: {}", fileName);
+//						log.debug("loading: {}", fileName);
 
 						Future<Void> future = audioPlayerManager.loadItem(absolutePath, this); // this is asynchronous loading
 						futureList.add(future);
@@ -140,7 +140,7 @@ public class AudioTrackHolder implements InitializingBean, AudioLoadResultHandle
 	@Override
 	public void trackLoaded(AudioTrack track) {
 		String path = getAudioTrackFilePath(track);
-		log.info("loaded track: {}", path);
+//		log.info("loaded track: {}", path);
 
 		String trackName = trackFilePathMap.get(path);
 		if (audioTracks.containsKey(trackName)) {
