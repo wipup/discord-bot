@@ -74,6 +74,7 @@ public class HelpTaskHelper {
 
 				.code("bot get audio [name <name>]").newline() //
 				.code("bot play audio <audio-name> [channel <channel-id>] [user <user-id>]").newline() //
+				.code("bot play audio '<audio1> , <audio2>, <audio3>'").newline() //
 				.code("bot pm [user <user-id>] message <any-message>").newline() //
 				.code("bot send [channel <channel-id>] message <any-message>").newline() //
 				.code("bot join [channel <channel-id>] [user <user-id>] ").newline() //
