@@ -110,7 +110,7 @@ public class AddScheduleTask {
 			throw new ActionFailException(rep);
 		}
 		for (String cmd : sch.getCommands()) {
-			isAllowSchedulingAction(cmdProcessor.parseCommand(null, cmd));
+			isAllowSchedulingAction(cmdProcessor.parseCommand(null, cmd), cmd);
 		}
 	}
 
@@ -290,9 +290,10 @@ public class AddScheduleTask {
 		return runCount;
 	}
 
-	private void isAllowSchedulingAction(BotAction action) throws Exception {
+	private void isAllowSchedulingAction(BotAction action, String cmdLine) throws Exception {
 		if (action == null) {
-			return;
+			Reply r = Reply.of().literal("Error! Invalid command: ").code(cmdLine);
+			throw new ActionFailException(r);
 		}
 		CmdAction act = action.getAction();
 		for (CmdAction allow : ScheduledAction.SCHEDULABLE_ACTIONS) {

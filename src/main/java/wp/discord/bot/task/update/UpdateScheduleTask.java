@@ -129,6 +129,7 @@ public class UpdateScheduleTask {
 				schedule.getScheduledTask().cancel(true);
 				schedule.setScheduledTask(null);
 				schedule.setActive(false);
+//				schedule.setActualRunCount(BigInteger.ZERO);
 				addTask.applyAlert(schedule, action);
 				return;
 			}

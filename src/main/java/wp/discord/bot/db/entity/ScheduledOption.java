@@ -117,8 +117,7 @@ public class ScheduledOption implements Describeable {
 
 	private Reply replyFixedDuration() {
 		return Reply.of() //
-				.literal(getType().getDisplayName()).append(prettyPrintDurationValue()).newline() //
-				.literal("Next Run: ").code(nextTriggerTimeDisplay()); //
+				.literal(getType().getDisplayName()).append(prettyPrintDurationValue()); //
 	}
 
 	private Reply replyFixedTime() {
