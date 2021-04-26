@@ -87,14 +87,20 @@ public class GetScheduleTask {
 	}
 
 	public List<ScheduledAction> getAllSchedules(BotAction action) throws Exception {
+		boolean admin = isAdminMode(action);
+		
 		String author = action.getAuthorId();
 		String userId = action.getFirstTokenParam(CmdToken.USER);
-		if (StringUtils.isNotEmpty(userId)) {
-			roleEnforcer.allowOnlyAdminOrHigher(action);
+		if (StringUtils.isNotEmpty(userId) && admin) {
 			author = DiscordFormat.extractId(userId);
 		}
 
-		List<ScheduledAction> allSchedules = repository.findAll(author);
+		List<ScheduledAction> allSchedules = null;
+		if (admin) {
+			allSchedules = repository.findAll();
+		} else {
+			allSchedules = repository.findAll(author);
+		}
 
 		if (CollectionUtils.isEmpty(allSchedules)) {
 			Reply r = Reply.of().mentionUser(author).literal(", you don't have any scheduled action.");
