@@ -131,6 +131,11 @@ public class BotSession implements AudioSendHandler, AudioEventListener, ThreadF
 		}
 	}
 
+	public void leaveVoiceChannelNow() {
+		log.debug("do leaveVoiceChannel now");
+		audioManager.closeAudioConnection();
+	}
+	
 	public void leaveVoiceChannel() {
 		synchronized (executorService) {
 			log.trace("queue leaveVoiceChannel");

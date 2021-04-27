@@ -31,7 +31,7 @@ public class LeaveVoiceChannelActionHandler implements ActionHandler {
 	public void handleAction(BotAction action) throws Exception {
 		BotSession session = action.getSession();
 		if (session != null) {
-			session.leaveVoiceChannel();
+			session.leaveVoiceChannelNow();
 			return;
 		}
 
@@ -40,7 +40,7 @@ public class LeaveVoiceChannelActionHandler implements ActionHandler {
 
 		if (StringUtils.isEmpty(channelId)) {
 			log.info("leaving all channel session");
-			sessionManager.getAllSessions().forEach(BotSession::leaveVoiceChannel);
+			sessionManager.getAllSessions().forEach(BotSession::leaveVoiceChannelNow);
 			return;
 		}
 
@@ -58,7 +58,7 @@ public class LeaveVoiceChannelActionHandler implements ActionHandler {
 			throw new ActionFailException(reply);
 		}
 
-		bs.leaveVoiceChannel();
+		bs.leaveVoiceChannelNow();
 	}
 
 	@Override
