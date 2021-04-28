@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -92,6 +93,28 @@ public class ScheduledAction implements Comparable<ScheduledAction>, Describeabl
 
 	public void setScheduledTask(ScheduledFuture<?> scheduledTask) {
 		this.scheduledTask = scheduledTask;
+	}
+
+	public boolean isRunningCountExceed() {
+		BigInteger actual = ObjectUtils.defaultIfNull(getActualRunCount(), BigInteger.ZERO);
+		BigInteger preferred = getDesiredRunCount();
+		if (preferred != null) {
+			return actual.compareTo(preferred) >= 0;
+		}
+		return false;
+	}
+
+	public void onFinishRunning() {
+		ScheduledOption opt = getPreference();
+		if (opt.getType() == ScheduledType.TIME) {
+			setActive(false);
+		} else if (opt.getType() == ScheduledType.FIXED_RATE) {
+			setPreference(ScheduledOption.fixedRate(opt.getValue(), opt.nextTriggerTime()));
+		}
+
+		if (isRunningCountExceed()) {
+			setActive(false);
+		}
 	}
 
 	@Override

@@ -97,7 +97,7 @@ public class ScheduledActionManager implements DisposableBean {
 		log.trace("scheduling: {}", scheduleAction);
 		return () -> {
 			try {
-				if (isRunningCountExceed(scheduleAction)) {
+				if (scheduleAction.isRunningCountExceed()) {
 					cancelTask(scheduleAction);
 					return;
 				}
@@ -123,24 +123,10 @@ public class ScheduledActionManager implements DisposableBean {
 				}
 
 			} finally {
-				if (scheduleAction.getPreference().getType() == ScheduledType.TIME) {
-					scheduleAction.setActive(false);
-					
-				} else if (isRunningCountExceed(scheduleAction)) {
-					scheduleAction.setActive(false);
-				}
+				scheduleAction.onFinishRunning();
 				SafeUtil.suppress(() -> scheduleRepository.save(scheduleAction));
 			}
 		};
-	}
-
-	private boolean isRunningCountExceed(ScheduledAction scheduleAction) {
-		BigInteger actual = ObjectUtils.defaultIfNull(scheduleAction.getActualRunCount(), BigInteger.ZERO);
-		BigInteger preferred = scheduleAction.getDesiredRunCount();
-		if (preferred != null) {
-			return actual.compareTo(preferred) >= 0;
-		}
-		return false;
 	}
 
 	private void cancelTask(ScheduledAction scheduleAction) {

@@ -59,7 +59,11 @@ public class ScheduledOption implements Describeable {
 		if (getType() == ScheduledType.CRON) {
 			return DateTimeUtil.samplingDate(new CronTrigger(getValue()), 1).get(0);
 		} else if (getType() == ScheduledType.FIXED_RATE) {
-			return DateTimeUtil.addDurationToDate(Duration.parse(getValue()), getStartTime());
+			Date next = DateTimeUtil.addDurationToDate(Duration.parse(getValue()), getStartTime());
+			while(next.before(new Date())) {
+				next = DateTimeUtil.addDurationToDate(Duration.parse(getValue()), next);
+			}
+			return next;
 		} else {
 			return null;
 		}
