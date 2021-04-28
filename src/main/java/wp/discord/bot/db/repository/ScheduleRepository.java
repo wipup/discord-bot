@@ -119,10 +119,10 @@ public class ScheduleRepository extends AbstractFileBasedRepository<ScheduledAct
 
 	@Override
 	public void doReload(ScheduledAction entity) throws Exception {
-		Date now = new Date();
 		ScheduledOption opt = entity.getPreference();
 		if (opt.getType() == ScheduledType.FIXED_RATE && entity.isActive()) {
-			if (opt.getStartTime().before(now)) { // if startTime is in the past
+			Date now = new Date();
+			if (now.after(opt.getStartTime())) { // if startTime is in the past
 				entity.setPreference(ScheduledOption.fixedRate(opt.getValue(), opt.nextTriggerTime()));
 			}
 		}
