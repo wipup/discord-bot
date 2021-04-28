@@ -67,8 +67,10 @@ public class GetAudioTask {
 	}
 
 	public void generateAudioListReaction(Message m) {
+		m.addReaction(Reaction.PREVIOUS_TRACK.getCode()).queue();
 		m.addReaction(Reaction.LEFT.getCode()).queue();
 		m.addReaction(Reaction.RIGHT.getCode()).queue();
+		m.addReaction(Reaction.NEXT_TRACK.getCode()).queue();
 	}
 
 	public AudioListReference getAudiosByPattern(String pattern, int offset, int size) throws Exception {

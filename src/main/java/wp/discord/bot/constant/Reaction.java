@@ -18,7 +18,13 @@ public enum Reaction {
 	RIGHT("fast_forward", "\u23e9"), //
 	LEFT("rewind", "\u23ea"), //
 	DOWN("arrow_double_down", "\u23ec"), //
-
+	
+	PLAY("arrow_forward", "▶️"), //
+	
+	POINT_RIGHT("point_right", "👉🏻"), 
+	NEXT_TRACK("next_track", "⏭️"), 
+	PREVIOUS_TRACK("previous", "⏮️"), 
+	
 	// -----------
 	OK("ok", "\u1f197"), //
 	EDIT("pencil", "\u1f4dd"), //

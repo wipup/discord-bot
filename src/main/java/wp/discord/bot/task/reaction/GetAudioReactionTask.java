@@ -49,10 +49,12 @@ public class GetAudioReactionTask {
 		int offset = list.getOffset();
 		if (reaction == Reaction.LEFT) {
 			offset -= list.getMaxDisplaySize();
-
 		} else if (reaction == Reaction.RIGHT) {
 			offset += list.getMaxDisplaySize();
-
+		} else if (reaction == Reaction.PREVIOUS_TRACK) {
+			offset = 0;
+		} else if (reaction == Reaction.NEXT_TRACK) {
+			offset = (list.getTotal() / list.getMaxDisplaySize()) * list.getMaxDisplaySize();
 		}
 
 		if (offset < 0) {
